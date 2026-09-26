@@ -1,0 +1,45 @@
+import React from 'react';
+import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
+import PropTypes from 'prop-types';
+import { useTheme } from '@mui/material';
+
+const OpportunitiesWonGraph = ({ data = [] }) => {
+  const theme = useTheme();
+
+  return (
+    <ResponsiveContainer maxHeight={260} minHeight={160}>
+      <BarChart barGap={16} barSize={8} data={data}>
+        <XAxis dataKey="name" />
+        <Tooltip
+          labelStyle={{ color: 'black' }}
+          contentStyle={{
+            borderRadius: 12,
+            borderColor: '#31354188',
+            background: '#FFFFFFCA',
+          }}
+          cursor={{ fill: 'transparent' }}
+        />
+        <Bar
+          dataKey="progress"
+          stackId="a"
+          fill={theme.alpha(theme.palette.primary.main, 0.9)}
+          radius={[20, 20, 0, 0]}
+          background={{ fill: theme.alpha(theme.palette.primary.main, 0.15) }}
+        />
+        <Bar
+          dataKey="actual"
+          stackId="b"
+          fill={theme.alpha(theme.palette.secondary.main, 0.9)}
+          radius={[20, 20, 0, 0]}
+          background={{ fill: theme.alpha(theme.palette.secondary.main, 0.15) }}
+        />
+      </BarChart>
+    </ResponsiveContainer>
+  );
+};
+
+export default OpportunitiesWonGraph;
+
+OpportunitiesWonGraph.propTypes = {
+  data: PropTypes.array,
+};

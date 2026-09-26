@@ -1,0 +1,256 @@
+// src/redux/features/modulos/modulosSlice.js
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import jwtAxios from '../../../services/auth/jwt-auth';
+import { showMessage, hideMessage} from '../cammon/commonSlice';
+
+// Estado inicial
+const initialState = {
+  rows: [],
+  desde: 0,
+  hasta: 0,
+  ultima_pagina: 1,
+  total: 0,
+  coleccionLigera: [],
+  moduloActual: null,
+  loading: false,
+  error: null,
+  message: null,
+};
+
+// Acciones asíncronas (Thunks)
+export const onGetColeccion = createAsyncThunk(
+    'modulos/onGetColeccion',
+    async ({ page, rowsPerPage, nombreFiltro, orderByToSend}, thunkAPI) => {
+      try {
+        
+        const nombreAux = nombreFiltro ? nombreFiltro : '';
+        const ordenar_por = orderByToSend ? orderByToSend : '';
+        const response = await jwtAxios.get('modulos', {
+          params: {
+            page: page,
+            limite: rowsPerPage,
+            nombre: nombreAux,
+            ordenar_por: ordenar_por,
+          },
+        });
+        // Supón que la estructura de la respuesta es como se espera
+        const { datos, desde, hasta, ultima_pagina, total } = response.data;  
+        return { datos, desde, hasta, ultima_pagina, total };
+      } catch (error) {
+        console.error("Error en onGetColeccion:", error);
+        dispatch(fetchSuccess());
+        return thunkAPI.rejectWithValue(messages['message.somethingWentWrong'] || error.message);
+      }
+    }
+);
+
+export const onGetColeccionLigera = createAsyncThunk(
+  'modulos/onGetColeccionLigera',
+  async (_, thunkAPI) => {
+    try {
+      const response = await jwtAxios.get('modulos', {
+        params: { ligera: true },
+      });
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(messages['message.somethingWentWrong'] || error.message);
+    }
+  }
+);
+
+export const onShow = createAsyncThunk(
+  'modulos/onShow',
+  async (id, thunkAPI) => {
+    try {
+      const response = await jwtAxios.get(`modulos/${id}`);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(messages['message.somethingWentWrong'] || error.message);
+    }
+  }
+);
+
+export const onUpdate = createAsyncThunk(
+  'modulos/onUpdate',
+  async ({ params, handleOnClose, updateColeccion }, thunkAPI) => {
+    try {
+      const response = await jwtAxios.put(`modulos/${params.id}`, params);
+
+      // Cierra el formulario y actualiza la colección
+      handleOnClose();
+      updateColeccion();
+
+      // Extrae el mensaje de la respuesta y despáchalo
+      const mensaje = response.data.mensajes[0]; // "El modulo ha sido modificado."
+      const tipoMensaje = response.data.mensajes[1]; // 1 (éxito)
+
+      // Despacha showMessage con el mensaje y el tipo de mensaje
+      thunkAPI.dispatch(showMessage([mensaje, tipoMensaje]));
+
+      return response.data.datos;
+    } catch (error) {
+      // Extrae el mensaje de error del backend si está disponible
+      const mensajeError = error.response?.data?.mensajes[0] || "Ocurrió un error";
+      thunkAPI.dispatch(showMessage([mensajeError, 4]));
+
+      return thunkAPI.rejectWithValue(mensajeError);
+    }
+  }
+);
+
+export const onDelete = createAsyncThunk(
+  'modulos/onDelete',
+  async ({ id, updateColeccion }, thunkAPI) => {
+    console.log(id)
+    try {
+      const response = await jwtAxios.delete(`modulos/${id}`);
+      updateColeccion();
+      const mensaje = response.data.mensajes[0];
+      const tipoMensaje = response.data.mensajes[1];
+
+      thunkAPI.dispatch(showMessage([mensaje, tipoMensaje]));
+      setTimeout(()=> {
+        thunkAPI.dispatch(hideMessage([mensaje, tipoMensaje])); 
+      }, 3000);
+      return response.data;
+    } catch (error) {
+      const mensajeError = error.response?.data?.mensajes[0] || "Ocurrió un error";
+      thunkAPI.dispatch(showMessage([mensajeError, 4]));
+      return thunkAPI.rejectWithValue(mensajeError);
+    }
+  }
+);
+
+export const onCreate = createAsyncThunk(
+  'modulos/onCreate',
+  async ({ params, handleOnClose, updateColeccion }, thunkAPI) => {
+    try {
+      const response = await jwtAxios.post('modulos', params);
+      handleOnClose();
+      updateColeccion();
+
+      const mensaje = response.data.mensajes[0];
+      const tipoMensaje = response.data.mensajes[1];
+
+      thunkAPI.dispatch(showMessage([mensaje, tipoMensaje]));
+      return response.data.datos;
+    } catch (error) {
+      const mensajeError = error.response?.data?.mensajes[0] || "Ocurrió un error";
+      thunkAPI.dispatch(showMessage([mensajeError, 4]));
+      return thunkAPI.rejectWithValue(mensajeError);
+    }
+  }
+);
+
+// Slice de modulos
+const modulosSlice = createSlice({
+  name: 'modulos',
+  initialState,
+  reducers: {
+    resetError(state) {
+      state.error = null;
+    },
+    resetModuloActual(state) {
+      state.moduloActual = null;
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      // Obtener colección de modulos
+      .addCase(onGetColeccion.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(onGetColeccion.fulfilled, (state, action) => {
+        state;
+        state.loading = false;
+        state.rows = action.payload.datos ; 
+        state.desde = action.payload.desde ;
+        state.hasta = action.payload.hasta;
+        state.ultima_pagina = action.payload.ultima_pagina ;
+        state.total = action.payload.total;
+      })
+      .addCase(onGetColeccion.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Obtener colección ligera de modulos
+      .addCase(onGetColeccionLigera.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(onGetColeccionLigera.fulfilled, (state, action) => {
+        state.loading = false;
+        state.coleccionLigera = action.payload;
+      })
+      .addCase(onGetColeccionLigera.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Mostrar un modulo
+      .addCase(onShow.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(onShow.fulfilled, (state, action) => {
+        state.loading = false;
+        state.moduloActual = action.payload;
+      })
+      .addCase(onShow.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Actualizar un modulo
+      .addCase(onUpdate.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(onUpdate.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        state.moduloActual = action.payload;
+      })
+      .addCase(onUpdate.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Eliminar un modulo
+      .addCase(onDelete.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(onDelete.fulfilled, (state, action) => {
+        state.loading = false;
+        state.moduloActual = action.payload;
+      })
+      .addCase(onDelete.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Crear un modulo
+      .addCase(onCreate.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.message = null;
+      })
+      .addCase(onCreate.fulfilled, (state, action) => {
+        state.loading = false;
+        state.moduloActual = action.datos;
+        state.message = action.payload[0];
+      })
+      .addCase(onCreate.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.message = action.payload[0];
+      });
+  },
+});
+
+// Exportar acciones y reducer
+export const { resetError, resetModuloActual } = modulosSlice.actions;
+export default modulosSlice.reducer;

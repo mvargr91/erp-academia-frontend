@@ -1,0 +1,20 @@
+import React from 'react';
+import { Bar, BarChart, ResponsiveContainer, XAxis } from 'recharts';
+import PropTypes from 'prop-types';
+
+const ProfileViewsGraph = ({ data = [] }) => {
+  return (
+    <ResponsiveContainer width="100%" height={100}>
+      <BarChart barSize={13} data={data}>
+        <XAxis dataKey="data" axisLine={false} tickLine={false} />
+        <Bar dataKey="number" fill="#959CA9" />
+      </BarChart>
+    </ResponsiveContainer>
+  );
+};
+
+export default ProfileViewsGraph;
+
+ProfileViewsGraph.propTypes = {
+  data: PropTypes.array,
+};
