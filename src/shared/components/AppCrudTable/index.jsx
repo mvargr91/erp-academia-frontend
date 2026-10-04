@@ -38,6 +38,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import TuneIcon from '@mui/icons-material/Tune';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import Swal from 'sweetalert2';
+import dayjs from 'dayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import moment from 'moment';
 import IntlMessages from '@crema/helpers/IntlMessages';
 import AppMessageView from '@crema/components/AppMessageView';
@@ -126,8 +128,8 @@ const useStyles = makeStyles(() => ({
     padding: '20px',
   },
   head: {
-    borderTop: '2px solid #dee2e6',
-    borderBottom: '2px solid #dee2e6',
+    borderTop: '2px solid rgba(128, 128, 128, 0.3)',
+    borderBottom: '2px solid rgba(128, 128, 128, 0.3)',
   },
   headCell: {
     padding: '0px 0px 0px 15px',
@@ -214,6 +216,7 @@ const AppCrudTable = (props) => {
     onEditar,
     onVer,
     accionesExtra,
+    eliminable,
     onVolver,
   } = props;
 
@@ -223,6 +226,8 @@ const AppCrudTable = (props) => {
     (state) => state[stateKey],
   );
   const { message, messageType } = useSelector(({ common }) => common);
+  // Al cambiar la sede del encabezado (cabecera X-Sede) la lista se vuelve a pedir.
+  const sedeId = useSelector((state) => state.sedeActual.id);
 
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -252,11 +257,11 @@ const AppCrudTable = (props) => {
 
   useEffect(() => {
     setPage(1);
-  }, [debouncedFiltros, orderByToSend, filtrosFijosKey]);
+  }, [debouncedFiltros, orderByToSend, filtrosFijosKey, sedeId]);
 
   useEffect(() => {
     cargarColeccion();
-  }, [dispatch, page, rowsPerPage, debouncedFiltros, orderByToSend, filtrosFijosKey, refreshKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [dispatch, page, rowsPerPage, debouncedFiltros, orderByToSend, filtrosFijosKey, refreshKey, sedeId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const changeOrderBy = (id) => {
     if (!paginado) return;
@@ -348,7 +353,7 @@ const AppCrudTable = (props) => {
   });
 
   const filtroSx = {
-    '& .MuiInput-underline:before': { borderBottomColor: '#ccc', marginBottom: -0.5 },
+    '& .MuiInput-underline:before': { borderBottomColor: theme.palette.divider, marginBottom: -0.5 },
     '& .MuiInput-underline:hover:before': { borderBottomColor: theme.palette.text.primary },
     '& .MuiInput-underline:after': { borderBottomColor: theme.palette.text.primary },
   };
@@ -417,7 +422,7 @@ const AppCrudTable = (props) => {
               <Box display='flex' alignItems='center' flex='1 1 100%'>
                 {onVolver && (
                   <Tooltip title='Volver'>
-                    <IconButton onClick={onVolver} sx={{ mr: 1, color: '#000' }}>
+                    <IconButton onClick={onVolver} sx={{ mr: 1, color: 'text.primary' }}>
                       <ArrowBackIosIcon />
                     </IconButton>
                   </Tooltip>
@@ -454,7 +459,26 @@ const AppCrudTable = (props) => {
             </Box>
             {filtrosConfig.length > 0 && (
               <Box className={classes.contenedorFiltros}>
-                {filtrosConfig.map((filtro) => (
+                {filtrosConfig.map((filtro) =>
+                  filtro.type === 'date' ? (
+                    // Mismo calendario (MUI, en español) que los formularios.
+                    <DatePicker
+                      key={filtro.name}
+                      label={filtro.label}
+                      format='DD/MM/YYYY'
+                      value={filtros[filtro.name] ? dayjs(filtros[filtro.name]) : null}
+                      onChange={(fecha) =>
+                        onChangeFiltro({
+                          target: { name: filtro.name, value: fecha && fecha.isValid() ? fecha.format('YYYY-MM-DD') : '' },
+                        })
+                      }
+                      slotProps={{
+                        textField: { variant: 'standard', fullWidth: true, sx: filtroSx, InputLabelProps: { shrink: true } },
+                        openPickerButton: { size: 'small' },
+                        actionBar: { actions: ['clear', 'today'] },
+                      }}
+                    />
+                  ) : (
                   <TextField
                     key={filtro.name}
                     label={filtro.label}
@@ -463,8 +487,6 @@ const AppCrudTable = (props) => {
                     value={filtros[filtro.name]}
                     variant='standard'
                     select={filtro.type === 'select'}
-                    type={filtro.type === 'date' ? 'date' : 'text'}
-                    InputLabelProps={filtro.type === 'date' ? { shrink: true } : undefined}
                     fullWidth
                     sx={filtroSx}
                   >
@@ -479,7 +501,8 @@ const AppCrudTable = (props) => {
                       )),
                     ]}
                   </TextField>
-                ))}
+                  ),
+                )}
                 <Box display='flex' mb={2}>
                   <Tooltip title='Limpiar Filtros'>
                     <IconButton sx={botonSx(theme.palette.primary.main)} onClick={limpiarFiltros}>
@@ -565,7 +588,7 @@ const AppCrudTable = (props) => {
                               />
                             </Tooltip>
                           ))}
-                        {onDelete && puede('Eliminar') && (
+                        {onDelete && puede('Eliminar') && (!eliminable || eliminable(row)) && (
                           <Tooltip title={<IntlMessages id='boton.eliminar' />}>
                             <DeleteIcon
                               onClick={() => onDeleteRow(row)}
@@ -658,7 +681,7 @@ AppCrudTable.propTypes = {
   entidadNombre: PropTypes.string,
   // [{ name, label, type: 'text' | 'select' | 'date', options: [{ id, nombre }] }]
   filtrosConfig: PropTypes.array,
-  // Filtros que siempre se envían (ej: { experiencia_id }).
+  // Filtros que siempre se envían (ej: { curso_id }).
   filtrosFijos: PropTypes.object,
   // false para endpoints hijos que devuelven arreglo plano (sin paginación ni orden).
   paginado: PropTypes.bool,
@@ -670,6 +693,8 @@ AppCrudTable.propTypes = {
   onVer: PropTypes.func,
   // [{ titulo, icono, onClick(row), permiso?, visible?(row), color? }]
   accionesExtra: PropTypes.array,
+  // (row) => bool: si se muestra Eliminar en esa fila (por defecto en todas).
+  eliminable: PropTypes.func,
   onVolver: PropTypes.func,
 };
 

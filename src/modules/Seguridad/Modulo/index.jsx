@@ -2,6 +2,8 @@ import React, {useState, useEffect} from 'react';
 import { Box, Button } from '@mui/material';
 import { Input } from '@mui/material';
 import PropTypes from 'prop-types';
+import { rutaCrear, rutaEditar, rutaVer } from '../../../shared/components/PaginaCrud';
+import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import { styled , useTheme} from '@mui/material/styles';
 import { lighten } from '@mui/material/styles';
@@ -24,7 +26,6 @@ import Switch from '@mui/material/Switch';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
-import ModuloCreator from './ModuloCreador';
 import {onGetColeccion, onDelete} from '../../../@crema/redux/features/modulo/moduloSlice';
 import {onGetColeccionLigera} from '../../../@crema/redux/features/aplicacion/aplicacionSlice';
 import {useDispatch, useSelector} from 'react-redux';
@@ -496,6 +497,7 @@ const Modulos = (props) => {
   const rowsPerPageOptions = [5, 10, 15, 25, 50];
 
   const [accion, setAccion] = useState('ver');
+  const navigate = useNavigate();
   const [moduloSeleccionado, setModuloSeleccionado] = useState(0);
 
   const { rows, desde, hasta, ultima_pagina, total } = useSelector((state) => state.modulos);
@@ -693,6 +695,15 @@ const Modulos = (props) => {
     setModuloSeleccionado(0);
     setAccion('ver');
   };
+
+
+  // Los formularios se abren como vista propia (ver shared/components/PaginaCrud).
+  useEffect(() => {
+    if (showForm) {
+      navigate(accion === 'crear' ? rutaCrear('/modulos') : accion === 'editar'
+        ? rutaEditar('/modulos', moduloSeleccionado) : rutaVer('/modulos', moduloSeleccionado));
+    }
+  }, [showForm]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
@@ -954,20 +965,6 @@ const Modulos = (props) => {
           </Box>
         )}
       </Paper>
-
-      {showForm ? (
-        <ModuloCreator
-          showForm={showForm}
-          modulo={moduloSeleccionado}
-          accion={accion}
-          handleOnClose={handleOnClose}
-          updateColeccion={updateColeccion}
-          titulo={titulo}
-          aplicaciones={aplicaciones}
-        />
-      ) : (
-        ''
-      )}
 
       <Popover
         id='popoverColumns'

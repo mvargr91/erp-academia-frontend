@@ -12,7 +12,7 @@ const FooterWrapper = ({ children, ...rest }) => {
         width: '100%',
         zIndex: 1102,
         boxShadow: 'none',
-        border: '1px solid #e8e5dd',
+        border: (theme) => `1px solid ${theme.palette.divider}`,
         backgroundColor: (theme) => theme.palette.background.paper,
         backgroundImage: (theme) =>
           `linear-gradient(${alpha(theme.palette.common.white, 0.05)}, ${alpha(

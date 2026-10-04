@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
 import AppCrudTable, { auditCells } from '../../../shared/components/AppCrudTable';
 import usePermisosOpcion from '../../../shared/hooks/usePermisosOpcion';
+import { accionesEnPagina } from '../../../shared/components/PaginaCrud';
 import useCrudModulo from '../../../shared/hooks/useCrudModulo';
 import { onGetColeccion, onDelete } from '../../../@crema/redux/features/pagos/pagosSlice';
+import { useSedes, celdaSede } from '../../../shared/sedes';
 import { METODOS_PAGO, nombreDe, formatoMoneda } from '../../../shared/constants/Academia';
-import PagoCreador from './PagoCreador';
 
-const cells = [
+const columnas = (variasSedes) => [
   { id: 'alumno_nombre', typeHead: 'string', label: 'Alumno', value: (v) => v, align: 'left', mostrarInicio: true },
   { id: 'curso_nombre', typeHead: 'string', label: 'Curso', value: (v) => v, align: 'left', mostrarInicio: true, ordenable: false },
+  celdaSede(variasSedes, { ordenable: true }),
   { id: 'plan_nombre', typeHead: 'string', label: 'Plan', value: (v) => v, align: 'left', mostrarInicio: false, ordenable: false },
   { id: 'monto', typeHead: 'numeric', label: 'Monto', value: formatoMoneda, align: 'right', mostrarInicio: true },
   { id: 'fecha_pago', typeHead: 'string', label: 'Fecha de pago', value: (v) => v, align: 'left', mostrarInicio: true },
@@ -21,11 +24,11 @@ const cells = [
 const filtrosConfig = [{ name: 'nombre', label: 'Alumno', type: 'text' }];
 
 const Pagos = ({ route }) => {
+  const { variasSedes } = useSedes();
+  const cells = useMemo(() => columnas(variasSedes), [variasSedes]);
   const { titulo, urlAyuda, permisos } = usePermisosOpcion(route.path);
-  const { refreshKey, updateColeccion } = useCrudModulo();
-  const [form, setForm] = useState({ open: false, accion: 'crear', id: 0 });
-
-  const cerrar = () => setForm({ open: false, accion: 'crear', id: 0 });
+  const { refreshKey } = useCrudModulo();
+  const navigate = useNavigate();
 
   return (
     <>
@@ -40,19 +43,8 @@ const Pagos = ({ route }) => {
         permisos={permisos}
         entidadNombre='Pago'
         refreshKey={refreshKey}
-        onCrear={() => setForm({ open: true, accion: 'crear', id: 0 })}
-        onEditar={(row) => setForm({ open: true, accion: 'editar', id: row.id })}
-        onVer={(row) => setForm({ open: true, accion: 'ver', id: row.id })}
+        {...accionesEnPagina(navigate, route.path)}
       />
-      {form.open && (
-        <PagoCreador
-          pago={form.id}
-          accion={form.accion}
-          titulo={titulo}
-          handleOnClose={cerrar}
-          updateColeccion={updateColeccion}
-        />
-      )}
     </>
   );
 };

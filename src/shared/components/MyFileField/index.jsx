@@ -65,9 +65,9 @@ const MyFileField = ({ name = 'archivo', label, tipo = 'imagen', rutaActual, dis
     <Box className={className}>
       <Typography variant='body2' sx={{ color: 'text.secondary', mb: 1 }}>{label}</Typography>
 
-      <Box sx={{ display: 'flex', gap: 3, alignItems: 'center', flexWrap: 'wrap', p: 3, border: '1px dashed', borderColor: error ? 'error.main' : '#C9D2DA', borderRadius: 2 }}>
+      <Box sx={{ display: 'flex', gap: 3, alignItems: 'center', flexWrap: 'wrap', p: 3, border: '1px dashed', borderColor: error ? 'error.main' : 'divider', borderRadius: 2 }}>
         {vistaPrevia && (
-          <Box component='img' src={vistaPrevia} alt='' sx={{ width: 96, height: 72, objectFit: 'cover', borderRadius: 1, bgcolor: '#F1F4F7' }} />
+          <Box component='img' src={vistaPrevia} alt='' sx={{ width: 96, height: 72, objectFit: 'cover', borderRadius: 1, bgcolor: 'action.hover' }} />
         )}
         <Box sx={{ flex: 1, minWidth: 180 }}>
           {archivo ? (
@@ -76,7 +76,7 @@ const MyFileField = ({ name = 'archivo', label, tipo = 'imagen', rutaActual, dis
             </Typography>
           ) : rutaActual ? (
             <Typography variant='body2' sx={{ display: 'flex', alignItems: 'center', gap: 1, wordBreak: 'break-all' }}>
-              <InsertDriveFileOutlinedIcon fontSize='small' sx={{ color: '#9AA5B1' }} />
+              <InsertDriveFileOutlinedIcon fontSize='small' sx={{ color: 'text.disabled' }} />
               {tipo === 'documento' ? nombreDeRuta(rutaActual) : (
                 <Link href={urlArchivo(rutaActual)} target='_blank' rel='noopener noreferrer'>{nombreDeRuta(rutaActual)}</Link>
               )}

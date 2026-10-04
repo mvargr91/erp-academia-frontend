@@ -54,7 +54,7 @@ const MUIAutocomplete = forwardRef(function MUIAutocomplete(
             '& .MuiInput-underline:before': {
               borderBottomColor: autocompleteProps.disabled
                 ? theme.palette.text.disabled
-                : '#ccc',
+                : theme.palette.divider,
             },
             '& .MuiInput-underline:hover:before': {
               borderBottomColor: autocompleteProps.primary

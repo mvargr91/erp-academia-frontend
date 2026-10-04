@@ -2,6 +2,8 @@ import React, {useState, useEffect} from 'react';
 import { Box, Button } from '@mui/material';
 import { Input } from '@mui/material';
 import PropTypes from 'prop-types';
+import { rutaCrear, rutaEditar, rutaVer } from '../../../shared/components/PaginaCrud';
+import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import { styled, useTheme } from '@mui/material/styles';
 import { lighten } from '@mui/material/styles';
@@ -26,7 +28,6 @@ import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import OpcionSistemaCreator from './OpcionSistemaCreador';
 import { onGetColeccion, onDelete} from '../../../@crema/redux/features/opcionSistema/opcionSistemaSlice';
 import { onGetColeccionLigera  } from '../../../@crema/redux/features/modulo/moduloSlice';
 import {useDispatch, useSelector} from 'react-redux';
@@ -526,23 +527,23 @@ const useStyles = makeStyles((theme) => ({
   },
   generalIcons: {
     '&:hover': {
-      color: 'black',
+      color: theme.palette.text.primary,
       cursor: 'pointer',
     },
   },
   editIcon: {
-    color: 'black',
+    color: theme.palette.text.primary,
   },
   visivilityIcon: {
-    color: 'black',
+    color: theme.palette.text.primary,
   },
   deleteIcon: {
-    color: 'black',
+    color: theme.palette.text.primary,
   },
   popoverColumns: {
     display: 'grid',
     padding: '10px',
-    color: 'black',
+    color: theme.palette.text.primary,
   },
   paginacion: {
     display: 'flex',
@@ -575,6 +576,7 @@ const OpcionSistema = (props) => {
   const rowsPerPageOptions = [5, 10, 15, 25, 50];
 
   const [accion, setAccion] = useState('ver');
+  const navigate = useNavigate();
   const [opcionSistemaSeleccionado, setOpcionSistemaSeleccionado] = useState(0);
 
   const { coleccionLigera } = useSelector((state) => state.modulos);
@@ -813,6 +815,15 @@ const OpcionSistema = (props) => {
     setOpcionSistemaSeleccionado(0);
     setAccion('ver');
   };
+
+
+  // Los formularios se abren como vista propia (ver shared/components/PaginaCrud).
+  useEffect(() => {
+    if (showForm) {
+      navigate(accion === 'crear' ? rutaCrear('/opciones-del-sistema') : accion === 'editar'
+        ? rutaEditar('/opciones-del-sistema', opcionSistemaSeleccionado) : rutaVer('/opciones-del-sistema', opcionSistemaSeleccionado));
+    }
+  }, [showForm]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
@@ -1061,20 +1072,6 @@ const OpcionSistema = (props) => {
           </Box>
         )}
       </Paper>
-
-      {showForm ? (
-        <OpcionSistemaCreator
-          showForm={showForm}
-          opcionSistema={opcionSistemaSeleccionado}
-          accion={accion}
-          handleOnClose={handleOnClose}
-          updateColeccion={updateColeccion}
-          titulo={titulo}
-          modulos={modulos}
-        />
-      ) : (
-        ''
-      )}
 
       <Popover
         id='popoverColumns'

@@ -14,6 +14,7 @@ import { onGetColeccionLigera as onGetProfesores } from '../../../../@crema/redu
 import { onGetColeccionLigera as onGetPlanes } from '../../../../@crema/redux/features/planes/planesSlice';
 import { onGetColeccionLigera as onGetAlumnos } from '../../../../@crema/redux/features/alumnos/alumnosSlice';
 import { aRadio } from '../../../../shared/constants/Academia';
+import { useSedes } from '../../../../shared/sedes';
 import CursoForm from './CursoForm';
 
 const validationSchema = yup.object({
@@ -25,8 +26,9 @@ const validationSchema = yup.object({
   cupo_max: yup.number().typeError('Debe ser un número').nullable().min(1, 'Mínimo 1'),
 });
 
-const initialValues = (registro) => ({
+const initialValues = (registro, sedePorDefecto) => ({
   id: registro?.id ?? '',
+  sede_id: registro?.sede_id ?? sedePorDefecto,
   nombre: registro?.nombre ?? '',
   ritmo_id: registro?.ritmo_id ?? '',
   profesor_id: registro?.profesor_id ?? '',
@@ -46,6 +48,7 @@ const CursoCreador = ({ curso, accion, handleOnClose, updateColeccion, titulo })
   const { coleccionLigera: profesores } = useSelector((s) => s.profesores);
   const { coleccionLigera: planes } = useSelector((s) => s.planes);
   const { coleccionLigera: alumnos } = useSelector((s) => s.alumnos);
+  const { sedePorDefecto } = useSedes();
 
   useEffect(() => {
     dispatch(onGetRitmos());
@@ -65,7 +68,7 @@ const CursoCreador = ({ curso, accion, handleOnClose, updateColeccion, titulo })
       onCreate={onCreate}
       onUpdate={onUpdate}
       resetActual={resetActual}
-      initialValues={initialValues}
+      initialValues={(registro) => initialValues(registro, sedePorDefecto)}
       validationSchema={validationSchema}
       maxWidth='md'
     >

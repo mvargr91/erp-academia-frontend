@@ -7,16 +7,13 @@ import {
   useLayoutActionsContext,
   useLayoutContext,
 } from '@crema/context/AppContextProvider/LayoutContextProvider';
-import { useThemeActionsContext } from '@crema/context/AppContextProvider/ThemeContextProvider';
-import { ThemeMode } from '@crema/constants/AppEnums';
 import {
   anonymousStructure,
   authorizedStructure,
   publicStructure,
 } from '../AppRoutes';
-import { esRutaPortal } from '../AppRoutes/Portal';
-import PublicLayout from '../../../shared/components/Portal/PublicLayout';
-import { useLocation, useRoutes } from 'react-router-dom';
+import { useRoutes } from 'react-router-dom';
+import AvisoSuscripcion from '../../../shared/components/AvisoSuscripcion';
 import { initialUrl } from '@crema/constants/AppConst';
 import { useSelector, useDispatch } from 'react-redux';
 import { getAuthUser } from '../../redux/features/auth/authSlice';
@@ -26,7 +23,6 @@ const AppLayout = () => {
   const dispatch = useDispatch();
   const { user, isAuthenticated, loading } = useSelector((state) => state.auth);
   const { updateNavStyle } = useLayoutActionsContext();
-  const { updateTheme, updateThemeMode } = useThemeActionsContext(); // Obtener funciones para actualizar el tema
   const AppLayout = Layouts[navStyle];
   const [params] = useUrlSearchParams();
   const  [url, setUrl] = useState(initialUrl);
@@ -51,49 +47,22 @@ const AppLayout = () => {
   
   // Aquí debes asegurarte de que `useRoutes` recibe un array con objetos correctos
   const routes = useRoutes(generatedRoutes);
-  const { pathname } = useLocation();
 
+  // Colores y modo claro/oscuro los maneja AparienciaProvider (shared/apariencia).
   useEffect(() => {
-    if (isAuthenticated && !loading) {
-      if (params.layout) updateNavStyle(params.layout);
-
-      // Establecer solo el modo DARK para el tema
-      updateThemeMode(ThemeMode.DARK);
-      updateTheme((prevTheme) => ({
-        ...prevTheme,
-        // palette: { //TODO:: cambio de color globalmente
-        //   ...prevTheme.palette,
-        //   mode: ThemeMode.DARK,
-        //   background: {
-        //     default: '#2B3137',
-        //     paper: '#313541',
-        //   },
-        //   text: {
-        //     primary: '#ffffff',
-        //     secondary: '#bbbbbb',
-        //   },
-        // },
-      }));
-    }
-  }, [
-    isAuthenticated,
-    loading,
-    params.layout,
-    updateNavStyle,
-    updateThemeMode,
-    updateTheme,
-  ]);
-
-  // Páginas del portal público: layout propio con o sin sesión.
-  if (esRutaPortal(pathname)) {
-    return <PublicLayout>{routes}</PublicLayout>;
-  }
+    if (isAuthenticated && !loading && params.layout) updateNavStyle(params.layout);
+  }, [isAuthenticated, loading, params.layout, updateNavStyle]);
 
   return (
     <>
       {isAuthenticated ? (
-        <AppLayout 
-          routes={routes} 
+        <AppLayout
+          routes={
+            <>
+              <AvisoSuscripcion />
+              {routes}
+            </>
+          }
           routesConfig={user?.usuario?.permisos}
        />
       ) : (

@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import Dialog from '@mui/material/Dialog';
+import Dialog from '../../../../shared/components/DialogoOPagina';
 import {Formik} from 'formik';
 import * as yup from 'yup';
 import {useDispatch, useSelector} from 'react-redux';

@@ -15,7 +15,6 @@ import AuthWrapper from '../AuthWrapper';
 import { useDispatch, useSelector } from 'react-redux';
 import {login} from '../../../@crema/redux/features/auth/authSlice';
 import { styled, useTheme } from '@mui/material/styles';
-import { PORTAL_HABILITADO } from '../../../shared/constants/RutasPortal';
 
 
 const validationSchema = yup.object({
@@ -59,7 +58,6 @@ const SigninJwtAuth = () => {
               dispatch(login({ username: data.username, password: data.password }))
               .unwrap() // Para manejar las promesas correctamente
               .then(() => {
-                // navigate('/inversiones'); // Redirigir al home si el login fue exitoso
               })
               .catch((err) => {
                 console.error('Error de login:', err); // Manejar el error si es necesario
@@ -164,16 +162,6 @@ const SigninJwtAuth = () => {
                   >
                     <IntlMessages id='common.login' />
                   </Button>
-                  {PORTAL_HABILITADO && (
-                    <Box sx={{ mt: 2, fontSize: 13, display: 'flex', gap: 2 }}>
-                      <Box component='span' sx={{ color: 'primary.main', cursor: 'pointer' }} onClick={() => navigate('/registro')}>
-                        Crear cuenta
-                      </Box>
-                      <Box component='span' sx={{ color: 'text.secondary', cursor: 'pointer' }} onClick={() => navigate('/')}>
-                        Volver al portal
-                      </Box>
-                    </Box>
-                  )}
                 </div>
               </Form>
             )}

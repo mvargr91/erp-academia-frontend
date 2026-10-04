@@ -2,6 +2,8 @@ import React, {useState, useEffect} from 'react';
 import { Box, Button } from '@mui/material';
 import { Input } from '@mui/material';
 import PropTypes from 'prop-types';
+import { rutaCrear, rutaEditar, rutaVer } from '../../../shared/components/PaginaCrud';
+import { useNavigate } from 'react-router-dom';
 import { styled, useTheme } from '@mui/material/styles';
 import { makeStyles } from '@mui/styles';
 import Table from '@mui/material/Table';
@@ -22,7 +24,6 @@ import Switch from '@mui/material/Switch';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
-import UsuarioCreador from './UsuarioCreador';
 import { onGetColeccion, onDelete, resetMessage } from '../../../@crema/redux/features/usuarios/usuariosSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -43,7 +44,6 @@ import MyCell from '../../../shared/components/MyCell';
 import moment from 'moment';
 import HelpButton from '../../../shared/components/HelpButton';
 import { Lock } from '@mui/icons-material';
-import CambioContraseña from './CambioContraseña';
 import { hideMessage } from '../../../@crema/redux/features/cammon/commonSlice';
 
 
@@ -524,23 +524,23 @@ const useStyles = makeStyles((theme) => ({
   },
   generalIcons: {
     '&:hover': {
-      color: 'black',
+      color: theme.palette.text.primary,
       cursor: 'pointer',
     },
   },
   editIcon: {
-    color: 'black',
+    color: theme.palette.text.primary,
   },
   visivilityIcon: {
-    color: 'black',
+    color: theme.palette.text.primary,
   },
   deleteIcon: {
-    color: 'black',
+    color: theme.palette.text.primary,
   },
   popoverColumns: {
     display: 'grid',
     padding: '10px',
-    color: 'black',
+    color: theme.palette.text.primary,
   },
   paginacion: {
     display: 'flex',
@@ -578,6 +578,7 @@ const Usuarios = (props) => {
   const rowsPerPageOptions = [5, 10, 15, 25, 50];
 
   const [accion, setAccion] = useState('ver');
+  const navigate = useNavigate();
   const [usuarioSeleccionado, setUsuarioSeleccionado] = useState(0);
  
   const { rows, desde, hasta, ultima_pagina, total } = useSelector((state) => state.usuarios);
@@ -796,6 +797,18 @@ const Usuarios = (props) => {
     setUsuarioSeleccionado(0);
     setAccion('ver');
   };
+
+
+  // Los formularios se abren como vista propia (ver shared/components/PaginaCrud).
+  useEffect(() => {
+    if (showForm.creator) {
+      navigate(accion === 'crear' ? rutaCrear('/usuarios') : accion === 'editar'
+        ? rutaEditar('/usuarios', usuarioSeleccionado) : rutaVer('/usuarios', usuarioSeleccionado));
+    }
+    if (showForm.pass) {
+      navigate(`/usuarios/${usuarioSeleccionado}/cambiar-clave`);
+    }
+  }, [showForm]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
@@ -1041,29 +1054,6 @@ const Usuarios = (props) => {
           </Box>
         )}
       </Paper>
-
-      {showForm.creator ? (
-        <UsuarioCreador
-          showForm={showForm.creator}
-          usuario={usuarioSeleccionado}
-          accion={accion}
-          handleOnClose={handleOnClose}
-          updateColeccion={updateColeccion}
-          titulo={titulo}
-        />
-      ) : (
-        ''
-      )}
-
-      {showForm.pass && (
-        <CambioContraseña
-          showForm={showForm.pass}
-          usuario={usuarioSeleccionado}
-          accion={accion}
-          handleOnClose={handleOnClose}
-          titulo={titulo}
-        />
-      )}
 
       <Popover
         id='popoverColumns'

@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { styled } from '@mui/material/styles';
 
 // Definir un estilo personalizado para el input usando styled
-const StyledTextField = styled(TextField)(({ theme }) => ({
+export const StyledTextField = styled(TextField)(({ theme }) => ({
   '& .MuiInputBase-input': {
     border: 'none',
     borderRadius: 0,
@@ -14,13 +14,13 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
   },
   '& .MuiInput-root': {
     '&:before': {
-      borderBottom: '1px solid #ccc',
+      borderBottom: `1px solid ${theme.palette.divider}`,
     },
     '&:after': {
-      borderBottom: '1px solid #ccc', 
+      borderBottom: `1px solid ${theme.palette.divider}`, 
     },
     '&.Mui-disabled:before': {
-      borderBottom: '1px solid #ddd !important', 
+      borderBottom: `1px solid ${theme.palette.divider} !important`, 
     },
   },
   '& .MuiInputBase-input.Mui-disabled': {
@@ -39,7 +39,8 @@ const MyTextField = (props) => {
       variant='standard'
       {...props}
       {...field}
-      helperText={errorText}
+      // El error tiene prioridad; si no hay, se muestra el texto de ayuda del campo.
+      helperText={errorText || props.helperText}
       error={!!errorText}
       onBlur={onBlur}
     />

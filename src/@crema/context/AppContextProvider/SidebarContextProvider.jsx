@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useState } from 'react';
 import PropTypes from 'prop-types';
 import defaultConfig from '@crema/constants/defaultConfig';
+import { menuInicial } from '../../../shared/apariencia/tema';
 
 const SidebarContext = createContext();
 const SidebarActionsContext = createContext();
@@ -13,9 +14,7 @@ const SidebarContextProvider = ({ children }) => {
   const [menuStyle, updateMenuStyle] = useState(
     defaultConfig.sidebar.menuStyle,
   );
-  const [sidebarColorSet, updateSidebarColorSet] = useState(
-    defaultConfig.sidebar.colorSet,
-  );
+  const [sidebarColorSet, updateSidebarColorSet] = useState(menuInicial);
   const [allowSidebarBgImage, updateImage] = useState(
     defaultConfig.sidebar.allowSidebarBgImage,
   );

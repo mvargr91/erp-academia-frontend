@@ -1,9 +1,9 @@
-// Identidad visual de Travel City LGTBIQ+.
+// Identidad visual por defecto del ERP (cada academia la sobrescribe en Apariencia).
 // Las imágenes viven en /public/brand (generadas a partir de /public/logo512.png).
 
 export const MARCA = {
-  nombre: 'Travel City LGTBIQ+',
-  eslogan: 'Explora Colombia con libertad',
+  nombre: 'ERP Academias',
+  eslogan: 'Gestión para academias de baile',
   logos: {
     // Fondos claros: portal público, correos, documentos.
     principal: '/brand/logo.png',

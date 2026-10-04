@@ -23,16 +23,12 @@ import UserInfo from "../../components/UserInfo";
 import HeaderNavWrapper from "./HeaderNavWrapper";
 import HorizontalNav from "../../components/HorizontalNav";
 import { allowMultiLanguage } from "../../../../constants/AppConst";
-import Button from "@mui/material/Button";
-import { useNavigate } from "react-router-dom";
-import TravelExploreIcon from "@mui/icons-material/TravelExplore";
-import { TEMA_MARCA_PANEL, gradienteArcoiris } from "../../../../../shared/constants/Marca";
-import { PORTAL_HABILITADO, RUTAS_PORTAL } from "../../../../../shared/constants/RutasPortal";
+import BotonModo from "../../../../../shared/apariencia/BotonModo";
+import { SelectorSede } from "../../../../../shared/sedes";
 
 const AppHeader = ({ toggleNavCollapsed, routesConfig }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const theme = useTheme();
-  const navigate = useNavigate();
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -55,7 +51,7 @@ const AppHeader = ({ toggleNavCollapsed, routesConfig }) => {
       }}
       className="app-bar"
     >
-      {TEMA_MARCA_PANEL && <Box sx={{ height: 4, background: gradienteArcoiris }} />}
+      <Box sx={{ height: 4, backgroundColor: "primary.main" }} />
       <Toolbar
         sx={{
           boxSizing: "border-box",
@@ -107,24 +103,6 @@ const AppHeader = ({ toggleNavCollapsed, routesConfig }) => {
           >
             <AppLogo />
           </Box>
-          <Hidden smDown>
-            {!TEMA_MARCA_PANEL && (
-            <Box
-              sx={{
-                position: "absolute",
-                left: "50%",
-                transform: "translateX(-50%)",
-                color: theme.palette.cuarternario.main,
-                fontSize: 30,
-                fontWeight: "bold",
-                textAlign: "center",
-              }}
-            >
-              Sistema de Inversiones
-            </Box>
-            )}
-          </Hidden>
-
           <Box
             sx={{
               flexGrow: 1,
@@ -137,18 +115,8 @@ const AppHeader = ({ toggleNavCollapsed, routesConfig }) => {
               alignItems: "center",
             }}
           >
-            {TEMA_MARCA_PANEL && PORTAL_HABILITADO && (
-              <Hidden mdDown>
-                <Button
-                  variant="outlined"
-                  startIcon={<TravelExploreIcon />}
-                  onClick={() => navigate(RUTAS_PORTAL.inicio)}
-                  sx={{ textTransform: "none", fontWeight: 600 }}
-                >
-                  Ver portal
-                </Button>
-              </Hidden>
-            )}
+            <SelectorSede sx={{ mr: 2 }} />
+            <BotonModo />
             <Box
               sx={{
                 ml: { sm: 4 },

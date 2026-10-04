@@ -15,7 +15,7 @@ import { Business, Person } from '@mui/icons-material';
 import { useAuthMethod, useAuthUser } from "@crema/hooks/AuthHooks";
 import { useSelector, useDispatch } from 'react-redux';
 import { logout, logoutUser } from "../../../../redux/features/auth/authSlice";
-import { PORTAL_HABILITADO, RUTAS_PORTAL, RUTA_MI_CUENTA } from "../../../../../shared/constants/RutasPortal";
+import { RUTA_MI_CUENTA } from "../../../../../shared/constants/RutasCuenta";
 
 const useStyles = makeStyles((theme) => ({
   userRoot: {
@@ -177,14 +177,14 @@ const UserInfo = ({ color }) => {
         >
           <MenuItem
             className={classes.font}
-            style={{ fontWeight: 'bold', color: 'black' }}
+            style={{ fontWeight: 'bold' }}
             disabled={true}  
           >
             {user.usuario.nombre }
           </MenuItem>
           <MenuItem
             className={classes.font}
-            style={{ fontWeight: 'bold', color: 'black' }}
+            style={{ fontWeight: 'bold' }}
             disabled={true}
           >
             {user.usuario.correo_electronico}
@@ -192,11 +192,6 @@ const UserInfo = ({ color }) => {
           <MenuItem onClick={() => irA(RUTA_MI_CUENTA)}>
             Mi cuenta
           </MenuItem>
-          {PORTAL_HABILITADO && (
-            <MenuItem onClick={() => irA(RUTAS_PORTAL.inicio)}>
-              Ir al portal
-            </MenuItem>
-          )}
           <Box className={classes.btnContainer}>
             <Button
               onClick={handleLogout} className={classes.logoutBtn}

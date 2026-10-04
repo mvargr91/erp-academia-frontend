@@ -1,10 +1,9 @@
 // src/@crema/redux/features/cuenta/cuentaSlice.jsx
 // "Mi cuenta": datos del usuario autenticado (cualquier rol). No usa createCrudSlice
 // porque el recurso no lleva id: el backend lo resuelve desde el token.
-//   GET v1/cuenta            -> { id, nombre, identificacion_usuario, correo_electronico, rol, miembro_desde, proveedor }
+//   GET v1/cuenta            -> { id, nombre, identificacion_usuario, correo_electronico, rol, miembro_desde }
 //   PUT v1/cuenta            -> datos personales
 //   PUT v1/cuenta/clave      -> cambio de contraseña (pide la actual)
-//   PUT v1/cuenta/proveedor  -> datos del negocio (solo si tiene proveedor vinculado)
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import jwtAxios from '../../../services/auth/jwt-auth';
 import { showMessage } from '../cammon/commonSlice';
@@ -41,7 +40,6 @@ export const onUpdateCuenta = guardar('onUpdateCuenta', 'cuenta', (datos, { disp
   dispatch(actualizarUsuarioSesion({ nombre: datos.nombre, correo_electronico: datos.correo_electronico })),
 );
 export const onCambiarClave = guardar('onCambiarClave', 'cuenta/clave');
-export const onUpdateNegocio = guardar('onUpdateNegocio', 'cuenta/proveedor');
 
 const cuentaSlice = createSlice({
   name: 'cuenta',
@@ -67,7 +65,7 @@ const cuentaSlice = createSlice({
         state.error = action.payload;
       });
 
-    [onUpdateCuenta, onCambiarClave, onUpdateNegocio].forEach((thunk) => {
+    [onUpdateCuenta, onCambiarClave].forEach((thunk) => {
       builder
         .addCase(thunk.pending, (state) => {
           state.saving = true;

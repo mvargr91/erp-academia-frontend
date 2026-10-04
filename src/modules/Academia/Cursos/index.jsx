@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AppCrudTable, { auditCells } from '../../../shared/components/AppCrudTable';
 import usePermisosOpcion from '../../../shared/hooks/usePermisosOpcion';
+import { accionesEnPagina } from '../../../shared/components/PaginaCrud';
 import useCrudModulo from '../../../shared/hooks/useCrudModulo';
 import { onGetColeccion, onDelete } from '../../../@crema/redux/features/cursos/cursosSlice';
+import { useSedes, celdaSede } from '../../../shared/sedes';
 import {
   DIAS_SEMANA,
   nombreDe,
@@ -11,10 +15,10 @@ import {
   colorActivo,
   valorSiNo,
 } from '../../../shared/constants/Academia';
-import CursoCreador from './CursoCreador';
 
-const cells = [
+const columnas = (variasSedes) => [
   { id: 'ritmo_nombre', typeHead: 'string', label: 'Ritmo', value: (v) => v, align: 'left', mostrarInicio: true },
+  celdaSede(variasSedes, { ordenable: true }),
   { id: 'profesor_nombre', typeHead: 'string', label: 'Profesor', value: (v) => v, align: 'left', mostrarInicio: true },
   { id: 'dia', typeHead: 'string', label: 'Día', value: (v) => nombreDe(DIAS_SEMANA, v), align: 'left', mostrarInicio: true },
   { id: 'hora', typeHead: 'string', label: 'Hora', value: (v) => (v ? String(v).substring(0, 5) : ''), align: 'left', mostrarInicio: true },
@@ -28,11 +32,11 @@ const cells = [
 const filtrosConfig = [{ name: 'nombre', label: 'Ritmo', type: 'text' }];
 
 const Cursos = ({ route }) => {
+  const { variasSedes } = useSedes();
+  const cells = useMemo(() => columnas(variasSedes), [variasSedes]);
   const { titulo, urlAyuda, permisos } = usePermisosOpcion(route.path);
-  const { refreshKey, updateColeccion } = useCrudModulo();
-  const [form, setForm] = useState({ open: false, accion: 'crear', id: 0 });
-
-  const cerrar = () => setForm({ open: false, accion: 'crear', id: 0 });
+  const { refreshKey } = useCrudModulo();
+  const navigate = useNavigate();
 
   return (
     <>
@@ -47,19 +51,11 @@ const Cursos = ({ route }) => {
         permisos={permisos}
         entidadNombre='Curso'
         refreshKey={refreshKey}
-        onCrear={() => setForm({ open: true, accion: 'crear', id: 0 })}
-        onEditar={(row) => setForm({ open: true, accion: 'editar', id: row.id })}
-        onVer={(row) => setForm({ open: true, accion: 'ver', id: row.id })}
+        {...accionesEnPagina(navigate, route.path)}
+        accionesExtra={[
+          { titulo: 'Calendario de clases', icono: CalendarMonthIcon, onClick: (row) => navigate(`${route.path}/${row.id}/calendario`) },
+        ]}
       />
-      {form.open && (
-        <CursoCreador
-          curso={form.id}
-          accion={form.accion}
-          titulo={titulo}
-          handleOnClose={cerrar}
-          updateColeccion={updateColeccion}
-        />
-      )}
     </>
   );
 };

@@ -16,7 +16,7 @@ const getStyledAutocomplete = (disabled, theme) =>
       color: disabled ? theme.palette.text.disabled : theme.palette.text.primary,
     },
     '& .MuiInput-root:before': {
-      borderBottom: `1px solid ${disabled ? theme.palette.text.disabled : '#ccc'}`,
+      borderBottom: `1px solid ${disabled ? theme.palette.text.disabled : theme.palette.divider}`,
     },
     '& .MuiInput-root:after': {
       borderBottom: `2px solid ${disabled ? theme.palette.text.disabled : theme.palette.text.primary}`,

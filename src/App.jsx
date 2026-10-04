@@ -9,6 +9,7 @@ import AppAuthProvider from '@crema/core/AppAuthProvider';
 import AuthRoutes from '@crema/components/AuthRoutes';
 import AppLayout from '@crema/core/AppLayout';
 import store from './@crema/redux/store';
+import AparienciaProvider from './shared/apariencia';
 import { Provider } from 'react-redux';
 import '@crema/mockapi';
 import './styles/index.css';
@@ -18,6 +19,7 @@ function App() {
   return (
     <>
         <AppContextProvider>
+            <AparienciaProvider>
             <Provider store={store}>
             <AppThemeProvider>
                 <AppStyleProvider>
@@ -35,7 +37,8 @@ function App() {
                     </AppLocaleProvider>
                 </AppStyleProvider>
             </AppThemeProvider>
-           </Provider>    
+           </Provider>
+            </AparienciaProvider>
         </AppContextProvider>
     </>
   )

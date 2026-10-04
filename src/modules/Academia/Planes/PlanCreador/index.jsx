@@ -21,10 +21,12 @@ const validationSchema = yup.object({
 const initialValues = (registro) => ({
   id: registro?.id ?? '',
   nombre: registro?.nombre ?? '',
+  sede_id: registro?.sede_id ?? '',
   descripcion: registro?.descripcion ?? '',
   valor: registro?.valor ?? '',
   periodicidad: registro?.periodicidad ?? 'mensual',
   num_clases: registro?.num_clases ?? '',
+  vigencia_dias: registro?.vigencia_dias ?? '',
   estado: aRadio(registro?.estado),
 });
 

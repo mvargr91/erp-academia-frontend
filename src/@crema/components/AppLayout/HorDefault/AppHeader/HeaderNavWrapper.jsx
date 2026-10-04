@@ -36,7 +36,7 @@ const HeaderNavWrapper = ({ children }) => {
         },
         '& .navLinkIcon': {
           mr: 2.5,
-          color: (theme) => theme.palette.common.white,
+          color: sidebarTextColor,
           fontSize: 20,
         },
       }}

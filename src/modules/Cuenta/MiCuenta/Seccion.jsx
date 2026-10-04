@@ -1,4 +1,4 @@
-// Bloque con título para agrupar campos (misma idea que las secciones de "Únete como proveedor").
+// Bloque con título para agrupar campos.
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Box, Grid, Typography } from '@mui/material';

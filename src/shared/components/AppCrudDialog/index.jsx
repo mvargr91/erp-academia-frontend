@@ -11,6 +11,7 @@ import Dialog from '@mui/material/Dialog';
 import Slide from '@mui/material/Slide';
 import { Box, Paper } from '@mui/material';
 import AppLoader from '@crema/components/AppLoader';
+import { useEnPaginaCrud } from '../PaginaCrud';
 
 // Indica a AppCrudForm si se muestra dentro de un modal o como página.
 const AppCrudContext = createContext({ enPagina: false });
@@ -36,9 +37,13 @@ const AppCrudDialog = (props) => {
     validationSchema,
     transformarAntesDeEnviar,
     maxWidth,
-    enPagina,
+    enPagina: enPaginaProp,
     children,
   } = props;
+
+  // Dentro de una ruta de formulario (PaginaCrud) siempre se pinta como página.
+  const enPaginaRuta = useEnPaginaCrud();
+  const enPagina = enPaginaProp || enPaginaRuta;
 
   const dispatch = useDispatch();
   const { actual, loadingActual, saving } = useSelector((state) => state[stateKey]);
@@ -96,7 +101,6 @@ const AppCrudDialog = (props) => {
             flexDirection: 'column',
             boxShadow: '0px 0px 5px 5px rgb(0 0 0 / 10%)',
             borderRadius: '4px',
-            backgroundColor: '#fff',
           }}
         >
           {formulario}

@@ -1,11 +1,13 @@
 import axios from '@crema/services/axios';
 import defaultConfig from '@crema/constants/defaultConfig';
+import environment from '../../../../env';
 
 // TODO:: convertir la url global 
 const jwtAxios = axios?.create({
   baseURL: defaultConfig.API_URL + '/v1/', 
   headers: {
     'Content-Type': 'application/json',
+    'X-Academia': environment.ACADEMIA,
   },
 });
 jwtAxios.interceptors.response.use(

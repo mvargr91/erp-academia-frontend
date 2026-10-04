@@ -7,21 +7,21 @@ import { styled } from '@mui/material/styles';
 const StyledTextField = styled(TextField)(({ theme }) => ({
   '& .MuiInputBase-input': {
     border: 'none',
-    borderBottom: '1px solid #000',
+    borderBottom: `1px solid ${theme.palette.text.primary}`,
     borderRadius: 0,
     '&:focus': {
-      borderBottom: '1px solid #000',
+      borderBottom: `1px solid ${theme.palette.text.primary}`,
     },
   },
   '& .MuiInput-root': {
     '&:before': {
-      borderBottom: '1px solid #ccc',
+      borderBottom: `1px solid ${theme.palette.divider}`,
     },
     '&:after': {
-      borderBottom: '1px solid #000',
+      borderBottom: `1px solid ${theme.palette.text.primary}`,
     },
     '&.Mui-disabled:before': {
-      borderBottom: '1px solid #ddd !important',
+      borderBottom: `1px solid ${theme.palette.divider} !important`,
     },
   },
   '& .MuiInputBase-input.Mui-disabled': {

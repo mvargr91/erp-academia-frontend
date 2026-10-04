@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Box, Button } from '@mui/material';
 import { Input } from '@mui/material';
 import PropTypes from 'prop-types';
+import { rutaCrear, rutaEditar, rutaVer } from '../../../shared/components/PaginaCrud';
+import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import { styled, useTheme } from '@mui/material/styles';
 import { lighten } from '@mui/material/styles';
@@ -24,7 +26,6 @@ import Switch from '@mui/material/Switch';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
-import AplicacionCreador from './AplicacionCreador';
 import {onGetColeccion, onDelete} from '../../../@crema/redux/features/aplicacion/aplicacionSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -498,6 +499,7 @@ const Aplicacion = (props) => {
   const rowsPerPageOptions = [5, 10, 15, 25, 50];
 
   const [accion, setAccion] = useState('ver');
+  const navigate = useNavigate();
   const [aplicacionSeleccionado, setAplicacionSeleccionado] = useState(0);
   const { rows, desde, hasta, ultima_pagina, total } = useSelector((state) => state.aplicaciones);
 
@@ -690,6 +692,15 @@ const Aplicacion = (props) => {
     setAplicacionSeleccionado(0);
     setAccion('ver');
   };
+
+
+  // Los formularios se abren como vista propia (ver shared/components/PaginaCrud).
+  useEffect(() => {
+    if (showForm) {
+      navigate(accion === 'crear' ? rutaCrear('/aplicaciones') : accion === 'editar'
+        ? rutaEditar('/aplicaciones', aplicacionSeleccionado) : rutaVer('/aplicaciones', aplicacionSeleccionado));
+    }
+  }, [showForm]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
@@ -945,20 +956,6 @@ const Aplicacion = (props) => {
           </Box>
         )}
       </Paper>
-
-      {showForm ? 
-      (
-        <AplicacionCreador
-          showForm={showForm}
-          aplicacion={aplicacionSeleccionado}
-          accion={accion}
-          handleOnClose={handleOnClose}
-          updateColeccion={updateColeccion}
-          titulo={titulo}
-        />
-      ) : (
-        ''
-      )}
 
       <Popover
         id='popoverColumns'

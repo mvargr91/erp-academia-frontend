@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Button } from '@mui/material';
 import { Input } from '@mui/material';
 import PropTypes from 'prop-types';
+import { rutaCrear, rutaEditar, rutaVer } from '../../../shared/components/PaginaCrud';
 import clsx from 'clsx';
 import { styled, useTheme } from '@mui/material/styles';
 import { alpha, lighten } from '@mui/material/styles';
@@ -24,7 +25,6 @@ import Switch from '@mui/material/Switch';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
-import RolCreator from './RolCreator';
 import { onGetColeccion, onDelete, resetMessage } from '../../../@crema/redux/features/rol/rolesSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -500,23 +500,23 @@ const useStyles = makeStyles((theme) => ({
   },
   generalIcons: {
     '&:hover': {
-      color: 'black',
+      color: theme.palette.text.primary,
       cursor: 'pointer',
     },
   },
   editIcon: {
-    color: 'black',
+    color: theme.palette.text.primary,
   },
   visivilityIcon: {
-    color: 'black',
+    color: theme.palette.text.primary,
   },
   deleteIcon: {
-    color: 'black',
+    color: theme.palette.text.primary,
   },
   popoverColumns: {
     display: 'grid',
     padding: '10px',
-    color: 'black',
+    color: theme.palette.text.primary,
   },
   paginacion: {
     display: 'flex',
@@ -755,6 +755,15 @@ const Roles = (props) => {
     setRolSeleccionado(0);
     setAccion('ver');
   };
+
+
+  // Los formularios se abren como vista propia (ver shared/components/PaginaCrud).
+  useEffect(() => {
+    if (showForm) {
+      navigate(accion === 'crear' ? rutaCrear('/roles') : accion === 'editar'
+        ? rutaEditar('/roles', rolSeleccionado) : rutaVer('/roles', rolSeleccionado));
+    }
+  }, [showForm]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
@@ -1021,19 +1030,6 @@ const Roles = (props) => {
           </Box>
         )}
       </Paper>
-
-      {showForm ? (
-        <RolCreator
-          showForm={showForm}
-          rol={rolSeleccionado}
-          accion={accion}
-          handleOnClose={handleOnClose}
-          updateColeccion={updateColeccion}
-          titulo={titulo}
-        />
-      ) : (
-        ''
-      )}
 
       <Popover
         id='popoverColumns'

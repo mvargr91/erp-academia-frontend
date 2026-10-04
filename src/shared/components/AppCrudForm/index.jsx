@@ -26,7 +26,8 @@ export const SeccionForm = ({ titulo }) => (
       fontWeight: Fonts.BOLD,
       textTransform: 'uppercase',
       letterSpacing: '0.04em',
-      borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+      borderBottom: '1px solid',
+      borderBottomColor: 'divider',
     }}
   >
     {titulo}
@@ -56,13 +57,14 @@ const AppCrudForm = ({ titulo, accion, handleOnClose, saving, children }) => {
           gap: 2,
           px: { xs: 5, md: 6 },
           py: 4,
-          borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+          borderBottom: '1px solid',
+          borderBottomColor: 'divider',
         }}
       >
         <Box display='flex' alignItems='center' gap={1}>
           {enPagina && (
             <Tooltip title='Volver'>
-              <IconButton onClick={handleOnClose} sx={{ color: '#000' }}>
+              <IconButton onClick={handleOnClose} sx={{ color: 'text.primary' }}>
                 <ArrowBackIosIcon />
               </IconButton>
             </Tooltip>
@@ -71,14 +73,14 @@ const AppCrudForm = ({ titulo, accion, handleOnClose, saving, children }) => {
             component='h2'
             fontSize={enPagina ? 22 : 20}
             fontWeight={enPagina ? Fonts.BOLD : Fonts.MEDIUM}
-            sx={{ color: '#2d2f33' }}
+            sx={{ color: 'text.primary' }}
           >
             {titulo}
           </Typography>
         </Box>
         {!enPagina && (
           <Tooltip title='Cerrar'>
-            <IconButton onClick={handleOnClose} sx={{ color: '#2d2f33' }}>
+            <IconButton onClick={handleOnClose} sx={{ color: 'text.primary' }}>
               <CloseIcon />
             </IconButton>
           </Tooltip>
@@ -103,8 +105,7 @@ const AppCrudForm = ({ titulo, accion, handleOnClose, saving, children }) => {
             '& > *': { gridColumn: { xs: '1 / -1', sm: 'span 3' }, minWidth: 0 },
             '& > .campo-tercio': { gridColumn: { xs: '1 / -1', sm: 'span 2' } },
             '& > .campo-completo': { gridColumn: '1 / -1' },
-            // El panel usa la paleta oscura: sin esto la línea de los selects vacíos es blanca.
-            '& .MuiInput-root:not(.Mui-error):before': { borderBottomColor: '#ccc' },
+            '& .MuiInput-root:not(.Mui-error):before': { borderBottomColor: theme.palette.divider },
           }}
         >
           {children}
@@ -118,13 +119,14 @@ const AppCrudForm = ({ titulo, accion, handleOnClose, saving, children }) => {
           gap: '10px',
           px: { xs: 5, md: 6 },
           py: 4,
-          borderTop: '1px solid rgba(0, 0, 0, 0.12)',
+          borderTop: '1px solid',
+          borderTopColor: 'divider',
           // En página los botones siguen visibles al desplazarse por un formulario largo.
           ...(enPagina && {
             position: 'sticky',
             bottom: 0,
             zIndex: 2,
-            backgroundColor: '#fff',
+            backgroundColor: 'background.paper',
             borderRadius: '0 0 4px 4px',
           }),
         }}
@@ -144,7 +146,7 @@ const AppCrudForm = ({ titulo, accion, handleOnClose, saving, children }) => {
           <Button
             sx={{
               px: 12,
-              color: 'white',
+              color: theme.palette.primary.contrastText,
               '&:hover': { backgroundColor: theme.palette.colorHovers, cursor: 'pointer' },
               backgroundColor: theme.palette.primary.main,
             }}

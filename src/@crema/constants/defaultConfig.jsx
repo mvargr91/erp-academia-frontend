@@ -44,8 +44,8 @@ export const textDark = {
 };
 
 export const backgroundDark = {
-  paper: '#FFFFFF',
-  default: '#F4F7FE',
+  paper: '#1E2530',
+  default: '#141A22',
 };
 
 export const backgroundLight = {

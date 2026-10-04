@@ -1,17 +1,30 @@
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import AppCrudTable, { auditCells } from '../../../shared/components/AppCrudTable';
+import { useSedes, celdaSede } from '../../../shared/sedes';
 import usePermisosOpcion from '../../../shared/hooks/usePermisosOpcion';
+import { accionesEnPagina } from '../../../shared/components/PaginaCrud';
 import useCrudModulo from '../../../shared/hooks/useCrudModulo';
 import { onGetColeccion, onDelete } from '../../../@crema/redux/features/alumnos/alumnosSlice';
-import { valorActivo, colorActivo } from '../../../shared/constants/Academia';
-import AlumnoCreador from './AlumnoCreador';
+import { valorActivo, colorActivo, formatoMoneda } from '../../../shared/constants/Academia';
 
-const cells = [
+const columnas = (variasSedes) => [
   { id: 'nombres', typeHead: 'string', label: 'Nombres', value: (v) => v, align: 'left', mostrarInicio: true },
   { id: 'apellidos', typeHead: 'string', label: 'Apellidos', value: (v) => v, align: 'left', mostrarInicio: true },
   { id: 'documento', typeHead: 'string', label: 'Documento', value: (v) => v, align: 'left', mostrarInicio: true, ordenable: false },
   { id: 'telefono', typeHead: 'string', label: 'Teléfono', value: (v) => v, align: 'left', mostrarInicio: true, ordenable: false },
+  celdaSede(variasSedes),
+  {
+    id: 'saldo_pendiente',
+    typeHead: 'numeric',
+    label: 'Debe',
+    value: (v) => formatoMoneda(v ?? 0),
+    align: 'right',
+    mostrarInicio: true,
+    ordenable: false,
+  },
   { id: 'correo', typeHead: 'string', label: 'Correo', value: (v) => v, align: 'left', mostrarInicio: true, ordenable: false },
   { id: 'estado', typeHead: 'string', label: 'Estado', value: valorActivo, cellColor: colorActivo, align: 'left', mostrarInicio: true },
   ...auditCells,
@@ -20,11 +33,11 @@ const cells = [
 const filtrosConfig = [{ name: 'nombre', label: 'Nombre o apellido', type: 'text' }];
 
 const Alumnos = ({ route }) => {
+  const { variasSedes } = useSedes();
+  const cells = useMemo(() => columnas(variasSedes), [variasSedes]);
   const { titulo, urlAyuda, permisos } = usePermisosOpcion(route.path);
-  const { refreshKey, updateColeccion } = useCrudModulo();
-  const [form, setForm] = useState({ open: false, accion: 'crear', id: 0 });
-
-  const cerrar = () => setForm({ open: false, accion: 'crear', id: 0 });
+  const { refreshKey } = useCrudModulo();
+  const navigate = useNavigate();
 
   return (
     <>
@@ -39,19 +52,15 @@ const Alumnos = ({ route }) => {
         permisos={permisos}
         entidadNombre='Alumno'
         refreshKey={refreshKey}
-        onCrear={() => setForm({ open: true, accion: 'crear', id: 0 })}
-        onEditar={(row) => setForm({ open: true, accion: 'editar', id: row.id })}
-        onVer={(row) => setForm({ open: true, accion: 'ver', id: row.id })}
+        {...accionesEnPagina(navigate, route.path)}
+        accionesExtra={[
+          {
+            titulo: 'Estado de cuenta y pagos',
+            icono: AccountBalanceWalletIcon,
+            onClick: (row) => navigate(`${route.path}/${row.id}/cuenta`),
+          },
+        ]}
       />
-      {form.open && (
-        <AlumnoCreador
-          alumno={form.id}
-          accion={form.accion}
-          titulo={titulo}
-          handleOnClose={cerrar}
-          updateColeccion={updateColeccion}
-        />
-      )}
     </>
   );
 };

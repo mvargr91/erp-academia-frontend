@@ -1,19 +1,14 @@
-// "Mi cuenta": perfil del usuario autenticado para cualquier rol (administrador, proveedor, cliente).
-// El proveedor ve además los datos de su negocio y el estado de verificación.
+// "Mi cuenta": perfil del usuario autenticado (cualquier rol).
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Alert, Avatar, Box, Card, Chip, CircularProgress, Tab, Tabs, Typography } from '@mui/material';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
-import StorefrontIcon from '@mui/icons-material/Storefront';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import VerifiedIcon from '@mui/icons-material/Verified';
 import { onGetCuenta } from '@crema/redux/features/cuenta/cuentaSlice';
 import AppMessageView from '@crema/components/AppMessageView';
 import { ERROR_TYPE } from '../../../shared/constants/Constantes';
-import { ESTADOS_VERIFICACION, colorDe, nombreDe } from '../../../shared/constants/Turismo';
 import { gradienteArcoiris } from '../../../shared/constants/Marca';
 import DatosPersonales from './DatosPersonales';
-import MiNegocio from './MiNegocio';
 import Seguridad from './Seguridad';
 
 const iniciales = (nombre = '') =>
@@ -27,14 +22,11 @@ const iniciales = (nombre = '') =>
 const fechaLarga = (fecha) =>
   fecha ? new Date(fecha.replace(' ', 'T')).toLocaleDateString('es-CO', { month: 'long', year: 'numeric' }) : '';
 
-// El panel corre en modo oscuro con fondos claros: los avisos se fuerzan a la versión clara.
-const avisoClaro = { borderRadius: 0, color: 'text.primary' };
-
 const MiCuenta = () => {
   const dispatch = useDispatch();
   const { datos: cuenta, loading, error } = useSelector((state) => state.cuenta);
   const { message, messageType } = useSelector(({ common }) => common);
-  // Pestaña inicial desde la URL (/mi-cuenta?tab=negocio). Se lee de window.location porque el guard de
+  // Pestaña inicial desde la URL (/mi-cuenta?tab=seguridad). Se lee de window.location porque el guard de
   // rutas de la plantilla redirige sin el query y luego lo restaura por fuera de react-router.
   const [tab, setTab] = useState(() => new URLSearchParams(window.location.search).get('tab'));
 
@@ -42,10 +34,8 @@ const MiCuenta = () => {
     dispatch(onGetCuenta());
   }, [dispatch]);
 
-  const proveedor = cuenta?.proveedor;
   const pestanas = [
     { id: 'datos', label: 'Datos personales', icon: <PersonOutlineIcon /> },
-    ...(proveedor ? [{ id: 'negocio', label: 'Mi negocio', icon: <StorefrontIcon /> }] : []),
     { id: 'seguridad', label: 'Seguridad', icon: <LockOutlinedIcon /> },
   ];
   const pestana = pestanas.some((p) => p.id === tab) ? tab : 'datos';
@@ -63,8 +53,6 @@ const MiCuenta = () => {
   }
   if (!cuenta) return null;
 
-  const estado = proveedor?.estado_verificacion;
-
   return (
     <Box sx={{ maxWidth: 960, mx: 'auto' }}>
       <Card sx={{ mb: 6, overflow: 'hidden' }}>
@@ -75,22 +63,13 @@ const MiCuenta = () => {
           </Avatar>
           <Box sx={{ flex: 1, minWidth: 200 }}>
             <Typography component='h1' sx={{ fontSize: 22, fontWeight: 600 }}>
-              {proveedor?.nombre_comercial ?? cuenta.nombre}
+              {cuenta.nombre}
             </Typography>
             <Typography sx={{ color: 'text.secondary' }}>
-              {proveedor ? `${cuenta.nombre} · ` : ''}
               {cuenta.correo_electronico}
             </Typography>
             <Box sx={{ display: 'flex', gap: 2, mt: 2, flexWrap: 'wrap', alignItems: 'center' }}>
               {cuenta.rol && <Chip size='small' label={cuenta.rol} color='primary' variant='outlined' />}
-              {estado && (
-                <Chip
-                  size='small'
-                  icon={estado === 'aprobado' ? <VerifiedIcon /> : undefined}
-                  label={`Verificación: ${nombreDe(ESTADOS_VERIFICACION, estado)}`}
-                  sx={{ color: '#fff', bgcolor: colorDe(ESTADOS_VERIFICACION, estado), '& .MuiChip-icon': { color: '#fff' } }}
-                />
-              )}
               {cuenta.miembro_desde && (
                 <Typography variant='body2' sx={{ color: 'text.secondary' }}>
                   Miembro desde {fechaLarga(cuenta.miembro_desde)}
@@ -99,16 +78,6 @@ const MiCuenta = () => {
             </Box>
           </Box>
         </Box>
-        {estado === 'pendiente' && (
-          <Alert severity='info' sx={{ ...avisoClaro, bgcolor: 'rgba(0,161,204,0.08)' }}>
-            Nuestro equipo está revisando tu negocio. Completa los datos de &quot;Mi negocio&quot; para agilizar la verificación.
-          </Alert>
-        )}
-        {estado === 'rechazado' && (
-          <Alert severity='warning' sx={{ ...avisoClaro, bgcolor: 'rgba(254,133,0,0.1)' }}>
-            Tu verificación fue rechazada{proveedor.observaciones_verificacion ? `: ${proveedor.observaciones_verificacion}` : '.'}
-          </Alert>
-        )}
       </Card>
 
       <Card>
@@ -125,7 +94,6 @@ const MiCuenta = () => {
         </Tabs>
         <Box sx={{ p: { xs: 4, md: 6 } }}>
           {pestana === 'datos' && <DatosPersonales cuenta={cuenta} />}
-          {pestana === 'negocio' && proveedor && <MiNegocio proveedor={proveedor} />}
           {pestana === 'seguridad' && <Seguridad />}
         </Box>
       </Card>

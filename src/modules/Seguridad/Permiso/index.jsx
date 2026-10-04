@@ -1,6 +1,8 @@
 import React, {useState, useEffect} from 'react';
 import {Box, Button} from '@mui/material';
 import PropTypes from 'prop-types';
+import { rutaCrear, rutaEditar, rutaVer } from '../../../shared/components/PaginaCrud';
+import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import { styled , useTheme} from '@mui/material/styles';
 import { lighten } from '@mui/material/styles';
@@ -23,7 +25,6 @@ import Switch from '@mui/material/Switch';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
-import PermisoCreator from './PermisoCreador';
 import { Input } from '@mui/material';
 import { onGetColeccion, onDelete, resetMessage } from '../../../@crema/redux/features/permiso/permisoSlice';
 import { onGetColeccionLigera } from '../../../@crema/redux/features/opcionSistema/opcionSistemaSlice';
@@ -465,6 +466,7 @@ const Permiso = (props) => {
   const rowsPerPageOptions = [5, 10, 15, 25, 50];
 
   const [accion, setAccion] = useState('ver');
+  const navigate = useNavigate();
   const [permisoSeleccionado, setPermisoSeleccionado] = useState(0);
   const { rows, desde, hasta, ultima_pagina, total } = useSelector((state) => state.permisos);
 
@@ -667,6 +669,15 @@ const Permiso = (props) => {
     setPermisoSeleccionado(0);
     setAccion('ver');
   };
+
+
+  // Los formularios se abren como vista propia (ver shared/components/PaginaCrud).
+  useEffect(() => {
+    if (showForm) {
+      navigate(accion === 'crear' ? rutaCrear('/permisos') : accion === 'editar'
+        ? rutaEditar('/permisos', permisoSeleccionado) : rutaVer('/permisos', permisoSeleccionado));
+    }
+  }, [showForm]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
@@ -919,20 +930,6 @@ const Permiso = (props) => {
           </Box>
         )}
       </Paper>
-
-      {showForm ? (
-        <PermisoCreator
-          showForm={showForm}
-          permiso={permisoSeleccionado}
-          accion={accion}
-          handleOnClose={handleOnClose}
-          updateColeccion={updateColeccion}
-          titulo={titulo}
-          opcionesSistema={opcionesSistema}
-        />
-      ) : (
-        ''
-      )}
 
       <Popover
         id='popoverColumns'

@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
 import AppCrudTable, { auditCells } from '../../../shared/components/AppCrudTable';
+import { useSedes, celdaSede } from '../../../shared/sedes';
 import usePermisosOpcion from '../../../shared/hooks/usePermisosOpcion';
+import { accionesEnPagina } from '../../../shared/components/PaginaCrud';
 import useCrudModulo from '../../../shared/hooks/useCrudModulo';
 import { onGetColeccion, onDelete } from '../../../@crema/redux/features/asistencias/asistenciasSlice';
-import AsistenciaCreador from './AsistenciaCreador';
 
-const cells = [
+const columnas = (variasSedes) => [
   { id: 'curso_nombre', typeHead: 'string', label: 'Curso', value: (v) => v, align: 'left', mostrarInicio: true },
+  celdaSede(variasSedes),
   { id: 'fecha_sesion', typeHead: 'string', label: 'Fecha', value: (v) => v, align: 'left', mostrarInicio: true },
   { id: 'presentes', typeHead: 'numeric', label: 'Presentes', value: (v) => v, align: 'center', mostrarInicio: true, ordenable: false },
   { id: 'total_alumnos', typeHead: 'numeric', label: 'Total', value: (v) => v, align: 'center', mostrarInicio: true, ordenable: false },
@@ -16,11 +19,11 @@ const cells = [
 ];
 
 const Asistencias = ({ route }) => {
+  const { variasSedes } = useSedes();
+  const cells = useMemo(() => columnas(variasSedes), [variasSedes]);
   const { titulo, urlAyuda, permisos } = usePermisosOpcion(route.path);
-  const { refreshKey, updateColeccion } = useCrudModulo();
-  const [form, setForm] = useState({ open: false, accion: 'crear', id: 0 });
-
-  const cerrar = () => setForm({ open: false, accion: 'crear', id: 0 });
+  const { refreshKey } = useCrudModulo();
+  const navigate = useNavigate();
 
   return (
     <>
@@ -34,19 +37,8 @@ const Asistencias = ({ route }) => {
         permisos={permisos}
         entidadNombre='Asistencia'
         refreshKey={refreshKey}
-        onCrear={() => setForm({ open: true, accion: 'crear', id: 0 })}
-        onEditar={(row) => setForm({ open: true, accion: 'editar', id: row.id })}
-        onVer={(row) => setForm({ open: true, accion: 'ver', id: row.id })}
+        {...accionesEnPagina(navigate, route.path)}
       />
-      {form.open && (
-        <AsistenciaCreador
-          asistencia={form.id}
-          accion={form.accion}
-          titulo={titulo}
-          handleOnClose={cerrar}
-          updateColeccion={updateColeccion}
-        />
-      )}
     </>
   );
 };

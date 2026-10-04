@@ -6,7 +6,7 @@ import Error403 from '../../../modules/errorPages/Error403';
 import { errorPagesConfigs } from './ErrorPagesRoutes';
 import { accountPagesConfigs } from './AccountRoutes';
 import { seguridadConfigs } from './Seguridad';
-import { portalRoutes, cuentaConfigs } from './Portal';
+import { cuentaConfigs } from './Cuenta';
 import { academiaConfigs } from './Academia';
 
 export const authorizedStructure = (loginUrl) => {
@@ -31,9 +31,8 @@ export const publicStructure = (initialUrl) => {
 
 export const anonymousStructure = (initialUrl) => {
   return {
-    // Con el portal habilitado, '/' y sus páginas son públicas; si no, '/' lleva al panel como antes.
-    routes: errorPagesConfigs.concat(portalRoutes, [
-      ...(portalRoutes.length ? [] : [{ path: '/', element: <Navigate to={initialUrl} /> }]),
+    routes: errorPagesConfigs.concat([
+      { path: '/', element: <Navigate to={initialUrl} /> },
       {
         path: '*',
         element: <Navigate to='/error-pages/error-404' />,

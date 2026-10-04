@@ -5,27 +5,47 @@ import PropTypes from 'prop-types';
 import { Typography } from '@mui/material';
 import { Fonts } from '@crema/constants/AppEnums';
 import AppLogo from '@crema/components/AppLayout/components/AppLogo';
-// TODO:: IMAGEN DE FONDO LOGIN
-import fondo from "../../assets/fondo/247.jpg";
-import { width } from '@mui/system';
+import fondoDefecto from '../../assets/fondo/247.jpg';
+import { useApariencia } from '../../shared/apariencia';
+import BotonModo from '../../shared/apariencia/BotonModo';
 
+const ALINEACION = { izquierda: 'flex-start', centro: 'center', derecha: 'flex-end' };
+
+// Pantallas de ingreso. Fondo, logo, textos y posición de la tarjeta salen de
+// Configuración → Apariencia de la academia.
 const AuthWrapper = ({ children }) => {
+  const { apariencia } = useApariencia();
+  const fondo = apariencia.login_fondo_url || fondoDefecto;
+
   return (
     <Box
       sx={{
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'flex-start', // Alinea a la izquierda
+        alignItems: { xs: 'center', sm: ALINEACION[apariencia.login_posicion] ?? ALINEACION.izquierda },
         justifyContent: 'center',
+        position: 'relative',
         backgroundImage: `url(${fondo})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         width: '100%',
-        minHeight: '100vh', // Asegura que cubra toda la pantalla
-        pl: { xs: 2, sm: 5, lg: 10 }, // Agrega espacio a la izquierda
+        minHeight: '100vh',
+        px: { xs: 4, sm: 10, lg: 20 },
+        py: 4,
       }}
     >
+      <BotonModo
+        sx={{
+          position: 'absolute',
+          top: 16,
+          right: 16,
+          color: 'text.primary',
+          backgroundColor: 'background.paper',
+          boxShadow: 2,
+          '&:hover': { backgroundColor: 'background.paper' },
+        }}
+      />
       <Card
         sx={{
           maxWidth: 400,
@@ -34,7 +54,6 @@ const AuthWrapper = ({ children }) => {
           overflow: 'hidden',
           position: 'relative',
           display: 'flex',
-          ml: { xs: -1, sm: 5, lg: 10 },
         }}
       >
         <Box
@@ -47,7 +66,7 @@ const AuthWrapper = ({ children }) => {
           }}
         >
           <Box sx={{ width: '100%' }}>
-            <Box sx={{ mb: { xs:10, xl: 8 } }}>
+            <Box sx={{ mb: { xs: 10, xl: 8 } }}>
               <Box
                 sx={{
                   m: 9,
@@ -56,8 +75,22 @@ const AuthWrapper = ({ children }) => {
                   justifyContent: 'center',
                 }}
               >
-                <AppLogo/>
+                <AppLogo />
               </Box>
+              {(apariencia.login_titulo || apariencia.login_subtitulo) && (
+                <Box sx={{ textAlign: 'center' }}>
+                  {apariencia.login_titulo && (
+                    <Typography component='h1' sx={{ fontSize: 20, fontWeight: Fonts.BOLD, color: 'text.primary' }}>
+                      {apariencia.login_titulo}
+                    </Typography>
+                  )}
+                  {apariencia.login_subtitulo && (
+                    <Typography sx={{ mt: 1, fontSize: 14, color: 'text.secondary' }}>
+                      {apariencia.login_subtitulo}
+                    </Typography>
+                  )}
+                </Box>
+              )}
             </Box>
             {children}
           </Box>

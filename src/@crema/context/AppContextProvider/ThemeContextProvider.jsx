@@ -5,9 +5,10 @@ import {
   useEffect,
   useState,
 } from "react";
-import defaultConfig, { defaultTheme, backgroundLight, backgroundDark, textDark, textLight} from "@crema/constants/defaultConfig";
+import defaultConfig, { defaultTheme } from "@crema/constants/defaultConfig";
 import PropTypes from "prop-types";
-import { LayoutDirection, ThemeMode } from "@crema/constants/AppEnums";
+import { LayoutDirection } from "@crema/constants/AppEnums";
+import { temaInicial } from "../../../shared/apariencia/tema";
 
 
 const ThemeContext = createContext({
@@ -22,24 +23,15 @@ export const useThemeContext = () => useContext(ThemeContext);
 export const useThemeActionsContext = () => useContext(ThemeActionsContext);
 
 const ThemeContextProvider = ({ children }) => {
-  const [theme, setTheme] = useState(defaultTheme.theme);
-  const [themeMode, updateThemeMode] = useState(defaultConfig.themeMode);
+  // Arranca con la apariencia de la academia vista por última vez en este navegador;
+  // AparienciaProvider la actualiza (tema + modo claro/oscuro) al responder el API.
+  const [theme, setTheme] = useState(temaInicial);
+  const [themeMode, updateThemeMode] = useState(() => theme.palette.mode);
   const [themeStyle, updateThemeStyle] = useState(defaultConfig.themeStyle);
 
   const updateTheme = useCallback((theme) => {
     setTheme(theme);
   }, []);
-
-  useEffect(() => {
-    if (theme.palette.mode !== themeMode) {
-      theme.palette.mode =
-        themeMode === ThemeMode.DARK ? ThemeMode.DARK : ThemeMode.LIGHT;
-      theme.palette.background =
-        themeMode === ThemeMode.DARK ? backgroundDark : backgroundLight;
-      theme.palette.text = themeMode === ThemeMode.DARK ? textLight : textLight;
-      updateTheme({ ...theme });
-    }
-  }, [themeMode, theme, updateTheme]);
 
   useEffect(() => {
     if (theme.direction === LayoutDirection.RTL) {

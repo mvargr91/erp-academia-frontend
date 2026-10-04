@@ -4,7 +4,7 @@ import { Fonts } from "../constants/AppEnums";
 
 export const useStyles = makeStyles((theme) => ({
   marcoTabla: {
-    backgroundColor: 'white',
+    backgroundColor: theme.palette.background.paper,
     boxShadow: '0px 0px 5px 5px rgb(0 0 0 / 10%)',
     borderRadius: '4px',
     paddingLeft: '15px',
@@ -16,8 +16,8 @@ export const useStyles = makeStyles((theme) => ({
     padding: '20px',
   },
   head: {
-    borderTop: '2px solid #dee2e6',
-    borderBottom: '2px solid #dee2e6',
+    borderTop: '2px solid rgba(128, 128, 128, 0.3)',
+    borderBottom: '2px solid rgba(128, 128, 128, 0.3)',
     // display:'grid',
     // gridTemplateColumns:gridTemplate,
   },
@@ -100,7 +100,7 @@ export const useStyles = makeStyles((theme) => ({
   },
   root2: {
     padding: '15px',
-    backgroundColor: 'white',
+    backgroundColor: theme.palette.background.paper,
     boxShadow: '0px 0px 5px 5px rgb(0 0 0 / 10%)',
     borderRadius: '4px',
     display: 'grid',
@@ -188,7 +188,7 @@ export const useStyles = makeStyles((theme) => ({
     justifyContent: 'flex-end',
     paddingBottom: '20px',
     gap: '10px',
-    backgroundColor: 'white',
+    backgroundColor: theme.palette.background.paper,
     paddingRight: '20px',
     position: 'sticky',
     left: 0,

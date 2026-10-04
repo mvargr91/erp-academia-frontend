@@ -9,6 +9,7 @@ import {
   resetActual,
 } from '../../../../@crema/redux/features/alumnos/alumnosSlice';
 import { aRadio } from '../../../../shared/constants/Academia';
+import { useSedes } from '../../../../shared/sedes';
 import AlumnoForm from './AlumnoForm';
 
 const validationSchema = yup.object({
@@ -22,8 +23,9 @@ const validationSchema = yup.object({
   telefono_emergencia: yup.string().nullable(),
 });
 
-const initialValues = (registro) => ({
+const initialValues = (registro, sedePorDefecto) => ({
   id: registro?.id ?? '',
+  sede_id: registro?.sede_id ?? sedePorDefecto,
   nombres: registro?.nombres ?? '',
   apellidos: registro?.apellidos ?? '',
   documento: registro?.documento ?? '',
@@ -36,7 +38,9 @@ const initialValues = (registro) => ({
   estado: aRadio(registro?.estado),
 });
 
-const AlumnoCreador = ({ alumno, accion, handleOnClose, updateColeccion, titulo }) => (
+const AlumnoCreador = ({ alumno, accion, handleOnClose, updateColeccion, titulo }) => {
+  const { sedePorDefecto } = useSedes();
+  return (
   <AppCrudDialog
     stateKey='alumnos'
     registroId={alumno}
@@ -47,7 +51,7 @@ const AlumnoCreador = ({ alumno, accion, handleOnClose, updateColeccion, titulo 
     onCreate={onCreate}
     onUpdate={onUpdate}
     resetActual={resetActual}
-    initialValues={initialValues}
+    initialValues={(registro) => initialValues(registro, sedePorDefecto)}
     validationSchema={validationSchema}
     maxWidth='md'
   >
@@ -55,7 +59,8 @@ const AlumnoCreador = ({ alumno, accion, handleOnClose, updateColeccion, titulo 
       <AlumnoForm registro={registro} accion={accion} titulo={titulo} handleOnClose={handleOnClose} saving={saving} />
     )}
   </AppCrudDialog>
-);
+  );
+};
 
 AlumnoCreador.propTypes = {
   alumno: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),

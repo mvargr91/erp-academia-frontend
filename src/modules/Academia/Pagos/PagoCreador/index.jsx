@@ -12,6 +12,7 @@ import {
 import { onGetColeccionLigera as onGetAlumnos } from '../../../../@crema/redux/features/alumnos/alumnosSlice';
 import { onGetColeccionLigera as onGetCursos } from '../../../../@crema/redux/features/cursos/cursosSlice';
 import { onGetColeccionLigera as onGetPlanes } from '../../../../@crema/redux/features/planes/planesSlice';
+import { useSedes } from '../../../../shared/sedes';
 import PagoForm from './PagoForm';
 
 const hoy = () => new Date().toISOString().slice(0, 10);
@@ -25,23 +26,26 @@ const validationSchema = yup.object({
   metodo_pago: yup.string().required('Requerido'),
 });
 
-const initialValues = (registro) => ({
+const initialValues = (registro, sedePorDefecto, inicial = {}) => ({
   id: registro?.id ?? '',
-  alumno_id: registro?.alumno_id ?? '',
-  curso_id: registro?.curso_id ?? '',
+  sede_id: registro?.sede_id ?? sedePorDefecto,
+  alumno_id: registro?.alumno_id ?? inicial.alumno_id ?? '',
+  curso_id: registro?.curso_id ?? inicial.curso_id ?? '',
   plan_id: registro?.plan_id ?? '',
-  monto: registro?.monto ?? '',
+  paquete_id: registro?.paquete_id ?? inicial.paquete_id ?? '',
+  monto: registro?.monto ?? inicial.monto ?? '',
   fecha_pago: registro?.fecha_pago ?? hoy(),
   metodo_pago: registro?.metodo_pago ?? 'efectivo',
   referencia: registro?.referencia ?? '',
   observacion: registro?.observacion ?? '',
 });
 
-const PagoCreador = ({ pago, accion, handleOnClose, updateColeccion, titulo }) => {
+const PagoCreador = ({ pago, accion, handleOnClose, updateColeccion, titulo, inicial }) => {
   const dispatch = useDispatch();
   const { coleccionLigera: alumnos } = useSelector((s) => s.alumnos);
   const { coleccionLigera: cursos } = useSelector((s) => s.cursos);
   const { coleccionLigera: planes } = useSelector((s) => s.planes);
+  const { sedePorDefecto } = useSedes();
 
   useEffect(() => {
     dispatch(onGetAlumnos());
@@ -60,7 +64,7 @@ const PagoCreador = ({ pago, accion, handleOnClose, updateColeccion, titulo }) =
       onCreate={onCreate}
       onUpdate={onUpdate}
       resetActual={resetActual}
-      initialValues={initialValues}
+      initialValues={(registro) => initialValues(registro, sedePorDefecto, inicial)}
       validationSchema={validationSchema}
       maxWidth='md'
     >
@@ -86,6 +90,8 @@ PagoCreador.propTypes = {
   handleOnClose: PropTypes.func.isRequired,
   updateColeccion: PropTypes.func.isRequired,
   titulo: PropTypes.string,
+  // Valores propuestos al crear (vienen de la URL): alumno_id, curso_id, paquete_id, monto.
+  inicial: PropTypes.object,
 };
 
 export default PagoCreador;
