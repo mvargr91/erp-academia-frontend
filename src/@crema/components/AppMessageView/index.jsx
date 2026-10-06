@@ -92,7 +92,7 @@ const AppMessageView = ({ clearInfoView, className, message, variant, ...other }
       }}
       open={open}
       onClose={onClose}
-      autoHideDuration={1000}
+      autoHideDuration={variant === 'error' ? 5000 : 1000}
       TransitionComponent={TransitionLeft}
       sx={{
         '& .MuiSnackbarContent-root': {

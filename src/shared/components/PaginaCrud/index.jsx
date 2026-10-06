@@ -5,12 +5,16 @@
 //   /recurso/:id/ver    formulario de solo lectura
 // PaginaCrud lee el id de la URL y avisa (por contexto) a AppCrudDialog que se pinte como página;
 // "Volver", "Cancelar" y el guardado regresan a la lista.
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { useDispatch, useSelector, useStore } from 'react-redux';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { authRole } from '@crema/constants/AppConst';
 import { RoutePermittedRole } from '@crema/constants/AppEnums';
+import AppMessageView from '@crema/components/AppMessageView';
+import { hideMessage } from '@crema/redux/features/cammon/commonSlice';
 import usePermisosOpcion from '../../hooks/usePermisosOpcion';
+import { ERROR_TYPE } from '../../constants/Constantes';
 
 const PaginaCrudContext = createContext(false);
 export const useEnPaginaCrud = () => useContext(PaginaCrudContext);
@@ -34,6 +38,20 @@ const PaginaCrud = ({ base, accion, render }) => {
   const [query] = useSearchParams();
   const navigate = useNavigate();
   const { titulo } = usePermisosOpcion(base);
+  const dispatch = useDispatch();
+  const store = useStore();
+  const { message, messageType } = useSelector(({ common }) => common);
+
+  // Un error que quedó pendiente no debe reaparecer en la lista al salir del formulario
+  // (el mensaje de guardado exitoso sí se deja: lo muestra la lista).
+  useEffect(
+    () => () => {
+      if (store.getState().common.messageType === ERROR_TYPE) {
+        dispatch(hideMessage());
+      }
+    },
+    [dispatch, store],
+  );
 
   // ?volver=/ruta permite regresar a otra pantalla (solo rutas internas).
   const destino = query.get('volver');
@@ -42,6 +60,8 @@ const PaginaCrud = ({ base, accion, render }) => {
   return (
     <PaginaCrudContext.Provider value>
       {render({ id: accion === 'crear' ? 0 : id, accion, volver, titulo, query })}
+      {/* Los errores al guardar se muestran aquí: la tabla de la lista no está montada. */}
+      <AppMessageView variant='error' message={messageType === ERROR_TYPE ? message : ''} />
     </PaginaCrudContext.Provider>
   );
 };
