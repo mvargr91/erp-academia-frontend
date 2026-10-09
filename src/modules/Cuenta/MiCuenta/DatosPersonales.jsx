@@ -37,7 +37,6 @@ const DatosPersonales = ({ cuenta }) => {
               <TextField
                 label='Número de identificación'
                 value={cuenta.identificacion_usuario ?? ''}
-                helperText='Es tu usuario para ingresar; no se puede cambiar.'
                 fullWidth
                 disabled
               />

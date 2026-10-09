@@ -12,12 +12,16 @@ import FormikMultiSelect from '../../../../shared/components/FormikMultiSelect';
 import { CampoSede } from '../../../../shared/sedes';
 import { onGetColeccionLigera as onGetPlanes } from '../../../../@crema/redux/features/planes/planesSlice';
 import { DIAS_SEMANA, OPCIONES_ESTADO, OPCIONES_SI_NO } from '../../../../shared/constants/Academia';
+import ParejasCurso from './ParejasCurso';
+import usePermisosOpcion from '../../../../shared/hooks/usePermisosOpcion';
 
 const CursoForm = (props) => {
-  const { accion, titulo, handleOnClose, saving, ritmos, profesores, planes, alumnos } = props;
+  const { accion, titulo, handleOnClose, saving, ritmos, profesores, planes, alumnos, registro } = props;
   const disabled = accion === 'ver';
   const dispatch = useDispatch();
   const { values } = useFormikContext();
+  // Definir cómo paga cada alumno (individual o en pareja) es un permiso aparte de modificar el curso.
+  const puedeFormaDePago = usePermisosOpcion('/cursos').permisos.indexOf('FormaDePago') >= 0;
 
   // Los planes disponibles son los generales y los de la sede del curso.
   useEffect(() => {
@@ -48,10 +52,16 @@ const CursoForm = (props) => {
         placeholder='Buscar alumno...'
         options={alumnos}
         disabled={disabled}
-        helperText='Si el alumno tiene un paquete vigente, asiste con su paquete; si no, se le cobra el primer ciclo de clases.'
       />
       <MyRadioField label='Activo' name='activo' disabled={disabled} required options={OPCIONES_SI_NO} />
       <MyRadioField label='Estado' name='estado' disabled={disabled} required options={OPCIONES_ESTADO} />
+
+      {accion !== 'crear' && registro && (
+        <>
+          <SeccionForm titulo='Pago individual o en pareja' />
+          <ParejasCurso key={registro.id} cursoId={registro.id} matriculados={registro.matriculados ?? []} soloLectura={!puedeFormaDePago} />
+        </>
+      )}
     </AppCrudForm>
   );
 };
@@ -65,6 +75,7 @@ CursoForm.propTypes = {
   profesores: PropTypes.array.isRequired,
   planes: PropTypes.array.isRequired,
   alumnos: PropTypes.array.isRequired,
+  registro: PropTypes.object,
 };
 
 export default CursoForm;

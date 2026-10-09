@@ -24,6 +24,7 @@ const initialValues = (registro) => ({
   sede_id: registro?.sede_id ?? '',
   descripcion: registro?.descripcion ?? '',
   valor: registro?.valor ?? '',
+  valor_alumno: registro?.valor_alumno ?? '',
   periodicidad: registro?.periodicidad ?? 'mensual',
   num_clases: registro?.num_clases ?? '',
   vigencia_dias: registro?.vigencia_dias ?? '',

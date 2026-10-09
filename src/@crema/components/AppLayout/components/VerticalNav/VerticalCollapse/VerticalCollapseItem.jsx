@@ -8,29 +8,50 @@ const VerticalCollapseItem = ({ children, sidebarTextColor, ...rest }) => {
   return (
     <ListItem
       sx={{
-        height: 40,
-        my: 0.25,
-        pl: '31px',
-        pr: 3.75,
-        whiteSpace: 'nowrap',
-        transition: 'all 0.4s ease',
+        // Cada módulo es el título de una sección: letra pequeña en mayúsculas y aire arriba
+        // para separar los grupos; sus opciones van debajo como botones.
+        minHeight: 36,
+        height: 'auto',
+        py: 1,
+        mt: 2,
+        mb: 0.5,
+        mx: 3,
+        width: 'calc(100% - 24px)',
+        pl: 3,
+        pr: 1,
+        borderRadius: '10px',
+        cursor: 'pointer',
+        whiteSpace: 'normal',
+        transition: 'background-color 0.2s ease',
+        '& > span': { flexShrink: 0 },
         '& .nav-item-text': {
-          fontWeight: Fonts.MEDIUM,
-          color: alpha(sidebarTextColor, 0.7),
+          lineHeight: 1.3,
+          overflowWrap: 'anywhere',
+          fontWeight: Fonts.SEMI_BOLD,
+          fontSize: 12,
+          letterSpacing: '0.08em',
+          textTransform: 'uppercase',
+          color: alpha(sidebarTextColor, 0.6),
         },
 
         '& .nav-item-icon': {
-          color: alpha(sidebarTextColor, 0.7),
-          fontSize: 20,
+          color: alpha(sidebarTextColor, 0.6),
+          fontSize: 18,
           display: 'block',
         },
 
         '& .nav-item-icon-arrow': {
-          color: alpha(sidebarTextColor, 0.7),
+          color: alpha(sidebarTextColor, 0.6),
+          fontSize: 20,
+          transition: 'transform 0.25s ease',
+          transform: 'rotate(-90deg)',
+        },
+        '&.open .nav-item-icon-arrow': {
+          transform: 'rotate(0deg)',
         },
 
         '& .MuiIconButton-root': {
-          mr: 3,
+          mr: 0,
           padding: 0,
         },
 
@@ -53,7 +74,7 @@ const VerticalCollapseItem = ({ children, sidebarTextColor, ...rest }) => {
           },
         },
         '&:hover': {
-          backgroundColor: 'transparent',
+          backgroundColor: alpha(sidebarTextColor, 0.06),
         },
       }}
       {...rest}

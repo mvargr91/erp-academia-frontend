@@ -80,7 +80,7 @@ const VerticalCollapse = ({ item, level }) => {
         {item.icono_menu && (
           <Box component='span'>
             <Icon
-              sx={{ mr: 4 }}
+              sx={{ mr: 3 }}
               color='action'
               className={clsx('nav-item-icon')}
             >
@@ -89,34 +89,25 @@ const VerticalCollapse = ({ item, level }) => {
           </Box>
         )}
         <ListItemText
-          sx={{
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            fontSize: 14,
-          }}
+          sx={{ fontSize: 14 }}
           className='nav-item-content'
           classes={{ primary: clsx('nav-item-text') }}
           primary={item.nombre}
         />
         <IconButton
           className='nav-item-icon-arrow-btn'
-          sx={{ p: 0, mr: 0.75 }}
+          sx={{ p: 0 }}
           disableRipple
           size='large'
         >
           <Icon className='nav-item-icon-arrow' color='inherit'>
-            {open
-              ? 'expand_more'
-              : theme.direction === 'ltr'
-              ? 'chevron_right'
-              : 'chevron_left'}
+            expand_more
           </Icon>
         </IconButton>
       </VerticalCollapseItem>
 
       {item.opciones && (
-        <Collapse in={open} className='collapse-children'>
+        <Collapse in={open} className='collapse-children' timeout={250}>
           {item.opciones.map((item) => (
             <React.Fragment key={item.nombre}>
               {item.type === 'collapse' && (

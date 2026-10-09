@@ -91,7 +91,7 @@ const AsistenciaForm = (props) => {
         label='Curso'
         options={cursos}
         disabled={disabled || !soloCrear}
-        textFieldProps={{ variant: 'standard', helperText: soloCrear ? 'Al elegir el curso se cargan sus alumnos matriculados.' : '' }}
+        textFieldProps={{ variant: 'standard' }}
       />
       <MyDateField label='Fecha de la sesión' name='fecha_sesion' disabled={disabled} />
       {!disabled && calendario && !calendario.valida && (

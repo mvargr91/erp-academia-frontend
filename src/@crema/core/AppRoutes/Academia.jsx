@@ -8,6 +8,7 @@ const Sedes = React.lazy(() => import('../../../modules/Academia/Sedes'));
 const SedeCreador = React.lazy(() => import('../../../modules/Academia/Sedes/SedeCreador'));
 const Ritmos = React.lazy(() => import('../../../modules/Academia/Ritmos'));
 const RitmoCreador = React.lazy(() => import('../../../modules/Academia/Ritmos/RitmoCreador'));
+const Tarifas = React.lazy(() => import('../../../modules/Academia/Tarifas'));
 const Planes = React.lazy(() => import('../../../modules/Academia/Planes'));
 const PlanCreador = React.lazy(() => import('../../../modules/Academia/Planes/PlanCreador'));
 const Profesores = React.lazy(() => import('../../../modules/Academia/Profesores'));
@@ -15,18 +16,22 @@ const ProfesorCreador = React.lazy(() => import('../../../modules/Academia/Profe
 const Alumnos = React.lazy(() => import('../../../modules/Academia/Alumnos'));
 const AlumnoCreador = React.lazy(() => import('../../../modules/Academia/Alumnos/AlumnoCreador'));
 const EstadoCuenta = React.lazy(() => import('../../../modules/Academia/Alumnos/EstadoCuenta'));
+const Matriculas = React.lazy(() => import('../../../modules/Academia/Matriculas'));
 const Cursos = React.lazy(() => import('../../../modules/Academia/Cursos'));
 const CursoCreador = React.lazy(() => import('../../../modules/Academia/Cursos/CursoCreador'));
 const Pagos = React.lazy(() => import('../../../modules/Academia/Pagos'));
 const PagoCreador = React.lazy(() => import('../../../modules/Academia/Pagos/PagoCreador'));
 const Asistencias = React.lazy(() => import('../../../modules/Academia/Asistencias'));
 const AsistenciaCreador = React.lazy(() => import('../../../modules/Academia/Asistencias/AsistenciaCreador'));
+const TomarAsistencia = React.lazy(() => import('../../../modules/Academia/Asistencias/TomarAsistencia'));
 const CalendarioCurso = React.lazy(() => import('../../../modules/Academia/Cursos/CalendarioCurso'));
 const Paquetes = React.lazy(() => import('../../../modules/Academia/Paquetes'));
 const PaqueteCreador = React.lazy(() => import('../../../modules/Academia/Paquetes/PaqueteCreador'));
+const PagarPaquete = React.lazy(() => import('../../../modules/Academia/Paquetes/PagarPaquete'));
 const ClasesPrivadas = React.lazy(() => import('../../../modules/Academia/ClasesPrivadas'));
 const ClasePrivadaCreador = React.lazy(() => import('../../../modules/Academia/ClasesPrivadas/ClasePrivadaCreador'));
 const RegistrarClase = React.lazy(() => import('../../../modules/Academia/ClasesPrivadas/RegistrarClase'));
+const CobrarClase = React.lazy(() => import('../../../modules/Academia/ClasesPrivadas/CobrarClase'));
 const Cierres = React.lazy(() => import('../../../modules/Academia/Cierres'));
 const Parametros = React.lazy(() => import('../../../modules/Academia/Parametros'));
 const EnviosCorreo = React.lazy(() => import('../../../modules/Academia/EnviosCorreo'));
@@ -67,6 +72,11 @@ export const academiaConfigs = [
   },
   ...rutasCrud('/sedes', Sedes, (p) => <SedeCreador sede={p.id} {...props(p)} />),
   ...rutasCrud('/ritmos', Ritmos, (p) => <RitmoCreador ritmo={p.id} {...props(p)} />),
+  {
+    permittedRole: RoutePermittedRole.User,
+    path: '/tarifas',
+    element: <Tarifas route={{ auth: authRole, path: '/tarifas' }} />,
+  },
   ...rutasCrud('/planes', Planes, (p) => <PlanCreador plan={p.id} {...props(p)} />),
   ...rutasCrud('/profesores', Profesores, (p) => <ProfesorCreador profesor={p.id} {...props(p)} />),
   ...rutasCrud('/alumnos', Alumnos, (p) => <AlumnoCreador alumno={p.id} {...props(p)} />),
@@ -74,6 +84,11 @@ export const academiaConfigs = [
     permittedRole: RoutePermittedRole.User,
     path: '/alumnos/:id/cuenta',
     element: <EstadoCuenta />,
+  },
+  {
+    permittedRole: RoutePermittedRole.User,
+    path: '/matriculas',
+    element: <Matriculas route={{ auth: authRole, path: '/matriculas' }} />,
   },
   ...rutasCrud('/cursos', Cursos, (p) => <CursoCreador curso={p.id} {...props(p)} />),
   {
@@ -95,6 +110,11 @@ export const academiaConfigs = [
     />
   )),
   ...rutasCrud('/asistencias', Asistencias, (p) => <AsistenciaCreador asistencia={p.id} {...props(p)} />),
+  {
+    permittedRole: RoutePermittedRole.User,
+    path: '/tomar-asistencia',
+    element: <TomarAsistencia route={{ auth: authRole, path: '/tomar-asistencia' }} />,
+  },
   ...rutasCrud('/cierres', Cierres, (p) => <CierreCreador cierre={p.id} {...props(p)} />),
   // Configuración: los registros los define el sistema; solo se editan.
   ...rutasCrud('/parametros', Parametros, (p) => <ParametroCreador parametro={p.id} {...props(p)} />, ['editar', 'ver']),
@@ -112,11 +132,21 @@ export const academiaConfigs = [
   { permittedRole: RoutePermittedRole.User, path: '/envios-correo/crear', element: <NuevoEnvio /> },
   { permittedRole: RoutePermittedRole.User, path: '/envios-correo/:id/ver', element: <DetalleEnvio /> },
   ...rutasCrud('/paquetes', Paquetes, (p) => <PaqueteCreador paquete={p.id} {...props(p)} />),
+  {
+    permittedRole: RoutePermittedRole.User,
+    path: '/paquetes/:id/pago',
+    element: <PagarPaquete />,
+  },
   ...rutasCrud('/clases-privadas', ClasesPrivadas, (p) => <ClasePrivadaCreador clase={p.id} {...props(p)} />),
   {
     permittedRole: RoutePermittedRole.User,
     path: '/clases-privadas/:id/registrar',
     element: <RegistrarClase />,
+  },
+  {
+    permittedRole: RoutePermittedRole.User,
+    path: '/clases-privadas/:id/pago',
+    element: <CobrarClase />,
   },
 
   // Administración ERP (el menú solo existe en la academia administradora).

@@ -197,6 +197,12 @@ const EstadoCuenta = () => {
                       {variasSedes && <TableCell>{c.sede}</TableCell>}
                       <TableCell>
                         <Chip size='small' label={c.modalidad === 'paquete' ? 'Paquete' : 'Ciclo'} />
+                        {!c.curso_activo && <Chip size='small' color='warning' label='Curso inactivo' sx={{ ml: 1 }} />}
+                        {c.clases_ciclo && c.curso_activo && (
+                          <Typography component='span' variant='caption' color='text.secondary' sx={{ display: 'block' }}>
+                            Clase {c.clases_consumidas} de {c.clases_ciclo} · renueva {fecha(c.proximo_pago)}
+                          </Typography>
+                        )}
                       </TableCell>
                       <TableCell sx={{ whiteSpace: 'nowrap' }}>{fecha(c.fecha_matricula)}</TableCell>
                       <TableCell align='right'>{formatoMoneda(Math.max(c.cobrado, 0))}</TableCell>

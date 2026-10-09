@@ -1,6 +1,7 @@
 // Tabla CRUD reutilizable con el mismo diseño de los módulos existentes (Banco, Proveedor...):
 // toolbar con título/ayuda/columnas/crear, filtros con debounce, ordenamiento por columna,
-// paginación superior e inferior, acciones por fila según permisos y confirmación de borrado.
+// paginación superior e inferior, acciones por fila según permisos, confirmación de borrado
+// y exportación a Excel de todos los registros que cumplen los filtros.
 import React, { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
@@ -9,6 +10,7 @@ import { makeStyles } from '@mui/styles';
 import {
   Box,
   Button,
+  CircularProgress,
   FormControlLabel,
   IconButton,
   LinearProgress,
@@ -35,6 +37,7 @@ import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import TuneIcon from '@mui/icons-material/Tune';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import Swal from 'sweetalert2';
@@ -46,6 +49,7 @@ import AppMessageView from '@crema/components/AppMessageView';
 import { useDebounce } from '@crema/hooks/useDebounce';
 import MyCell from '../MyCell';
 import HelpButton from '../HelpButton';
+import { exportarExcel } from '../../functions/ExportarExcel';
 import {
   CREATE_TYPE,
   ERROR_TYPE,
@@ -238,6 +242,7 @@ const AppCrudTable = (props) => {
   const debouncedFiltros = useDebounce(filtros, 800);
   const [columnasMostradas, setColumnasMostradas] = useState(() => construirColumnas(cells));
   const [popoverTarget, setPopoverTarget] = useState(null);
+  const [exportando, setExportando] = useState(false);
 
   const classes = useStyles({ vp: '0px', numFiltros: Math.max(filtrosConfig.length, 1) });
   const filtrosFijosKey = JSON.stringify(filtrosFijos);
@@ -262,6 +267,32 @@ const AppCrudTable = (props) => {
   useEffect(() => {
     cargarColeccion();
   }, [dispatch, page, rowsPerPage, debouncedFiltros, orderByToSend, filtrosFijosKey, refreshKey, sedeId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Exporta todos los registros de la lista (no solo la página visible) con los filtros y el orden
+  // actuales y las columnas que estén a la vista.
+  const exportar = async () => {
+    setExportando(true);
+    try {
+      const filas = onGetColeccion.obtenerTodas
+        ? await onGetColeccion.obtenerTodas({ orderByToSend, filtros: { ...debouncedFiltros, ...filtrosFijos } })
+        : rows;
+      await exportarExcel({
+        nombre: titulo || entidadNombre || 'Datos',
+        columnas: columnasMostradas.filter((columna) => columna.mostrar),
+        filas,
+      });
+    } catch (e) {
+      Swal.fire({
+        background: theme.palette.background.default,
+        color: theme.palette.text.primary,
+        title: 'Error',
+        text: 'No se pudo exportar a Excel. Inténtalo de nuevo.',
+        icon: 'error',
+      });
+    } finally {
+      setExportando(false);
+    }
+  };
 
   const changeOrderBy = (id) => {
     if (!paginado) return;
@@ -448,6 +479,15 @@ const AppCrudTable = (props) => {
                     <TuneIcon />
                   </IconButton>
                 </Tooltip>
+                {puede('Exportar') && (
+                  <Tooltip title='Exportar a Excel'>
+                    <span>
+                      <IconButton sx={botonSx('#1D6F42')} onClick={exportar} disabled={exportando || total === 0}>
+                        {exportando ? <CircularProgress size={22} color='inherit' /> : <FileDownloadIcon />}
+                      </IconButton>
+                    </span>
+                  </Tooltip>
+                )}
                 {onCrear && puede('Crear') && (
                   <Tooltip title={`Crear ${entidadNombre}`}>
                     <IconButton sx={botonSx(theme.palette.primary.main)} onClick={onCrear}>

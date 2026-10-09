@@ -19,39 +19,48 @@ const VistaPrevia = ({ apariencia, fondoLogin }) => {
       <Box sx={{ display: 'grid', gap: 3 }}>
         <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflow: 'hidden', bgcolor: 'background.default' }}>
           <Box sx={{ height: 4, bgcolor: 'primary.main' }} />
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 1.5, bgcolor: 'background.paper' }}>
-            <Box component='img' src={logo} alt='' sx={{ height: 34, maxWidth: 140, objectFit: 'contain' }} />
-            <Typography sx={{ fontSize: 12, fontWeight: 500, color: tema.palette.cuarternario.main }}>Nombre del usuario</Typography>
-          </Box>
-          <Box sx={{ display: 'flex', gap: 1, px: 3, py: 1.5, bgcolor: menu.sidebarBgColor }}>
-            {MENU.map((opcion, i) => (
-              <Box
-                key={opcion}
-                sx={{
-                  px: 2,
-                  py: 0.5,
-                  borderRadius: 1,
-                  fontSize: 12,
-                  color: i === 0 ? menu.sidebarMenuSelectedTextColor : menu.sidebarTextColor,
-                  bgcolor: i === 0 ? menu.sidebarMenuSelectedBgColor : 'transparent',
-                }}
-              >
-                {opcion}
+          <Box sx={{ display: 'flex' }}>
+            {/* Menú lateral: logo arriba y opciones debajo */}
+            <Box sx={{ width: 130, flexShrink: 0, display: 'flex', flexDirection: 'column', bgcolor: menu.sidebarBgColor }}>
+              <Box sx={{ display: 'flex', justifyContent: 'center', px: 1.5, py: 1.5, bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider' }}>
+                <Box component='img' src={logo} alt='' sx={{ height: 34, maxWidth: 106, objectFit: 'contain' }} />
               </Box>
-            ))}
-          </Box>
-          <Box sx={{ p: 3 }}>
-            <Paper sx={{ p: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
-              <Box>
-                <Typography sx={{ fontSize: 14, fontWeight: 600, color: 'text.primary' }}>Alumnos</Typography>
-                <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>Texto de ejemplo del contenido.</Typography>
-                <Typography sx={{ fontSize: 12, color: 'primary.main' }}>Enlace de ejemplo</Typography>
+              <Box sx={{ display: 'grid', gap: 0.5, p: 1 }}>
+                {MENU.map((opcion, i) => (
+                  <Box
+                    key={opcion}
+                    sx={{
+                      px: 1.5,
+                      py: 0.5,
+                      borderRadius: 1,
+                      fontSize: 12,
+                      color: i === 0 ? menu.sidebarMenuSelectedTextColor : menu.sidebarTextColor,
+                      bgcolor: i === 0 ? menu.sidebarMenuSelectedBgColor : 'transparent',
+                    }}
+                  >
+                    {opcion}
+                  </Box>
+                ))}
               </Box>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button size='small' variant='outlined'>Cancelar</Button>
-                <Button size='small' variant='contained'>Guardar</Button>
+            </Box>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', px: 3, py: 2, bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider' }}>
+                <Typography sx={{ fontSize: 12, fontWeight: 500, color: tema.palette.cuarternario.main }}>Nombre del usuario</Typography>
               </Box>
-            </Paper>
+              <Box sx={{ p: 3 }}>
+                <Paper sx={{ p: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
+                  <Box>
+                    <Typography sx={{ fontSize: 14, fontWeight: 600, color: 'text.primary' }}>Alumnos</Typography>
+                    <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>Texto de ejemplo del contenido.</Typography>
+                    <Typography sx={{ fontSize: 12, color: 'primary.main' }}>Enlace de ejemplo</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button size='small' variant='outlined'>Cancelar</Button>
+                    <Button size='small' variant='contained'>Guardar</Button>
+                  </Box>
+                </Paper>
+              </Box>
+            </Box>
           </Box>
         </Box>
 

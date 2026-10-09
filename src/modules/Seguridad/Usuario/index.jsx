@@ -964,7 +964,8 @@ const Usuarios = (props) => {
                                 }}></DeleteIcon>
                             </Tooltip>
                           )}
-                          {permisos.indexOf('Clave') >= 0 && ['IN', 'AC'].includes(user?.usuario?.rol?.tipo??'') && (
+                          {/* Permiso propio de la opción Usuarios (CambiarClaveUsuario en el backend). */}
+                          {permisos.indexOf('CambiarClave') >= 0 && (
                             <Tooltip title='Cambiar Clave'>
                               <Lock
                                 onClick={() => onChangePassword(row.id)}

@@ -1,7 +1,6 @@
 import React from "react";
 import { styled, useTheme } from '@mui/material/styles';
 import PropTypes from "prop-types";
-import PropsTypes from "prop-types";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import AppLngSwitcher from "../../../AppLngSwitcher";
@@ -20,13 +19,11 @@ import { alpha } from "@mui/material/styles";
 import NotificationBar from "../NotificationBar";
 import AppLogo from "../../components/AppLogo";
 import UserInfo from "../../components/UserInfo";
-import HeaderNavWrapper from "./HeaderNavWrapper";
-import HorizontalNav from "../../components/HorizontalNav";
 import { allowMultiLanguage } from "../../../../constants/AppConst";
 import BotonModo from "../../../../../shared/apariencia/BotonModo";
 import { SelectorSede } from "../../../../../shared/sedes";
 
-const AppHeader = ({ toggleNavCollapsed, routesConfig }) => {
+const AppHeader = ({ toggleNavCollapsed, menuOculto }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const theme = useTheme();
   const handleClick = (event) => {
@@ -63,36 +60,35 @@ const AppHeader = ({ toggleNavCollapsed, routesConfig }) => {
         <Box
           sx={{
             width: "100%",
-            maxWidth: { lg: 1140, xl: 1420 },
+            maxWidth: { lg: 1340, xl: 1420 },
             mx: "auto",
             px: 5,
             display: "flex",
             alignItems: "center",
           }}
         >
-          <Hidden lgUp>
-            <IconButton
+          <IconButton
+            sx={{
+              marginRight: (theme) => theme.spacing(2),
+              color: "text.secondary",
+            }}
+            edge="start"
+            className="menu-btn"
+            color="inherit"
+            aria-label="Mostrar u ocultar el menú"
+            onClick={toggleNavCollapsed}
+            size="large"
+          >
+            <MenuIcon
               sx={{
-                marginRight: (theme) => theme.spacing(2),
-                color: "text.secondary",
+                width: 35,
+                height: 35,
               }}
-              edge="start"
-              className="menu-btn"
-              color="inherit"
-              aria-label="open drawer"
-              onClick={toggleNavCollapsed}
-              size="large"
-            >
-              <MenuIcon
-                sx={{
-                  width: 35,
-                  height: 35,
-                }}
-              />
-            </IconButton>
-          </Hidden>
+            />
+          </IconButton>
           <Box
             sx={{
+              display: { lg: menuOculto ? "block" : "none" },
               "& .app-logo": {
                 pl: 0,
               },
@@ -194,20 +190,6 @@ const AppHeader = ({ toggleNavCollapsed, routesConfig }) => {
           </Box>
         </Box>
       </Toolbar>
-      <Hidden lgDown>
-        <HeaderNavWrapper>
-          <Box
-            sx={{
-              width: "100%",
-              maxWidth: { lg: 1140, xl: 1436 },
-              mx: "auto",
-              px: 5,
-            }}
-          >
-            <HorizontalNav routesConfig={routesConfig} />
-          </Box>
-        </HeaderNavWrapper>
-      </Hidden>
     </AppBar>
   );
 };
@@ -215,5 +197,5 @@ export default AppHeader;
 
 AppHeader.propTypes = {
   toggleNavCollapsed: PropTypes.func,
-  routesConfig: PropsTypes.array.isRequired,
+  menuOculto: PropTypes.bool,
 };

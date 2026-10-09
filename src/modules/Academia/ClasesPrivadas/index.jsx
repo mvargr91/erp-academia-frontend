@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
+import PaymentsIcon from '@mui/icons-material/Payments';
 import AppCrudTable, { auditCells } from '../../../shared/components/AppCrudTable';
 import { useSedes, celdaSede } from '../../../shared/sedes';
 import usePermisosOpcion from '../../../shared/hooks/usePermisosOpcion';
@@ -10,8 +11,10 @@ import { accionesEnPagina } from '../../../shared/components/PaginaCrud';
 import useCrudModulo from '../../../shared/hooks/useCrudModulo';
 import { onGetColeccion, onDelete } from '../../../@crema/redux/features/clasesPrivadas/clasesPrivadasSlice';
 import { onGetColeccionLigera as onGetProfesores } from '../../../@crema/redux/features/profesores/profesoresSlice';
+import { formatoMoneda } from '../../../shared/constants/Academia';
 
 const COLORES = { programada: '#1A73E8', realizada: 'green', cancelada: 'gray' };
+const COLORES_COBRO = { pagada: 'green', por_cobrar: 'red', paquete: 'gray' };
 
 const columnas = (variasSedes) => [
   { id: 'fecha', typeHead: 'string', label: 'Fecha', value: (v) => v, align: 'left', mostrarInicio: true, ordenable: false },
@@ -25,6 +28,16 @@ const columnas = (variasSedes) => [
     label: 'Estado',
     value: (v) => v,
     cellColor: (_v, row) => COLORES[row?.estado] ?? '',
+    align: 'left',
+    mostrarInicio: true,
+    ordenable: false,
+  },
+  {
+    id: 'cobro_nombre',
+    typeHead: 'string',
+    label: 'Cobro',
+    value: (v, row) => (row.cobro === 'paquete' ? v : `${v} · ${formatoMoneda(row.valor)}`),
+    cellColor: (_v, row) => COLORES_COBRO[row?.cobro] ?? '',
     align: 'left',
     mostrarInicio: true,
     ordenable: false,
@@ -69,7 +82,7 @@ const ClasesPrivadas = ({ route }) => {
       cells={cells}
       filtrosConfig={filtrosConfig}
       titulo={titulo}
-      subtitulo='Cada alumno descuenta 1 clase de su paquete si asiste, no asiste o cancela con menos de 24 horas.'
+      subtitulo='Para alumnos con paquete o para una persona que solo toma una clase suelta. Asistir, no asistir o cancelar tarde descuenta la clase; cancelar a tiempo no.'
       urlAyuda={urlAyuda}
       permisos={permisos}
       entidadNombre='Clase'
@@ -80,9 +93,16 @@ const ClasesPrivadas = ({ route }) => {
         {
           titulo: 'Registrar asistencia',
           icono: HowToRegIcon,
-          permiso: 'Modificar',
+          permiso: 'RegistrarAsistencia',
           color: 'green',
           onClick: (row) => navigate(`${route.path}/${row.id}/registrar`),
+        },
+        {
+          titulo: 'Registrar pago',
+          icono: PaymentsIcon,
+          // Cobrar es un permiso aparte del de registrar asistencia.
+          permiso: 'Pagar',
+          onClick: (row) => navigate(`${route.path}/${row.id}/pago`),
         },
       ]}
     />

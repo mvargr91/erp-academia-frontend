@@ -32,7 +32,7 @@ const PagoAcademiaForm = ({ accion, titulo, handleOnClose, saving, registro, fac
           name='factura_id'
           label='Cuenta de cobro'
           options={facturas}
-          textFieldProps={{ variant: 'standard', helperText: 'Solo aparecen cuentas con saldo pendiente.' }}
+          textFieldProps={{ variant: 'standard' }}
         />
       ) : (
         <TextField

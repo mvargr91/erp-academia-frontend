@@ -13,6 +13,7 @@ import {
   TextField,
   ToggleButton,
   ToggleButtonGroup,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined';
@@ -41,7 +42,7 @@ const sombra = { boxShadow: '0px 0px 5px 2px rgb(0 0 0 / 8%)' };
 
 const COLORES = [
   ['color_primario', 'Color principal', 'Botones, enlaces y elementos resaltados.'],
-  ['color_menu', 'Color del menú', 'Barra de menú y títulos de la cabecera.'],
+  ['color_menu', 'Color del menú', 'Menú lateral y títulos de la cabecera.'],
   ['color_acento', 'Color de acento', 'Opción activa del menú y filtros.'],
 ];
 
@@ -82,17 +83,19 @@ const CampoColor = ({ etiqueta, ayuda, valor, onChange, disabled }) => {
           disabled={disabled}
           sx={{ width: 44, height: 40, p: 0, border: 'none', background: 'none', cursor: disabled ? 'default' : 'pointer', flexShrink: 0 }}
         />
-        <TextField
-          variant='standard'
-          fullWidth
-          label={etiqueta}
-          value={valor}
-          onChange={(e) => onChange(e.target.value.trim().toUpperCase())}
-          disabled={disabled}
-          error={!valido}
-          helperText={!valido ? 'Formato #RRGGBB' : pocoContraste ? 'Muy claro: el texto encima se verá oscuro.' : ayuda}
-          inputProps={{ maxLength: 7, spellCheck: false }}
-        />
+        <Tooltip title={ayuda ?? ''} placement='top-start'>
+          <TextField
+            variant='standard'
+            fullWidth
+            label={etiqueta}
+            value={valor}
+            onChange={(e) => onChange(e.target.value.trim().toUpperCase())}
+            disabled={disabled}
+            error={!valido}
+            helperText={!valido ? 'Formato #RRGGBB' : pocoContraste ? 'Muy claro: el texto encima se verá oscuro.' : ''}
+            inputProps={{ maxLength: 7, spellCheck: false }}
+          />
+        </Tooltip>
       </Box>
     </Box>
   );

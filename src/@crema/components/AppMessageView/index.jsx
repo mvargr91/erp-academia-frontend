@@ -10,7 +10,7 @@ import IconButton from '@mui/material/IconButton';
 import SnackbarContent from '@mui/material/SnackbarContent';
 import WarningIcon from '@mui/icons-material/Warning';
 import Snackbar from '@mui/material/Snackbar';
-import { Slide } from '@mui/material';
+import { Portal, Slide } from '@mui/material';
 import { amber, green } from '@mui/material/colors';
 import { hideMessage } from '../../redux/features/cammon/commonSlice';
 import { useDispatch } from 'react-redux';
@@ -84,7 +84,10 @@ const AppMessageView = ({ clearInfoView, className, message, variant, ...other }
     }, 500); // Ajusta el tiempo según el auto-cierre
   }
 
+  // Se dibuja en el <body> (Portal): dentro de la página quedaba atrapado en el área de contenido y,
+  // al medir el 90 % de la pantalla, su borde izquierdo se escondía bajo el menú lateral.
   return (
+    <Portal>
     <StyledSnackbar
       anchorOrigin={{
         vertical: 'bottom',
@@ -92,17 +95,28 @@ const AppMessageView = ({ clearInfoView, className, message, variant, ...other }
       }}
       open={open}
       onClose={onClose}
-      autoHideDuration={variant === 'error' ? 5000 : 1000}
+      autoHideDuration={variant === 'error' ? 6000 : 3000}
       TransitionComponent={TransitionLeft}
       sx={{
+        // Ocupa solo el área de contenido: a la derecha del menú lateral cuando está visible.
+        left: 'calc(var(--ancho-menu, 0px) + 16px) !important',
+        right: '16px !important',
+        bottom: '24px !important',
+        transform: 'none !important',
+        justifyContent: 'center',
+        zIndex: (theme) => theme.zIndex.snackbar,
         '& .MuiSnackbarContent-root': {
-          fontSize: '0.8rem', // Aumenta el tamaño de la fuente
-          textAlign: 'center', // Centra el texto
-          display:'flex',
-          maxWidth: '1200px', // Ajusta el ancho del Snackbar
-          color: 'white', // Cambia el color del texto
-          width: '90vw', 
+          fontSize: '0.9rem',
+          display: 'flex',
+          flexWrap: 'nowrap',
+          alignItems: 'center',
+          width: '100%',
+          maxWidth: 760,
+          color: 'white',
+          borderRadius: '10px',
+          boxShadow: '0 8px 24px rgb(0 0 0 / 25%)',
         },
+        '& .MuiSnackbarContent-message': { flex: 1, minWidth: 0 },
       }}
     >
       {message && (
@@ -130,6 +144,7 @@ const AppMessageView = ({ clearInfoView, className, message, variant, ...other }
         />
       )}
     </StyledSnackbar>
+    </Portal>
   );
 };
 

@@ -11,6 +11,7 @@ import {
 } from '../../../../@crema/redux/features/paquetes/paquetesSlice';
 import { onGetColeccionLigera as onGetAlumnos } from '../../../../@crema/redux/features/alumnos/alumnosSlice';
 import { onGetColeccionLigera as onGetPlanes } from '../../../../@crema/redux/features/planes/planesSlice';
+import { onGetColeccionLigera as onGetProfesores } from '../../../../@crema/redux/features/profesores/profesoresSlice';
 import { useSedes } from '../../../../shared/sedes';
 import PaqueteForm from './PaqueteForm';
 
@@ -43,11 +44,13 @@ const PaqueteCreador = ({ paquete, accion, handleOnClose, updateColeccion, titul
   const dispatch = useDispatch();
   const { coleccionLigera: alumnos } = useSelector((s) => s.alumnos);
   const { coleccionLigera: planes } = useSelector((s) => s.planes);
+  const { coleccionLigera: profesores } = useSelector((s) => s.profesores);
   const { sedePorDefecto } = useSedes();
 
   useEffect(() => {
     dispatch(onGetAlumnos());
     dispatch(onGetPlanes());
+    dispatch(onGetProfesores());
   }, [dispatch]);
 
   return (
@@ -63,7 +66,7 @@ const PaqueteCreador = ({ paquete, accion, handleOnClose, updateColeccion, titul
       resetActual={resetActual}
       initialValues={(registro) => initialValues(registro, sedePorDefecto)}
       validationSchema={accion === 'crear' ? esquemaCrear : esquemaEditar}
-      maxWidth='md'
+      maxWidth='lg'
     >
       {({ registro, saving }) => (
         <PaqueteForm
@@ -74,6 +77,7 @@ const PaqueteCreador = ({ paquete, accion, handleOnClose, updateColeccion, titul
           saving={saving}
           alumnos={alumnos ?? []}
           planes={(planes ?? []).filter((p) => p.periodicidad === 'paquete')}
+          profesores={profesores ?? []}
         />
       )}
     </AppCrudDialog>

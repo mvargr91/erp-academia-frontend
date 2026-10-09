@@ -1,10 +1,12 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import PaymentsIcon from '@mui/icons-material/Payments';
 import AppCrudTable, { auditCells } from '../../../shared/components/AppCrudTable';
 import { useSedes, celdaSede } from '../../../shared/sedes';
 import usePermisosOpcion from '../../../shared/hooks/usePermisosOpcion';
-import { accionesEnPagina } from '../../../shared/components/PaginaCrud';
+import { accionesEnPagina, rutaEditar, rutaVer } from '../../../shared/components/PaginaCrud';
 import useCrudModulo from '../../../shared/hooks/useCrudModulo';
 import { onGetColeccion, onDelete } from '../../../@crema/redux/features/paquetes/paquetesSlice';
 import { formatoMoneda } from '../../../shared/constants/Academia';
@@ -80,13 +82,28 @@ const Paquetes = ({ route }) => {
       cells={cells}
       filtrosConfig={filtrosConfig}
       titulo={titulo}
-      subtitulo='Cada clase privada o grupal (si la matrícula es por paquete) descuenta 1 del paquete vigente que vence primero.'
+      subtitulo='Después de crear el paquete, usa «Registrar clases» para anotar cada clase y «Registrar pago» para cobrarlo.'
       urlAyuda={urlAyuda}
       permisos={permisos}
       entidadNombre='Paquete'
       refreshKey={refreshKey}
       defaultOrderBy=''
       {...accionesEnPagina(navigate, route.path)}
+      accionesExtra={[
+        {
+          titulo: 'Registrar clases',
+          icono: EventAvailableIcon,
+          permiso: 'RegistrarClases',
+          color: 'green',
+          onClick: (row) => navigate((permisos.indexOf('Modificar') >= 0 ? rutaEditar : rutaVer)(route.path, row.id)),
+        },
+        {
+          titulo: 'Registrar pago',
+          icono: PaymentsIcon,
+          permiso: 'Pagar',
+          onClick: (row) => navigate(`${route.path}/${row.id}/pago`),
+        },
+      ]}
     />
   );
 };

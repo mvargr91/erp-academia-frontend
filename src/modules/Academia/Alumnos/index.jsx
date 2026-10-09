@@ -57,6 +57,7 @@ const Alumnos = ({ route }) => {
           {
             titulo: 'Estado de cuenta y pagos',
             icono: AccountBalanceWalletIcon,
+            permiso: 'EstadoCuenta',
             onClick: (row) => navigate(`${route.path}/${row.id}/cuenta`),
           },
         ]}

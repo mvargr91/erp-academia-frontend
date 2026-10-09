@@ -20,26 +20,32 @@ const PlanForm = ({ accion, titulo, handleOnClose, saving }) => {
         className='campo-completo'
         opcional
         disabled={disabled}
-        helperText='Elige una sede si este precio solo aplica allí.'
       />
       <MyTextField fullWidth type='number' label='Valor' name='valor' disabled={disabled} required />
       <MySelectField fullWidth variant='standard' label='Periodicidad' name='periodicidad' disabled={disabled} required options={PERIODICIDADES} />
       <MyTextField
         fullWidth
         type='number'
-        label='N.° de clases'
+        label='N.° de clases (vacío = 4)'
         name='num_clases'
         disabled={disabled}
-        helperText='Mensual: clases por ciclo de pago (vacío = 4). Paquete: clases que trae.'
       />
       {values.periodicidad === 'paquete' && (
         <MyTextField
           fullWidth
           type='number'
-          label='Vigencia (días)'
+          label='Valor para alumnos de cursos (opcional)'
+          name='valor_alumno'
+          disabled={disabled}
+        />
+      )}
+      {values.periodicidad === 'paquete' && (
+        <MyTextField
+          fullWidth
+          type='number'
+          label='Vigencia en días (vacío = no vence)'
           name='vigencia_dias'
           disabled={disabled}
-          helperText='Días para usar el paquete desde la compra. Vacío = no vence.'
         />
       )}
       <MyRadioField className='campo-completo' label='Estado' name='estado' disabled={disabled} required options={OPCIONES_ESTADO} />

@@ -23,27 +23,33 @@ const VerticalNavItem = ({ children, level, ...rest }) => {
         'curved-menu': menuStyle === MenuStyle.CURVED_MENU,
       })}
       sx={{
-        height: 40,
-        my: 0.25,
+        minHeight: 42,
+        height: 'auto',
+        py: 1.5,
+        my: 0.5,
         cursor: 'pointer',
         textDecoration: 'none !important',
-        mx: 2,
-        width: 'calc(100% - 16px)',
-        pl: 22 + 33 * 1 + 'px', // TODO:: tener en cuenta, visalización del menú
+        mx: 3,
+        width: 'calc(100% - 24px)',
+        pl: 3,
         pr: 3,
-        borderRadius: 1,
+        borderRadius: '10px',
         position: 'relative',
-        transition: 'all 0.4s ease',
-        whiteSpace: 'nowrap',
+        transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+        // El texto largo baja a otra línea; el icono conserva su tamaño.
+        whiteSpace: 'normal',
+        '& > span': { flexShrink: 0 },
         '& .nav-item-icon': {
-          color: alpha(sidebarTextColor, 0.7),
+          color: alpha(sidebarTextColor, 0.8),
           fontSize: 20,
           display: 'block',
         },
         '& .nav-item-text': {
-          color: alpha(sidebarTextColor, 0.7),
+          color: alpha(sidebarTextColor, 0.85),
           fontWeight: Fonts.MEDIUM,
           fontSize: 14,
+          lineHeight: 1.3,
+          overflowWrap: 'anywhere',
         },
 
         '& .MuiTouchRipple-root': {
@@ -53,16 +59,18 @@ const VerticalNavItem = ({ children, level, ...rest }) => {
           textTransform: 'uppercase',
         },
         '&:hover, &:focus': {
+          backgroundColor: alpha(sidebarTextColor, 0.1),
           '& .nav-item-text, & .nav-item-icon, & .nav-item-icon-arrow': {
             color: sidebarTextColor,
           },
         },
         '&.active': {
           backgroundColor: sidebarMenuSelectedBgColor,
+          boxShadow: `0 4px 12px ${alpha('#000', 0.18)}, inset 0 0 0 1px ${alpha(sidebarTextColor, 0.18)}`,
           pointerEvents: 'none',
           '& .nav-item-text': {
             color: sidebarMenuSelectedTextColor + '!important',
-            fontWeight: Fonts.MEDIUM,
+            fontWeight: Fonts.SEMI_BOLD,
           },
           '& .nav-item-icon': {
             color: sidebarMenuSelectedTextColor + '!important',

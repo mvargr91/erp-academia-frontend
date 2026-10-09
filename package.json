@@ -43,6 +43,7 @@
     "d3-geo": "^3.1.0",
     "date-fns": "^2.30.0",
     "dayjs": "^1.11.13",
+    "exceljs": "^4.4.0",
     "filestack-react": "^5.0.0",
     "firebase": "^10.6.0",
     "formik": "^2.4.2",

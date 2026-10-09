@@ -44,6 +44,10 @@ const Pagos = ({ route }) => {
         entidadNombre='Pago'
         refreshKey={refreshKey}
         {...accionesEnPagina(navigate, route.path)}
+        // El pago de una clase personalizada se corrige desde la clase, no desde aquí.
+        onEditar={(row) =>
+          navigate(row.clase_privada_id ? `/clases-privadas/${row.clase_privada_id}/pago` : `${route.path}/${row.id}/editar`)
+        }
       />
     </>
   );

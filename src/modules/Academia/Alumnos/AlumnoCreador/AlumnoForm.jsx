@@ -24,7 +24,6 @@ const AlumnoForm = ({ accion, titulo, handleOnClose, saving }) => {
         className='campo-completo'
         disabled={disabled}
         label='Sede principal'
-        helperText='Es informativa: el alumno puede tomar cursos en cualquier sede.'
       />
       <SeccionForm titulo='Contacto de emergencia' />
       <MyTextField fullWidth label='Contacto de emergencia' name='contacto_emergencia' disabled={disabled} />

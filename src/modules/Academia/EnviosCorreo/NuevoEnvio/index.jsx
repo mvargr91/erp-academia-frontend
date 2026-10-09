@@ -57,14 +57,9 @@ const Contenido = ({ catalogos, resumen, setResumen }) => {
             name='plantilla_id'
             label='Plantilla (opcional)'
             options={catalogos.plantillas.map((p) => ({ id: p.id, nombre: p.nombre }))}
-            textFieldProps={{
-              variant: 'standard',
-              helperText: catalogos.plantillas.length
-                ? 'Copia su asunto y contenido; puedes ajustarlos solo para este envío.'
-                : 'No tienes plantillas manuales: créalas en Configuración → Plantillas de correo, o escribe el mensaje aquí.',
-            }}
+            textFieldProps={{ variant: 'standard' }}
           />
-          <MyTextField fullWidth label='Asunto' name='asunto' required helperText='Admite variables, ej.: {alumno}' />
+          <MyTextField fullWidth label='Asunto' name='asunto' required />
           <FormikEditorHtml name='texto' label='Contenido' variables={VARIABLES} className='' />
         </CardContent>
       </Card>

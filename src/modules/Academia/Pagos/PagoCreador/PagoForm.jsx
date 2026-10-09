@@ -37,10 +37,10 @@ const PagoForm = (props) => {
         label='Paquete de clases (opcional)'
         options={paquetes}
         disabled={disabled}
-        textFieldProps={{ variant: 'standard', helperText: 'Si eliges un paquete, el pago abona a su saldo.' }}
+        textFieldProps={{ variant: 'standard' }}
       />
       {!values.paquete_id && (
-        <FormikAutocomplete name='curso_id' label='Curso' options={cursos} disabled={disabled} textFieldProps={{ variant: 'standard', helperText: 'El pago descuenta el saldo del alumno en este curso.' }} />
+        <FormikAutocomplete name='curso_id' label='Curso' options={cursos} disabled={disabled} textFieldProps={{ variant: 'standard' }} />
       )}
       <FormikAutocomplete name='plan_id' label='Plan (opcional)' options={planes} disabled={disabled} textFieldProps={{ variant: 'standard' }} />
       <MyTextField fullWidth type='number' label='Monto' name='monto' disabled={disabled} required />

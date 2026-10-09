@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Alert } from '@mui/material';
+import { StyledTextField } from '../../../../shared/components/MyTextField';
 import AppCrudForm, { SeccionForm } from '../../../../shared/components/AppCrudForm';
 import MyTextField from '../../../../shared/components/MyTextField';
 import MyRadioField from '../../../../shared/components/MyRadioField';
@@ -16,25 +17,24 @@ const AcademiaForm = ({ accion, titulo, handleOnClose, saving, registro }) => {
       <SeccionForm titulo='Datos de la academia' />
       <MyTextField fullWidth
         autoFocus
-        label='Código (subdominio)'
+        label={crear ? 'Código (subdominio, no se puede cambiar después)' : 'Código (subdominio)'}
         name='codigo'
         disabled={!crear}
         required={crear}
-        helperText={crear ? 'Ej.: salsaclub → salsaclub.tudominio.com. No se puede cambiar después.' : registro?.url}
       />
       <MyTextField fullWidth label='Nombre comercial' name='nombre' disabled={disabled} required />
-      <MyTextField fullWidth label='Correo de contacto' name='correo' disabled={disabled} helperText='Los alumnos responden a este correo.' />
+      {!crear && registro?.url && <StyledTextField fullWidth variant='standard' label='Dirección web' value={registro.url} disabled />}
+      <MyTextField fullWidth label='Correo de contacto' name='correo' disabled={disabled} />
       <MyTextField fullWidth label='Teléfono' name='telefono' disabled={disabled} />
       <SeccionForm titulo='Cobro del ERP' />
-      <MyTextField fullWidth label='Tarifa mensual' name='tarifa_mensual' type='number' disabled={disabled} required helperText='0 = no se le cobra.' />
+      <MyTextField fullWidth label='Tarifa mensual (0 = no se cobra)' name='tarifa_mensual' type='number' disabled={disabled} required />
       <MyTextField
         fullWidth
-        label='Día de corte'
+        label='Día de corte (1-28)'
         name='dia_corte'
         type='number'
         disabled={disabled}
         required
-        helperText='Día del mes en que se genera su cuenta de cobro (1-28).'
       />
       <MyDateField label='Cobrar desde' name='fecha_inicio_cobro' disabled={disabled} />
       {registro?.suspendida_por_mora === 1 && (

@@ -84,6 +84,21 @@ export const createCrudSlice = ({ name, endpoint, acciones = {} }) => {
     },
   );
 
+  // Todos los registros que cumplen los filtros (recorre las páginas), sin tocar el estado de la
+  // lista. Lo usa la exportación a Excel de AppCrudTable.
+  onGetColeccion.obtenerTodas = async ({ orderByToSend, filtros } = {}) => {
+    const filas = [];
+    for (let page = 1, ultima = 1; page <= ultima && page <= 200; page += 1) {
+      const response = await jwtAxios.get(endpoint, {
+        params: limpiarParams({ page, limite: 500, ordenar_por: orderByToSend, ...filtros }),
+      });
+      const coleccion = normalizarColeccion(response.data);
+      filas.push(...coleccion.datos);
+      ultima = coleccion.ultima_pagina;
+    }
+    return filas;
+  };
+
   const onGetColeccionLigera = createAsyncThunk(
     `${name}/onGetColeccionLigera`,
     async (filtros = {}, thunkAPI) => {

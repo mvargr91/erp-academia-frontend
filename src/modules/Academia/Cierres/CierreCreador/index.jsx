@@ -64,7 +64,6 @@ const CierreCreador = ({ cierre, accion, handleOnClose, updateColeccion, titulo 
           className='campo-completo'
           opcional
           disabled={accion === 'ver'}
-          helperText='Elige una sede si solo cierra esa.'
         />
         <Alert severity='info' className='campo-completo'>
           Las clases que caigan en estas fechas no se cuentan: los ciclos de 4 clases de los alumnos se corren a la

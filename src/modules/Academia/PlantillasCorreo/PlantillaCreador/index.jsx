@@ -160,7 +160,6 @@ const PlantillaCreador = ({ plantilla, accion, handleOnClose, updateColeccion, t
               name='nombre'
               disabled={ver}
               required
-              helperText='Ej.: Clase cancelada, Promoción de diciembre. Solo lo ves tú.'
             />
           )}
           <MyTextField
@@ -170,7 +169,6 @@ const PlantillaCreador = ({ plantilla, accion, handleOnClose, updateColeccion, t
             name='asunto'
             disabled={ver}
             required
-            helperText='También admite variables, por ejemplo {curso}.'
           />
           <FormikEditorHtml
             name='texto'

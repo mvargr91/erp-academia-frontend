@@ -7,7 +7,6 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { onGetCuenta } from '@crema/redux/features/cuenta/cuentaSlice';
 import AppMessageView from '@crema/components/AppMessageView';
 import { ERROR_TYPE } from '../../../shared/constants/Constantes';
-import { gradienteArcoiris } from '../../../shared/constants/Marca';
 import DatosPersonales from './DatosPersonales';
 import Seguridad from './Seguridad';
 
@@ -56,7 +55,8 @@ const MiCuenta = () => {
   return (
     <Box sx={{ maxWidth: 960, mx: 'auto' }}>
       <Card sx={{ mb: 6, overflow: 'hidden' }}>
-        <Box sx={{ height: 6, background: gradienteArcoiris }} />
+        {/* Franja con el color primario de la academia (Configuración → Apariencia). */}
+        <Box sx={{ height: 6, backgroundColor: 'primary.main' }} />
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 4, p: { xs: 4, md: 6 }, flexWrap: 'wrap' }}>
           <Avatar sx={{ width: 72, height: 72, fontSize: 26, fontWeight: 600, bgcolor: 'primary.main' }}>
             {iniciales(cuenta.nombre)}

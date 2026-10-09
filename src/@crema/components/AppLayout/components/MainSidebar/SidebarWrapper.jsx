@@ -11,6 +11,7 @@ const SidebarWrapper = ({ children, ...rest }) => {
         paddingBottom: 0,
         position: { xs: 'relative', lg: 'fixed' },
         borderRight: (theme) => `1px solid ${theme.palette.divider}`,
+        boxShadow: { lg: '2px 0 12px rgb(0 0 0 / 10%)' },
         top: 0,
         left: 0,
         zIndex: 1101,
