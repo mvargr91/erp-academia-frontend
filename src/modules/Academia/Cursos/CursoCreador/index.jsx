@@ -11,7 +11,6 @@ import {
 } from '../../../../@crema/redux/features/cursos/cursosSlice';
 import { onGetColeccionLigera as onGetRitmos } from '../../../../@crema/redux/features/ritmos/ritmosSlice';
 import { onGetColeccionLigera as onGetProfesores } from '../../../../@crema/redux/features/profesores/profesoresSlice';
-import { onGetColeccionLigera as onGetPlanes } from '../../../../@crema/redux/features/planes/planesSlice';
 import { onGetColeccionLigera as onGetAlumnos } from '../../../../@crema/redux/features/alumnos/alumnosSlice';
 import { aRadio } from '../../../../shared/constants/Academia';
 import { useSedes } from '../../../../shared/sedes';
@@ -20,7 +19,6 @@ import CursoForm from './CursoForm';
 const validationSchema = yup.object({
   ritmo_id: yup.number().typeError('Requerido').required('Requerido'),
   profesor_id: yup.number().nullable(),
-  plan_id: yup.number().nullable(),
   dia: yup.number().typeError('Requerido').required('Requerido'),
   hora: yup.string().required('Requerido'),
   cupo_max: yup.number().typeError('Debe ser un número').nullable().min(1, 'Mínimo 1'),
@@ -32,7 +30,6 @@ const initialValues = (registro, sedePorDefecto) => ({
   nombre: registro?.nombre ?? '',
   ritmo_id: registro?.ritmo_id ?? '',
   profesor_id: registro?.profesor_id ?? '',
-  plan_id: registro?.plan_id ?? '',
   dia: registro?.dia ?? '',
   hora: registro?.hora ?? '',
   fecha_inicio: registro?.fecha_inicio ?? '',
@@ -46,14 +43,12 @@ const CursoCreador = ({ curso, accion, handleOnClose, updateColeccion, titulo })
   const dispatch = useDispatch();
   const { coleccionLigera: ritmos } = useSelector((s) => s.ritmos);
   const { coleccionLigera: profesores } = useSelector((s) => s.profesores);
-  const { coleccionLigera: planes } = useSelector((s) => s.planes);
   const { coleccionLigera: alumnos } = useSelector((s) => s.alumnos);
   const { sedePorDefecto } = useSedes();
 
   useEffect(() => {
     dispatch(onGetRitmos());
     dispatch(onGetProfesores());
-    dispatch(onGetPlanes());
     dispatch(onGetAlumnos());
   }, [dispatch]);
 
@@ -81,7 +76,6 @@ const CursoCreador = ({ curso, accion, handleOnClose, updateColeccion, titulo })
           saving={saving}
           ritmos={ritmos}
           profesores={profesores}
-          planes={planes}
           alumnos={alumnos}
         />
       )}

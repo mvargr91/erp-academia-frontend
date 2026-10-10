@@ -177,19 +177,6 @@ const AsistenciaForm = (props) => {
                     primary={a.nombre}
                     primaryTypographyProps={{ fontSize: 16, fontWeight: a.presente ? 'bold' : 'normal' }}
                   />
-                  {cicloDe[a.alumno_id]?.modalidad === 'paquete' && (
-                    <Chip
-                      size='small'
-                      variant='outlined'
-                      sx={{ mr: 1 }}
-                      color={cicloDe[a.alumno_id].paquete.restantes > 1 ? 'primary' : 'error'}
-                      label={
-                        cicloDe[a.alumno_id].paquete.restantes > 0
-                          ? `Paquete · quedan ${cicloDe[a.alumno_id].paquete.restantes}`
-                          : 'Paquete sin clases'
-                      }
-                    />
-                  )}
                   {cicloDe[a.alumno_id]?.clase_numero && (
                     <Chip
                       size='small'

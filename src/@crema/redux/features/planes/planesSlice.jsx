@@ -1,4 +1,4 @@
-// Academia: planes / precios de las clases.
+// Academia: tipos de paquete de clases personalizadas (se definen en Tarifas).
 import { createCrudSlice } from '../../helpers/createCrudSlice';
 
 const { slice, thunks } = createCrudSlice({

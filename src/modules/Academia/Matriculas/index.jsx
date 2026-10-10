@@ -140,7 +140,7 @@ const Contenido = ({ catalogos, cotizacion, setCotizacion }) => {
   const alumnoId = values.tipo === 'existente' ? values.alumno_id : '';
 
   // Recalcula los precios al cambiar los cursos o el alumno (un alumno existente puede tener
-  // ya otros cursos, un paquete vigente o estar matriculado en alguno de los elegidos).
+  // ya otros cursos o estar matriculado en alguno de los elegidos).
   useEffect(() => {
     if (!values.cursos.length) {
       setCotizacion(SIN_COTIZAR);
@@ -330,11 +330,6 @@ const Contenido = ({ catalogos, cotizacion, setCotizacion }) => {
                           <TableCell>
                             {yaEsta && <Chip size='small' label='Ya está matriculado' />}
                             {orden > 0 && `${orden}.º · ${precio?.regla ?? '…'}`}
-                            {!yaEsta && !orden && (
-                              <Typography component='span' variant='caption' color='text.secondary'>
-                                {c.plan_nombre}
-                              </Typography>
-                            )}
                           </TableCell>
                           <TableCell align='right'>{orden > 0 ? (precio ? formatoMoneda(precio.valor) : '…') : ''}</TableCell>
                         </TableRow>
@@ -459,7 +454,7 @@ const Matriculas = ({ route }) => {
     if (resultado) return;
     Promise.all([
       jwtAxios.get('alumnos', { params: { ligera: 1 } }),
-      // Lista completa (no la ligera): trae horario, profesor, plan y cupo de cada curso.
+      // Lista completa (no la ligera): trae horario, profesor y cupo de cada curso.
       jwtAxios.get('cursos', { params: { limite: 500, ordenar_por: 'ritmo_nombre:asc' } }),
     ])
       .then(([al, cu]) => setCatalogos({ alumnos: al.data, cursos: cu.data.datos.filter((c) => esActivo(c.estado)), cargado: true }))

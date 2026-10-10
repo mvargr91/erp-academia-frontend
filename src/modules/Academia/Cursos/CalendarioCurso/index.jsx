@@ -74,7 +74,7 @@ const CalendarioCurso = () => {
             Calendario · {datos.curso.nombre}
           </Typography>
           <Typography color='text.secondary'>
-            {datos.curso.horario} · {datos.curso.plan ?? 'Sin plan'} · ciclos de {datos.curso.clases_por_ciclo} clases
+            {datos.curso.horario} · ciclos de {datos.curso.clases_por_ciclo} clases
           </Typography>
         </Box>
       </Box>

@@ -1,7 +1,5 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import { useDispatch } from 'react-redux';
-import { useFormikContext } from 'formik';
 import AppCrudForm, { SeccionForm } from '../../../../shared/components/AppCrudForm';
 import MyTextField from '../../../../shared/components/MyTextField';
 import MySelectField from '../../../../shared/components/MySelectField';
@@ -10,25 +8,18 @@ import MyRadioField from '../../../../shared/components/MyRadioField';
 import FormikAutocomplete from '../../../../shared/components/FormikAutocomplete';
 import FormikMultiSelect from '../../../../shared/components/FormikMultiSelect';
 import { CampoSede } from '../../../../shared/sedes';
-import { onGetColeccionLigera as onGetPlanes } from '../../../../@crema/redux/features/planes/planesSlice';
 import { DIAS_SEMANA, OPCIONES_ESTADO, OPCIONES_SI_NO } from '../../../../shared/constants/Academia';
 import ParejasCurso from './ParejasCurso';
 import usePermisosOpcion from '../../../../shared/hooks/usePermisosOpcion';
 
 const CursoForm = (props) => {
-  const { accion, titulo, handleOnClose, saving, ritmos, profesores, planes, alumnos, registro } = props;
+  const { accion, titulo, handleOnClose, saving, ritmos, profesores, alumnos, registro } = props;
   const disabled = accion === 'ver';
-  const dispatch = useDispatch();
-  const { values } = useFormikContext();
   // Definir cómo paga cada alumno (individual o en pareja) es un permiso aparte de modificar el curso.
-  const puedeFormaDePago = usePermisosOpcion('/cursos').permisos.indexOf('FormaDePago') >= 0;
-
-  // Los planes disponibles son los generales y los de la sede del curso.
-  useEffect(() => {
-    if (values.sede_id) {
-      dispatch(onGetPlanes({ sede_id: values.sede_id }));
-    }
-  }, [dispatch, values.sede_id]);
+  const { permisos } = usePermisosOpcion('/cursos');
+  const puedeFormaDePago = permisos.indexOf('FormaDePago') >= 0;
+  // Pactar un valor distinto de la tarifa con un alumno (beca, convenio) es otro permiso.
+  const puedeValorEspecial = permisos.indexOf('ValorEspecial') >= 0;
 
   return (
     <AppCrudForm titulo={titulo} accion={accion} handleOnClose={handleOnClose} saving={saving}>
@@ -36,7 +27,6 @@ const CursoForm = (props) => {
       <CampoSede disabled={disabled} />
       <FormikAutocomplete name='ritmo_id' label='Ritmo' options={ritmos} disabled={disabled} textFieldProps={{ variant: 'standard' }} />
       <FormikAutocomplete name='profesor_id' label='Profesor' options={profesores} disabled={disabled} textFieldProps={{ variant: 'standard' }} />
-      <FormikAutocomplete name='plan_id' label='Plan / Precio' options={planes} disabled={disabled} textFieldProps={{ variant: 'standard' }} />
       <MyTextField fullWidth label='Nombre (opcional)' name='nombre' disabled={disabled} />
 
       <SeccionForm titulo='Horario' />
@@ -58,8 +48,8 @@ const CursoForm = (props) => {
 
       {accion !== 'crear' && registro && (
         <>
-          <SeccionForm titulo='Pago individual o en pareja' />
-          <ParejasCurso key={registro.id} cursoId={registro.id} matriculados={registro.matriculados ?? []} soloLectura={!puedeFormaDePago} />
+          <SeccionForm titulo='Cómo paga cada alumno' />
+          <ParejasCurso key={registro.id} cursoId={registro.id} matriculados={registro.matriculados ?? []} soloLectura={!puedeFormaDePago} puedeValorEspecial={puedeValorEspecial} />
         </>
       )}
     </AppCrudForm>
@@ -73,7 +63,6 @@ CursoForm.propTypes = {
   saving: PropTypes.bool,
   ritmos: PropTypes.array.isRequired,
   profesores: PropTypes.array.isRequired,
-  planes: PropTypes.array.isRequired,
   alumnos: PropTypes.array.isRequired,
   registro: PropTypes.object,
 };

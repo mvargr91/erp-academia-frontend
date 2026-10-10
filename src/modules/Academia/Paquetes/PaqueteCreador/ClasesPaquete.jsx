@@ -33,7 +33,7 @@ const FilaClase = ({ numero, clase, profesores, soloLectura, guardando, onGuarda
   const cambio = Object.keys(original).some((k) => String(original[k]) !== String(borrador[k]));
   const completa = Boolean(borrador.fecha && borrador.hora);
 
-  // Clases que no se registraron aquí (grupales, o agendadas en Clases personalizadas): solo se muestran.
+  // Clases que no se registraron aquí (agendadas en Clases personalizadas): solo se muestran.
   if (clase && !clase.editable) {
     return (
       <Box sx={{ display: 'grid', gridTemplateColumns: columnas, gap: 2, alignItems: 'center', py: 1.5, borderBottom: 1, borderColor: 'divider' }}>
@@ -41,7 +41,7 @@ const FilaClase = ({ numero, clase, profesores, soloLectura, guardando, onGuarda
         <Typography>{fechaCorta(clase.fecha)}</Typography>
         <Typography>{clase.hora ?? ''}</Typography>
         <Typography color='text.secondary'>
-          {clase.origen === 'grupal' ? `Clase grupal · ${clase.curso ?? ''}` : `Clase personalizada${clase.profesor_nombre ? ` · ${clase.profesor_nombre}` : ''}`}
+          Clase personalizada{clase.profesor_nombre ? ` · ${clase.profesor_nombre}` : ''}
         </Typography>
         <Typography>{resultadoDe(clase.resultado).nombre}</Typography>
         <Chip size='small' color='warning' label='Descuenta' />

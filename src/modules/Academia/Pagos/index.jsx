@@ -13,7 +13,6 @@ const columnas = (variasSedes) => [
   { id: 'alumno_nombre', typeHead: 'string', label: 'Alumno', value: (v) => v, align: 'left', mostrarInicio: true },
   { id: 'curso_nombre', typeHead: 'string', label: 'Curso', value: (v) => v, align: 'left', mostrarInicio: true, ordenable: false },
   celdaSede(variasSedes, { ordenable: true }),
-  { id: 'plan_nombre', typeHead: 'string', label: 'Plan', value: (v) => v, align: 'left', mostrarInicio: false, ordenable: false },
   { id: 'monto', typeHead: 'numeric', label: 'Monto', value: formatoMoneda, align: 'right', mostrarInicio: true },
   { id: 'fecha_pago', typeHead: 'string', label: 'Fecha de pago', value: (v) => v, align: 'left', mostrarInicio: true },
   { id: 'metodo_pago', typeHead: 'string', label: 'Método', value: (v) => nombreDe(METODOS_PAGO, v), align: 'left', mostrarInicio: true },

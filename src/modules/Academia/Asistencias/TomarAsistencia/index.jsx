@@ -339,15 +339,6 @@ const TomarAsistencia = ({ route }) => {
                       <Typography sx={{ width: 32, color: 'text.secondary' }}>{i + 1}.</Typography>
                       <ListItemText primary={a.nombre} primaryTypographyProps={{ fontSize: 16, fontWeight: a.presente ? 'bold' : 'normal' }} />
                       {a.retirado && <Chip size='small' variant='outlined' sx={{ mr: 1 }} label='Ya no está matriculado' />}
-                      {a.modalidad === 'paquete' && (
-                        <Chip
-                          size='small'
-                          variant='outlined'
-                          sx={{ mr: 1 }}
-                          color={a.paquete?.restantes > 1 ? 'primary' : 'error'}
-                          label={a.paquete?.restantes > 0 ? `Paquete · quedan ${a.paquete.restantes}` : 'Paquete sin clases'}
-                        />
-                      )}
                       {a.clase_numero && (
                         <Chip
                           size='small'

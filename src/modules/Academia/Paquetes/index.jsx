@@ -15,7 +15,7 @@ const COLORES = { activo: 'green', agotado: 'gray', vencido: 'red', anulado: 'gr
 
 const columnas = (variasSedes) => [
   { id: 'alumno_nombre', typeHead: 'string', label: 'Alumno', value: (v) => v, align: 'left', mostrarInicio: true, ordenable: false },
-  { id: 'plan_nombre', typeHead: 'string', label: 'Plan', value: (v) => v, align: 'left', mostrarInicio: true, ordenable: false },
+  { id: 'plan_nombre', typeHead: 'string', label: 'Tipo de paquete', value: (v) => v, align: 'left', mostrarInicio: true, ordenable: false },
   celdaSede(variasSedes),
   {
     id: 'clases_restantes',

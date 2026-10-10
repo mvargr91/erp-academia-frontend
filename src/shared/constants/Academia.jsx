@@ -23,13 +23,6 @@ export const DIAS_SEMANA = [
   { id: 6, nombre: 'Sábado' },
 ];
 
-export const PERIODICIDADES = [
-  { id: 'semanal', nombre: 'Semanal' },
-  // El id se conserva por los planes ya guardados: es un ciclo de N clases, no un mes calendario.
-  { id: 'mensual', nombre: 'Ciclo de clases' },
-  { id: 'paquete', nombre: 'Paquete de clases' },
-];
-
 export const METODOS_PAGO = [
   { id: 'efectivo', nombre: 'Efectivo' },
   { id: 'transferencia', nombre: 'Transferencia' },

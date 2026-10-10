@@ -33,7 +33,7 @@ const PaqueteForm = ({ accion, titulo, handleOnClose, saving, registro, alumnos,
   const puedeRegistrarClases = permisos.indexOf('RegistrarClases') >= 0;
   const resumen = alDia?.id === registro?.id ? alDia : registro;
 
-  // Al elegir el plan se proponen sus clases, precio y vencimiento (precio de alumno si ya toma un curso grupal).
+  // Al elegir el tipo de paquete se proponen sus clases, precio y vencimiento (precio de alumno si ya toma un curso grupal).
   useEffect(() => {
     if (!crear || !values.plan_id) return;
     const plan = planes.find((p) => String(p.id) === String(values.plan_id));
@@ -64,7 +64,7 @@ const PaqueteForm = ({ accion, titulo, handleOnClose, saving, registro, alumnos,
       <FormikAutocomplete name='alumno_id' label='Alumno' options={alumnos} disabled={!crear} textFieldProps={{ variant: 'standard' }} />
       <FormikAutocomplete
         name='plan_id'
-        label='Plan de paquete'
+        label='Tipo de paquete (Tarifas)'
         options={planes}
         disabled={!crear}
         textFieldProps={{ variant: 'standard' }}

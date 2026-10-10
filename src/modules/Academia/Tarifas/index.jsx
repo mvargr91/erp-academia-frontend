@@ -1,6 +1,6 @@
-// Tarifas de la academia: escalas de cursos grupales (total por ciclo según cuántos cursos toma el
-// alumno, individual y en pareja) y precios de las clases personalizadas (por clase o paquete, con
-// precio aparte para alumnos de cursos). Todo es opcional: sin escala cada curso cobra su plan.
+// Tarifas de la academia, la única pantalla de precios: lo que paga un alumno por ciclo según cuántos
+// cursos toma (individual y en pareja) y los precios de las clases personalizadas (clase suelta o
+// paquete, con precio aparte para alumnos de cursos). Los cursos no tienen precio propio.
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -35,13 +35,13 @@ const MAX_ESCALONES = 20;
 // tipo => [título, explicación, personas que pagan ese total]
 const ESCALAS = {
   individual: [
-    'Individual',
-    'Total que paga un alumno por ciclo según cuántos cursos toma. Sin escalones, cada curso cobra el precio de su plan.',
+    'Cursos · Individual',
+    'Total que paga un alumno por ciclo según cuántos cursos toma. El valor de 1 curso es el precio de un curso; si la academia no da descuento por tomar varios, basta con ese: cada curso adicional cobra lo mismo.',
     1,
   ],
   pareja: [
-    'En pareja',
-    'Total que pagan las dos personas por ciclo cuando dos alumnos de un curso pagan en pareja (se define por alumno, en el curso o al matricular). Sin escalones, pagan la escala individual.',
+    'Cursos · En pareja',
+    'Total que pagan las dos personas por ciclo cuando dos alumnos de un curso pagan en pareja (se define por alumno, en el curso o al matricular). Si se deja vacío, cada uno paga la tarifa individual.',
     2,
   ],
 };
@@ -162,8 +162,9 @@ const Personalizadas = ({ paquetes, onChange, puedeEditar }) => {
           Clases personalizadas
         </Typography>
         <Typography variant='body2' color='text.secondary' sx={{ mt: 1, mb: 3 }}>
-          Precio de la clase suelta y de cada paquete. El precio para alumnos se propone al vender el paquete a quien ya toma un curso
-          grupal; si se deja vacío, pagan el precio normal.
+          Precio de la clase suelta y de cada paquete. El precio para alumnos se propone al vender el paquete a quien ya toma un
+          curso; si se deja vacío, pagan el precio normal. La vigencia son los días que tiene el alumno para usar las clases desde la
+          compra.
         </Typography>
         {paquetes.length > 0 && (
           <TableContainer>
@@ -176,6 +177,7 @@ const Personalizadas = ({ paquetes, onChange, puedeEditar }) => {
                   <TableCell align='right'>Por clase</TableCell>
                   <TableCell>Precio alumnos</TableCell>
                   <TableCell align='right'>Por clase</TableCell>
+                  <TableCell>Vigencia (días)</TableCell>
                   <TableCell />
                 </TableRow>
               </TableHead>
@@ -201,6 +203,9 @@ const Personalizadas = ({ paquetes, onChange, puedeEditar }) => {
                       {campo(i, 'valor_alumno', { type: 'number', sx: { width: 120 }, inputProps: { min: 0, 'aria-label': 'Precio alumnos' } })}
                     </TableCell>
                     <TableCell align='right'>{porClase(p.valor_alumno, p.clases)}</TableCell>
+                    <TableCell>
+                      {campo(i, 'vigencia_dias', { type: 'number', placeholder: 'Sin límite', sx: { width: 100 }, inputProps: { min: 1, 'aria-label': 'Vigencia en días' } })}
+                    </TableCell>
                     <TableCell align='right'>
                       {puedeEditar && (
                         <Tooltip title='Quitar (los paquetes ya vendidos no cambian)'>
@@ -225,7 +230,7 @@ const Personalizadas = ({ paquetes, onChange, puedeEditar }) => {
           <Button
             size='small'
             startIcon={<AddIcon />}
-            onClick={() => onChange([...paquetes, { id: null, nombre: '', clases: '', valor: '', valor_alumno: '' }])}
+            onClick={() => onChange([...paquetes, { id: null, nombre: '', clases: '', valor: '', valor_alumno: '', vigencia_dias: '' }])}
             sx={{ mt: 2 }}
           >
             Agregar clase o paquete
@@ -252,7 +257,7 @@ const Tarifas = ({ route }) => {
 
   const aTexto = (datos) => ({
     ...Object.fromEntries(Object.keys(ESCALAS).map((tipo) => [tipo, (datos[tipo] ?? []).map(String)])),
-    personalizadas: (datos.personalizadas ?? []).map((p) => ({ ...p, valor_alumno: p.valor_alumno ?? '' })),
+    personalizadas: (datos.personalizadas ?? []).map((p) => ({ ...p, valor_alumno: p.valor_alumno ?? '', vigencia_dias: p.vigencia_dias ?? '' })),
   });
 
   useEffect(() => {
@@ -275,6 +280,7 @@ const Tarifas = ({ route }) => {
           clases: Number(p.clases),
           valor: Number(p.valor),
           valor_alumno: numero(p.valor_alumno),
+          vigencia_dias: numero(p.vigencia_dias),
         })),
       })
       .then(({ data }) => {
@@ -297,8 +303,8 @@ const Tarifas = ({ route }) => {
         {titulo || 'Tarifas'}
       </Typography>
       <Typography color='text.secondary' sx={{ mb: 3 }}>
-        Precios de los cursos grupales por ciclo de clases y de las clases personalizadas. Los cambios aplican desde el siguiente
-        ciclo de cada alumno y a los paquetes que se vendan en adelante; lo ya cobrado no se modifica.
+        Aquí se definen todos los precios de la academia: los cursos (por ciclo de clases) y las clases personalizadas. Los cambios
+        aplican desde el siguiente ciclo de cada alumno y a los paquetes que se vendan en adelante; lo ya cobrado no se modifica.
       </Typography>
       {error && (
         <Alert severity='error' sx={{ mb: 2 }} onClose={() => setError('')}>

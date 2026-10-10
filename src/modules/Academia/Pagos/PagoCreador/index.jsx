@@ -11,7 +11,6 @@ import {
 } from '../../../../@crema/redux/features/pagos/pagosSlice';
 import { onGetColeccionLigera as onGetAlumnos } from '../../../../@crema/redux/features/alumnos/alumnosSlice';
 import { onGetColeccionLigera as onGetCursos } from '../../../../@crema/redux/features/cursos/cursosSlice';
-import { onGetColeccionLigera as onGetPlanes } from '../../../../@crema/redux/features/planes/planesSlice';
 import { useSedes } from '../../../../shared/sedes';
 import PagoForm from './PagoForm';
 
@@ -20,7 +19,6 @@ const hoy = () => new Date().toISOString().slice(0, 10);
 const validationSchema = yup.object({
   alumno_id: yup.number().typeError('Requerido').required('Requerido'),
   curso_id: yup.number().nullable(),
-  plan_id: yup.number().nullable(),
   monto: yup.number().typeError('Debe ser un número').required('Requerido').min(0, 'No puede ser negativo'),
   fecha_pago: yup.string().required('Requerido'),
   metodo_pago: yup.string().required('Requerido'),
@@ -44,13 +42,11 @@ const PagoCreador = ({ pago, accion, handleOnClose, updateColeccion, titulo, ini
   const dispatch = useDispatch();
   const { coleccionLigera: alumnos } = useSelector((s) => s.alumnos);
   const { coleccionLigera: cursos } = useSelector((s) => s.cursos);
-  const { coleccionLigera: planes } = useSelector((s) => s.planes);
   const { sedePorDefecto } = useSedes();
 
   useEffect(() => {
     dispatch(onGetAlumnos());
     dispatch(onGetCursos());
-    dispatch(onGetPlanes());
   }, [dispatch]);
 
   return (
@@ -77,7 +73,6 @@ const PagoCreador = ({ pago, accion, handleOnClose, updateColeccion, titulo, ini
           saving={saving}
           alumnos={alumnos}
           cursos={cursos}
-          planes={planes}
         />
       )}
     </AppCrudDialog>

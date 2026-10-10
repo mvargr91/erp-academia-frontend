@@ -1,5 +1,5 @@
 // Estado de cuenta de un alumno: lo que debe (cursos y paquetes), lo que ha pagado,
-// su historial de pagos y el acceso directo para registrar un pago.
+// su historial de pagos y el acceso directo para registrar un pago o condonar una deuda.
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -10,6 +10,10 @@ import {
   Card,
   CardContent,
   Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Grid,
   IconButton,
   LinearProgress,
@@ -19,11 +23,13 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
   Tooltip,
   Typography,
 } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import PaymentsIcon from '@mui/icons-material/Payments';
+import MoneyOffIcon from '@mui/icons-material/MoneyOff';
 import jwtAxios from '../../../../@crema/services/auth/jwt-auth';
 import usePermisosOpcion from '../../../../shared/hooks/usePermisosOpcion';
 import { useSedes } from '../../../../shared/sedes';
@@ -63,23 +69,52 @@ const EstadoCuenta = () => {
   const { variasSedes } = useSedes();
   const { permisos: permisosPagos } = usePermisosOpcion('/pagos');
   const puedePagar = (permisosPagos ?? []).indexOf('Crear') >= 0;
+  // Condonar (perdonar la deuda sin recibir dinero) es un permiso aparte de registrar pagos.
+  const puedeCondonar = (permisosPagos ?? []).indexOf('Condonar') >= 0;
   const [datos, setDatos] = useState(null);
   const [error, setError] = useState('');
+  // Deuda que se está condonando: { destino: {curso_id | paquete_id}, concepto, saldo, motivo }
+  const [condonar, setCondonar] = useState(null);
+  const [aviso, setAviso] = useState(null);
+  const [enviando, setEnviando] = useState(false);
 
-  useEffect(() => {
-    setDatos(null);
+  const cargar = () =>
     jwtAxios
       .get(`alumnos/${id}/estado-cuenta`)
       .then(({ data }) => setDatos(data))
       .catch(() => setError('No se pudo cargar el estado de cuenta del alumno.'));
-  }, [id]);
+
+  useEffect(() => {
+    setDatos(null);
+    cargar();
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const enviar = (peticion) => {
+    setEnviando(true);
+    setAviso(null);
+    peticion
+      .then(({ data }) => {
+        setAviso({ tipo: 'success', texto: data.mensajes[0] });
+        setCondonar(null);
+        return cargar();
+      })
+      .catch((e) => setAviso({ tipo: 'error', texto: e?.response?.data?.mensajes?.[0] ?? 'No se pudo completar la operación.' }))
+      .finally(() => setEnviando(false));
+  };
+  const confirmarCondonar = () =>
+    enviar(jwtAxios.post('condonaciones', { alumno_id: id, ...condonar.destino, motivo: condonar.motivo.trim() }));
+  const deshacer = (c) => {
+    if (window.confirm(`¿Deshacer la condonación de ${formatoMoneda(c.valor)}? Ese valor vuelve al saldo del alumno.`)) {
+      enviar(jwtAxios.delete(`condonaciones/${c.id}`));
+    }
+  };
 
   if (error) {
     return <Alert severity='error'>{error}</Alert>;
   }
   if (!datos) return <LinearProgress />;
 
-  const { alumno, resumen, cursos, paquetes, pagos } = datos;
+  const { alumno, resumen, cursos, paquetes, pagos, condonaciones = [] } = datos;
 
   // Abre el formulario de pagos con el alumno (y el curso o paquete) ya elegidos; al guardar vuelve aquí.
   const registrarPago = (extra = {}) => {
@@ -106,8 +141,54 @@ const EstadoCuenta = () => {
       </Tooltip>
     );
 
+  const botonCondonar = (destino, concepto, saldo) =>
+    puedeCondonar &&
+    saldo > 0 && (
+      <Button
+        size='small'
+        color='warning'
+        startIcon={<MoneyOffIcon />}
+        sx={{ ml: 1 }}
+        onClick={() => setCondonar({ destino, concepto, saldo, motivo: '' })}
+      >
+        Condonar
+      </Button>
+    );
+
   return (
     <Box>
+      {aviso && (
+        <Alert severity={aviso.tipo} sx={{ mb: 2 }} onClose={() => setAviso(null)}>
+          {aviso.texto}
+        </Alert>
+      )}
+      <Dialog open={Boolean(condonar)} onClose={() => !enviando && setCondonar(null)} maxWidth='xs' fullWidth>
+        <DialogTitle>Condonar deuda</DialogTitle>
+        <DialogContent>
+          <Typography sx={{ mb: 2 }}>
+            Se condonan <strong>{formatoMoneda(condonar?.saldo ?? 0)}</strong> de {condonar?.concepto}. El saldo queda en 0 y no se
+            registra ningún pago.
+          </Typography>
+          <TextField
+            autoFocus
+            fullWidth
+            multiline
+            minRows={2}
+            label='Motivo'
+            value={condonar?.motivo ?? ''}
+            onChange={(e) => setCondonar({ ...condonar, motivo: e.target.value })}
+            inputProps={{ maxLength: 255 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCondonar(null)} disabled={enviando}>
+            Cancelar
+          </Button>
+          <Button color='warning' variant='contained' onClick={confirmarCondonar} disabled={enviando || !condonar?.motivo.trim()}>
+            Condonar
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3, flexWrap: 'wrap' }}>
         <Tooltip title='Volver'>
           <IconButton onClick={() => navigate('/alumnos')}>
@@ -188,15 +269,9 @@ const EstadoCuenta = () => {
                     <TableRow key={c.curso_alumno_id} hover>
                       <TableCell>
                         {c.curso}
-                        {c.plan && (
-                          <Typography component='span' variant='caption' color='text.secondary' sx={{ display: 'block' }}>
-                            {c.plan}
-                          </Typography>
-                        )}
                       </TableCell>
                       {variasSedes && <TableCell>{c.sede}</TableCell>}
                       <TableCell>
-                        <Chip size='small' label={c.modalidad === 'paquete' ? 'Paquete' : 'Ciclo'} />
                         {!c.curso_activo && <Chip size='small' color='warning' label='Curso inactivo' sx={{ ml: 1 }} />}
                         {c.clases_ciclo && c.curso_activo && (
                           <Typography component='span' variant='caption' color='text.secondary' sx={{ display: 'block' }}>
@@ -211,8 +286,9 @@ const EstadoCuenta = () => {
                         {c.saldo < 0 ? `${formatoMoneda(-c.saldo)} a favor` : formatoMoneda(c.saldo)}
                       </TableCell>
                       <TableCell sx={{ whiteSpace: 'nowrap' }}>{fecha(c.ultima_fecha_pago)}</TableCell>
-                      <TableCell align='right'>
-                        {c.modalidad !== 'paquete' && botonPagar({ curso: c.curso_id, monto: c.saldo }, c.saldo)}
+                      <TableCell align='right' sx={{ whiteSpace: 'nowrap' }}>
+                        {botonPagar({ curso: c.curso_id, monto: c.saldo }, c.saldo)}
+                        {botonCondonar({ curso_id: c.curso_id }, c.curso, c.saldo)}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -255,7 +331,10 @@ const EstadoCuenta = () => {
                       <TableCell align='right' sx={{ fontWeight: 'bold', color: p.saldo > 0 ? 'error.main' : 'text.primary' }}>
                         {formatoMoneda(p.saldo)}
                       </TableCell>
-                      <TableCell align='right'>{botonPagar({ paquete: p.id, monto: p.saldo }, p.saldo)}</TableCell>
+                      <TableCell align='right' sx={{ whiteSpace: 'nowrap' }}>
+                        {botonPagar({ paquete: p.id, monto: p.saldo }, p.saldo)}
+                        {botonCondonar({ paquete_id: p.id }, `el paquete #${p.id} · ${p.plan}`, p.saldo)}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -310,6 +389,48 @@ const EstadoCuenta = () => {
           )}
         </CardContent>
       </Card>
+
+      {condonaciones.length > 0 && (
+        <Card sx={{ ...sombra, height: 'auto', mt: 2 }}>
+          <CardContent>
+            <Typography variant='h5' sx={{ fontWeight: 'bold', mb: 2 }}>
+              Deudas condonadas · {formatoMoneda(resumen.total_condonado)}
+            </Typography>
+            <TableContainer>
+              <Table size='small'>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Fecha</TableCell>
+                    <TableCell>Concepto</TableCell>
+                    <TableCell>Motivo</TableCell>
+                    <TableCell>Autorizó</TableCell>
+                    <TableCell align='right'>Valor</TableCell>
+                    <TableCell />
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {condonaciones.map((c) => (
+                    <TableRow key={c.id} hover>
+                      <TableCell sx={{ whiteSpace: 'nowrap' }}>{fecha(c.fecha)}</TableCell>
+                      <TableCell>{c.concepto}</TableCell>
+                      <TableCell>{c.motivo}</TableCell>
+                      <TableCell>{c.usuario}</TableCell>
+                      <TableCell align='right'>{formatoMoneda(c.valor)}</TableCell>
+                      <TableCell align='right'>
+                        {puedeCondonar && (
+                          <Button size='small' disabled={enviando} onClick={() => deshacer(c)}>
+                            Deshacer
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </CardContent>
+        </Card>
+      )}
     </Box>
   );
 };
