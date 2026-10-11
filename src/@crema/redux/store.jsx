@@ -27,6 +27,11 @@ import parametrosReducer from './features/parametros/parametrosSlice';
 import plantillasCorreoReducer from './features/plantillasCorreo/plantillasCorreoSlice';
 import paquetesReducer from './features/paquetes/paquetesSlice';
 import clasesPrivadasReducer from './features/clasesPrivadas/clasesPrivadasSlice';
+// Vacacionales
+import vacacionalAlumnosReducer from './features/vacacionales/vacacionalAlumnosSlice';
+import vacacionalCursosReducer from './features/vacacionales/vacacionalCursosSlice';
+import vacacionalInscripcionesReducer from './features/vacacionales/vacacionalInscripcionesSlice';
+import vacacionalPagosReducer from './features/vacacionales/vacacionalPagosSlice';
 import festivosReducer from './features/festivos/festivosSlice';
 import academiasReducer from './features/academias/academiasSlice';
 import facturasAcademiasReducer from './features/facturasAcademias/facturasAcademiasSlice';
@@ -61,6 +66,11 @@ export const store = configureStore({
     plantillasCorreo: plantillasCorreoReducer,
     paquetes: paquetesReducer,
     clasesPrivadas: clasesPrivadasReducer,
+    // Vacacionales
+    vacacionalAlumnos: vacacionalAlumnosReducer,
+    vacacionalCursos: vacacionalCursosReducer,
+    vacacionalInscripciones: vacacionalInscripcionesReducer,
+    vacacionalPagos: vacacionalPagosReducer,
     // Administración ERP
     academias: academiasReducer,
     festivos: festivosReducer,

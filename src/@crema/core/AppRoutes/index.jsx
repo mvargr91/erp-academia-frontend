@@ -8,6 +8,7 @@ import { accountPagesConfigs } from './AccountRoutes';
 import { seguridadConfigs } from './Seguridad';
 import { cuentaConfigs } from './Cuenta';
 import { academiaConfigs } from './Academia';
+import { vacacionalesConfigs } from './Vacacionales';
 
 export const authorizedStructure = (loginUrl) => {
   return {
@@ -17,6 +18,7 @@ export const authorizedStructure = (loginUrl) => {
       ...accountPagesConfigs,
       ...seguridadConfigs,
       ...academiaConfigs,
+      ...vacacionalesConfigs,
       ...cuentaConfigs,
     ],
   };

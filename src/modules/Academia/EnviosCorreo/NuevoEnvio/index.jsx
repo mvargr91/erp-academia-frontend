@@ -1,6 +1,6 @@
 // Nuevo envío masivo: plantilla (o texto libre) + destinatarios, revisión previa y envío a la cola.
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { Formik, Form, useFormikContext } from 'formik';
 import * as yup from 'yup';
@@ -15,6 +15,7 @@ import MyTextField from '../../../../shared/components/MyTextField';
 import FormikAutocomplete from '../../../../shared/components/FormikAutocomplete';
 import FormikMultiSelect from '../../../../shared/components/FormikMultiSelect';
 import FormikEditorHtml from '../../../../shared/components/FormikEditorHtml';
+import { formatoMoneda } from '../../../../shared/constants/Academia';
 
 const VARIABLES = {
   alumno: 'Nombre del destinatario',
@@ -23,11 +24,41 @@ const VARIABLES = {
   curso: 'Curso (si el envío es a un curso)',
 };
 
+const VACIO = { plantilla_id: '', asunto: '', texto: '', audiencia: 'todos', curso_id: '', vacacional_curso_id: '', alumnos: [] };
+
+const escapar = (texto) => String(texto ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+// Borrador del anuncio de un vacacional próximo (llega con ?vacacional=ID desde Cursos vacacionales).
+// Va por defecto al público de vacacionales; se puede cambiar a los alumnos de la academia.
+const anuncioDe = (v) => {
+  const datos = [
+    v.ritmo_nombre && ['Género', v.ritmo_nombre],
+    v.profesor_nombre && ['Profesor', v.profesor_nombre],
+    ['Días de clase', v.fechas_texto],
+    v.hora_inicio && ['Horario', v.hora_fin ? `${v.hora_inicio} a ${v.hora_fin}` : v.hora_inicio],
+    v.total_fechas > v.clases_por_alumno && ['Clases', `eliges ${v.clases_por_alumno} de los ${v.total_fechas} días`],
+    ['Valor', formatoMoneda(v.valor)],
+  ].filter(Boolean);
+  return {
+    ...VACIO,
+    audiencia: 'vacacionales',
+    asunto: `Próximo vacacional: ${v.nombre}`,
+    texto: [
+      '<p>Hola {alumno},</p>',
+      `<p>En {academia} abrimos un nuevo vacacional: <strong>${escapar(v.nombre)}</strong>.</p>`,
+      `<ul>${datos.map(([k, d]) => `<li><strong>${k}:</strong> ${escapar(d)}</li>`).join('')}</ul>`,
+      v.descripcion ? `<p>${escapar(v.descripcion)}</p>` : '',
+      '<p>Los cupos son limitados. Responde este correo para reservar el tuyo.</p>',
+    ].join(''),
+  };
+};
+
 const esquema = yup.object({
   asunto: yup.string().required('Requerido').max(150, 'Máximo 150 caracteres'),
   texto: yup.string().test('vacio', 'Escribe el contenido', (v) => Boolean(v && v.replace(/<[^>]*>/g, '').trim())),
   audiencia: yup.string().required('Elige a quién enviar'),
   curso_id: yup.mixed().when('audiencia', { is: 'curso', then: (s) => s.required('Elige el curso') }),
+  vacacional_curso_id: yup.mixed().when('audiencia', { is: 'vacacional_curso', then: (s) => s.required('Elige el curso vacacional') }),
   alumnos: yup.array().when('audiencia', { is: 'seleccion', then: (s) => s.min(1, 'Elige al menos un alumno') }),
 });
 
@@ -44,7 +75,7 @@ const Contenido = ({ catalogos, resumen, setResumen }) => {
   }, [values.plantilla_id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Cambiar los destinatarios invalida el resumen calculado.
-  useEffect(() => setResumen(null), [values.audiencia, values.curso_id, values.alumnos]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => setResumen(null), [values.audiencia, values.curso_id, values.vacacional_curso_id, values.alumnos]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>
@@ -85,6 +116,14 @@ const Contenido = ({ catalogos, resumen, setResumen }) => {
           {values.audiencia === 'curso' && (
             <FormikAutocomplete name='curso_id' label='Curso' options={catalogos.cursos} textFieldProps={{ variant: 'standard' }} />
           )}
+          {values.audiencia === 'vacacional_curso' && (
+            <FormikAutocomplete
+              name='vacacional_curso_id'
+              label='Curso vacacional'
+              options={catalogos.vacacionales}
+              textFieldProps={{ variant: 'standard' }}
+            />
+          )}
           {values.audiencia === 'seleccion' && (
             <FormikMultiSelect name='alumnos' label='Alumnos' options={catalogos.alumnos} className='' placeholder='Buscar alumno...' />
           )}
@@ -106,7 +145,9 @@ const NuevoEnvio = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const theme = useTheme();
-  const [catalogos, setCatalogos] = useState({ plantillas: [], audiencias: [], cursos: [], alumnos: [] });
+  const [query] = useSearchParams();
+  const vacacionalId = query.get('vacacional');
+  const [catalogos, setCatalogos] = useState({ plantillas: [], audiencias: [], cursos: [], alumnos: [], vacacionales: [] });
   const [resumen, setResumen] = useState(null);
   const [error, setError] = useState('');
   const [enviando, setEnviando] = useState(false);
@@ -117,12 +158,20 @@ const NuevoEnvio = () => {
       jwtAxios.get('envios-correo', { params: { limite: 1 } }),
       jwtAxios.get('cursos', { params: { ligera: 1 } }),
       jwtAxios.get('alumnos', { params: { ligera: 1 } }),
+      // Sin permiso sobre vacacionales el resto del formulario sigue funcionando.
+      jwtAxios.get('vacacionales-cursos', { params: { ligera: 1 } }).catch(() => ({ data: [] })),
     ])
-      .then(([pl, en, cu, al]) =>
-        setCatalogos({ plantillas: pl.data, audiencias: en.data.audiencias, cursos: cu.data, alumnos: al.data }),
+      .then(([pl, en, cu, al, va]) =>
+        setCatalogos({ plantillas: pl.data, audiencias: en.data.audiencias, cursos: cu.data, alumnos: al.data, vacacionales: va.data }),
       )
       .catch(() => setError('No se pudieron cargar los datos del formulario.'));
   }, []);
+
+  const vacacional = useMemo(
+    () => catalogos.vacacionales.find((v) => String(v.id) === String(vacacionalId)),
+    [catalogos.vacacionales, vacacionalId],
+  );
+  const iniciales = useMemo(() => (vacacional ? anuncioDe(vacacional) : VACIO), [vacacional]);
 
   const payload = (v) => ({
     plantilla_id: v.plantilla_id || null,
@@ -130,6 +179,7 @@ const NuevoEnvio = () => {
     texto: v.texto,
     audiencia: v.audiencia,
     curso_id: v.audiencia === 'curso' ? v.curso_id : null,
+    vacacional_curso_id: v.audiencia === 'vacacional_curso' ? v.vacacional_curso_id : null,
     alumnos: v.audiencia === 'seleccion' ? v.alumnos : [],
   });
   const mensajeError = (e, texto) => e?.response?.data?.mensajes?.[0] ?? texto;
@@ -187,7 +237,9 @@ const NuevoEnvio = () => {
         </Alert>
       )}
       <Formik
-        initialValues={{ plantilla_id: '', asunto: '', texto: '', audiencia: 'todos', curso_id: '', alumnos: [] }}
+        // El borrador del anuncio llega cuando cargan los catálogos: el formulario se monta de nuevo con él.
+        key={vacacional ? `anuncio-${vacacional.id}` : 'nuevo'}
+        initialValues={iniciales}
         validationSchema={esquema}
         onSubmit={() => {}}
       >
