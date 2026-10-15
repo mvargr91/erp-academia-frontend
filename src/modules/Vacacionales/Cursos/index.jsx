@@ -21,7 +21,7 @@ const horario = (_v, row) => (row.hora_inicio ? `${row.hora_inicio}${row.hora_fi
 const columnas = (variasSedes) => [
   { id: 'nombre', label: 'Curso', ...texto, mostrarInicio: true },
   { id: 'ritmo_nombre', label: 'Género', ...texto, mostrarInicio: true },
-  { id: 'profesor_nombre', label: 'Profesor', ...texto, mostrarInicio: true },
+  { id: 'profesor_nombre', label: 'Profesor', ...texto, mostrarInicio: false },
   celdaSede(variasSedes),
   { id: 'fechas_texto', label: 'Días de clase', ...texto, mostrarInicio: true },
   { id: 'hora_inicio', label: 'Horario', ...texto, value: horario, mostrarInicio: true },
@@ -32,7 +32,7 @@ const columnas = (variasSedes) => [
     label: 'Inscritos',
     ...texto,
     value: (v, row) => (row.cupo_max ? `${v} (cupo ${row.cupo_max} por clase)` : v),
-    mostrarInicio: true,
+    mostrarInicio: false,
   },
   { id: 'momento_nombre', label: 'Momento', ...texto, cellColor: (_v, row) => COLORES[row?.momento] ?? '', mostrarInicio: true },
   { id: 'estado', label: 'Estado', ...texto, value: valorActivo, cellColor: colorActivo, mostrarInicio: false },

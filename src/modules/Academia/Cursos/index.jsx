@@ -19,11 +19,11 @@ import {
 const columnas = (variasSedes) => [
   { id: 'ritmo_nombre', typeHead: 'string', label: 'Ritmo', value: (v) => v, align: 'left', mostrarInicio: true },
   celdaSede(variasSedes, { ordenable: true }),
-  { id: 'profesor_nombre', typeHead: 'string', label: 'Profesor', value: (v) => v, align: 'left', mostrarInicio: true },
+  { id: 'profesor_nombre', typeHead: 'string', label: 'Profesor', value: (v) => v, align: 'left', mostrarInicio: false },
   { id: 'dia', typeHead: 'string', label: 'Día', value: (v) => nombreDe(DIAS_SEMANA, v), align: 'left', mostrarInicio: true },
   { id: 'hora', typeHead: 'string', label: 'Hora', value: (v) => (v ? String(v).substring(0, 5) : ''), align: 'left', mostrarInicio: true },
-  { id: 'matriculados', typeHead: 'numeric', label: 'Matriculados', value: (v) => v, align: 'center', mostrarInicio: true, ordenable: false },
-  { id: 'activo', typeHead: 'string', label: 'Activo', value: valorSiNo, cellColor: colorActivo, align: 'left', mostrarInicio: true },
+  { id: 'matriculados', typeHead: 'numeric', label: 'Matriculados', value: (v) => v, align: 'center', mostrarInicio: false, ordenable: false },
+  { id: 'activo', typeHead: 'string', label: 'Activo', value: valorSiNo, cellColor: colorActivo, align: 'left', mostrarInicio: false },
   { id: 'estado', typeHead: 'string', label: 'Estado', value: valorActivo, cellColor: colorActivo, align: 'left', mostrarInicio: false },
   ...auditCells,
 ];

@@ -15,8 +15,8 @@ const COLORES = { activo: 'green', agotado: 'gray', vencido: 'red', anulado: 'gr
 
 const columnas = (variasSedes) => [
   { id: 'alumno_nombre', typeHead: 'string', label: 'Alumno', value: (v) => v, align: 'left', mostrarInicio: true, ordenable: false },
-  { id: 'plan_nombre', typeHead: 'string', label: 'Tipo de paquete', value: (v) => v, align: 'left', mostrarInicio: true, ordenable: false },
-  celdaSede(variasSedes),
+  { id: 'plan_nombre', typeHead: 'string', label: 'Tipo de paquete', value: (v) => v, align: 'left', mostrarInicio: false, ordenable: false },
+  celdaSede(variasSedes, { mostrarInicio: false }),
   {
     id: 'clases_restantes',
     typeHead: 'string',
@@ -26,7 +26,7 @@ const columnas = (variasSedes) => [
     mostrarInicio: true,
     ordenable: false,
   },
-  { id: 'fecha_compra', typeHead: 'string', label: 'Compra', value: (v) => v, align: 'left', mostrarInicio: true, ordenable: false },
+  { id: 'fecha_compra', typeHead: 'string', label: 'Compra', value: (v) => v, align: 'left', mostrarInicio: false, ordenable: false },
   { id: 'fecha_vencimiento', typeHead: 'string', label: 'Vence', value: (v) => v ?? 'No vence', align: 'left', mostrarInicio: true, ordenable: false },
   {
     id: 'estado_nombre',
@@ -35,7 +35,7 @@ const columnas = (variasSedes) => [
     value: (v) => v,
     cellColor: (_v, row) => COLORES[row?.estado_efectivo] ?? '',
     align: 'left',
-    mostrarInicio: true,
+    mostrarInicio: false,
     ordenable: false,
   },
   { id: 'valor', typeHead: 'numeric', label: 'Valor', value: formatoMoneda, align: 'right', mostrarInicio: false, ordenable: false },

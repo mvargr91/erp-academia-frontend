@@ -39,7 +39,7 @@ const columnas = (variasSedes) => [
     ...texto,
     value: (v) => (v ? 'Activa' : 'Anulada'),
     cellColor: (v) => (v ? 'green' : 'gray'),
-    mostrarInicio: true,
+    mostrarInicio: false,
   },
   ...auditCells,
 ];

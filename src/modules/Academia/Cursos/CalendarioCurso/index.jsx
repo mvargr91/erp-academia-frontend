@@ -1,10 +1,11 @@
-// Calendario de un curso: semanas con clase, festivos y cierres (a dónde se corre la clase)
-// e indica si el curso es individual o en pareja.
+// Calendario de un curso: semanas con clase, festivos y cierres (a dónde se corre la clase).
+// Un festivo se puede habilitar para que el curso sí tenga clase ese día.
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Alert,
   Box,
+  Button,
   Card,
   CardContent,
   Chip,
@@ -21,6 +22,7 @@ import {
 } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import jwtAxios from '../../../../@crema/services/auth/jwt-auth';
+import usePermisosOpcion from '../../../../shared/hooks/usePermisosOpcion';
 
 const DIAS = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
 const fecha = (iso) => {
@@ -43,7 +45,10 @@ const CalendarioCurso = () => {
   const navigate = useNavigate();
   const [datos, setDatos] = useState(null);
   const [error, setError] = useState('');
-
+  const [aviso, setAviso] = useState(null);
+  const [enviando, setEnviando] = useState(false);
+  const { permisos } = usePermisosOpcion('/cursos');
+  const puedeModificar = permisos.indexOf('Modificar') >= 0;
 
   const cargar = () =>
     jwtAxios
@@ -54,6 +59,28 @@ const CalendarioCurso = () => {
   useEffect(() => {
     cargar();
   }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const enviar = (peticion) => {
+    setEnviando(true);
+    setAviso(null);
+    peticion
+      .then(({ data }) => {
+        setAviso({ tipo: 'success', texto: data.mensajes[0] });
+        return cargar();
+      })
+      .catch((e) => setAviso({ tipo: 'error', texto: e?.response?.data?.mensajes?.[0] ?? 'No se pudo completar la operación.' }))
+      .finally(() => setEnviando(false));
+  };
+  const habilitar = (s) => {
+    if (window.confirm(`¿El curso tendrá clase el ${fecha(s.fecha)} (${s.motivo})? Esa clase cuenta en el ciclo de los alumnos, así que su próximo pago llega una semana antes.`)) {
+      enviar(jwtAxios.post(`cursos/${id}/festivos-habilitados`, { fecha: s.fecha }));
+    }
+  };
+  const deshabilitar = (s) => {
+    if (window.confirm(`¿Quitar la clase del ${fecha(s.fecha)}? La clase vuelve a correrse a la semana siguiente.`)) {
+      enviar(jwtAxios.delete(`cursos/${id}/festivos-habilitados/${s.fecha}`));
+    }
+  };
 
   if (error) return <Alert severity='error'>{error}</Alert>;
   if (!datos) return <LinearProgress />;
@@ -80,9 +107,15 @@ const CalendarioCurso = () => {
       </Box>
 
       <Alert severity='info' sx={{ mb: 3 }}>
-        Si una clase cae en festivo o en un cierre de la academia no se dicta: se corre a la semana siguiente y el ciclo de
-        cada alumno (y su próximo pago) termina una semana después.
+        {datos.dicta_festivos
+          ? 'La academia dicta clases los festivos. Solo los cierres de la academia corren la clase a la semana siguiente.'
+          : 'Si una clase cae en festivo o en un cierre de la academia no se dicta: se corre a la semana siguiente y el ciclo de cada alumno (y su próximo pago) termina una semana después. Si el curso sí tiene clase en un festivo, usa "Dar clase" en esa fecha.'}
       </Alert>
+      {aviso && (
+        <Alert severity={aviso.tipo} sx={{ mb: 3 }} onClose={() => setAviso(null)}>
+          {aviso.texto}
+        </Alert>
+      )}
 
       <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
@@ -97,6 +130,7 @@ const CalendarioCurso = () => {
                     <TableCell>Fecha</TableCell>
                     <TableCell>Estado</TableCell>
                     <TableCell>Detalle</TableCell>
+                    {puedeModificar && <TableCell />}
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -116,12 +150,28 @@ const CalendarioCurso = () => {
                           <Chip size='small' color={ESTADOS[s.estado].color} label={ESTADOS[s.estado].label} />
                         </TableCell>
                         <TableCell>
-                          {esClase
-                            ? s.fecha === hoy
-                              ? 'Hoy'
-                              : ''
-                            : `${s.motivo} → se corre al ${fecha(s.se_corre_a)}`}
+                          {[
+                            s.fecha === hoy ? 'Hoy' : '',
+                            s.festivo_habilitado ? `Festivo con clase (${s.festivo_habilitado})` : '',
+                            esClase ? '' : `${s.motivo} → se corre al ${fecha(s.se_corre_a)}`,
+                          ]
+                            .filter(Boolean)
+                            .join(' · ')}
                         </TableCell>
+                        {puedeModificar && (
+                          <TableCell align='right' sx={{ whiteSpace: 'nowrap' }}>
+                            {s.estado === 'festivo' && (
+                              <Button size='small' disabled={enviando} onClick={() => habilitar(s)}>
+                                Dar clase
+                              </Button>
+                            )}
+                            {s.festivo_habilitado && (
+                              <Button size='small' color='error' disabled={enviando} onClick={() => deshabilitar(s)}>
+                                Quitar clase
+                              </Button>
+                            )}
+                          </TableCell>
+                        )}
                       </TableRow>
                     );
                   })}

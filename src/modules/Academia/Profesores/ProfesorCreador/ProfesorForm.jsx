@@ -10,12 +10,13 @@ const ProfesorForm = ({ accion, titulo, handleOnClose, saving }) => {
 
   return (
     <AppCrudForm titulo={titulo} accion={accion} handleOnClose={handleOnClose} saving={saving}>
-      <SeccionForm titulo='Datos personales' />
+      <SeccionForm titulo='Datos obligatorios' />
       <MyTextField autoFocus fullWidth label='Nombres' name='nombres' disabled={disabled} required />
       <MyTextField fullWidth label='Apellidos' name='apellidos' disabled={disabled} required />
+      <MyTextField className='campo-completo' fullWidth type='email' label='Correo' name='correo' disabled={disabled} required />
+      <SeccionForm titulo='Otros datos' />
       <MyTextField fullWidth label='Documento' name='documento' disabled={disabled} />
       <MyTextField fullWidth label='Teléfono' name='telefono' disabled={disabled} />
-      <MyTextField fullWidth type='email' label='Correo' name='correo' disabled={disabled} />
       <MyTextField fullWidth label='Especialidad' name='especialidad' disabled={disabled} />
       <MyRadioField className='campo-completo' label='Estado' name='estado' disabled={disabled} required options={OPCIONES_ESTADO} />
     </AppCrudForm>

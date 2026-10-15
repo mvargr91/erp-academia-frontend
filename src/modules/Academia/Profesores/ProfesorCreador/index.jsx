@@ -14,7 +14,7 @@ import ProfesorForm from './ProfesorForm';
 const validationSchema = yup.object({
   nombres: yup.string().required('Requerido').max(100, 'Máximo 100 caracteres'),
   apellidos: yup.string().required('Requerido').max(100, 'Máximo 100 caracteres'),
-  correo: yup.string().email('Correo inválido').nullable(),
+  correo: yup.string().required('Requerido').email('Correo inválido'),
   documento: yup.string().nullable(),
   telefono: yup.string().nullable(),
   especialidad: yup.string().nullable(),

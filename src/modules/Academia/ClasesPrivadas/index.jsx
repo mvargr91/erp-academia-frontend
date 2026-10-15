@@ -21,7 +21,7 @@ const columnas = (variasSedes) => [
   { id: 'hora', typeHead: 'string', label: 'Hora', value: (v, row) => `${v} (${row.duracion_min} min)`, align: 'left', mostrarInicio: true, ordenable: false },
   celdaSede(variasSedes),
   { id: 'alumnos_nombres', typeHead: 'string', label: 'Alumno(s)', value: (v) => v, align: 'left', mostrarInicio: true, ordenable: false },
-  { id: 'profesor_nombre', typeHead: 'string', label: 'Profesor', value: (v) => v, align: 'left', mostrarInicio: true, ordenable: false },
+  { id: 'profesor_nombre', typeHead: 'string', label: 'Profesor', value: (v) => v, align: 'left', mostrarInicio: false, ordenable: false },
   {
     id: 'estado_nombre',
     typeHead: 'string',
@@ -29,7 +29,7 @@ const columnas = (variasSedes) => [
     value: (v) => v,
     cellColor: (_v, row) => COLORES[row?.estado] ?? '',
     align: 'left',
-    mostrarInicio: true,
+    mostrarInicio: false,
     ordenable: false,
   },
   {

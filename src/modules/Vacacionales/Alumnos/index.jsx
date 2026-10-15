@@ -16,13 +16,13 @@ const cells = [
   { id: 'nombre', label: 'Alumno', ...texto, mostrarInicio: true },
   { id: 'documento', label: 'Documento', ...texto, mostrarInicio: false },
   { id: 'fecha_nacimiento', label: 'Nacimiento', ...texto, mostrarInicio: false },
-  { id: 'telefono', label: 'Teléfono', ...texto, mostrarInicio: true },
-  { id: 'correo', label: 'Correo', ...texto, mostrarInicio: true },
+  { id: 'telefono', label: 'Teléfono', ...texto, mostrarInicio: false },
+  { id: 'correo', label: 'Correo', ...texto, mostrarInicio: false },
   { id: 'acudiente_nombre', label: 'Acudiente', ...texto, mostrarInicio: true },
   { id: 'acudiente_telefono', label: 'Tel. acudiente', ...texto, mostrarInicio: false },
   { id: 'inscripciones', label: 'Vacacionales tomados', ...texto, typeHead: 'numeric', align: 'right', mostrarInicio: true },
   { id: 'ultimo_vacacional', label: 'Último vacacional', ...texto, mostrarInicio: true },
-  { id: 'estado', label: 'Estado', ...texto, value: valorActivo, cellColor: colorActivo, mostrarInicio: true },
+  { id: 'estado', label: 'Estado', ...texto, value: valorActivo, cellColor: colorActivo, mostrarInicio: false },
   ...auditCells,
 ];
 

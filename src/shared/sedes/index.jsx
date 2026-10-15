@@ -62,7 +62,7 @@ SelectorSede.propTypes = {
  * Campo "Sede" de un formulario Formik (name='sede_id'). Con una sola sede no se pinta, salvo
  * `opcional`, donde vacío significa "todas las sedes" y tampoco aporta con una sola.
  */
-export const CampoSede = ({ disabled, opcional, label, helperText, ...props }) => {
+export const CampoSede = ({ disabled, opcional, required, label, helperText, ...props }) => {
   const { sedes, variasSedes } = useSedes();
   if (!variasSedes) {
     return null;
@@ -73,7 +73,7 @@ export const CampoSede = ({ disabled, opcional, label, helperText, ...props }) =
       label={label ?? (opcional ? 'Sede (vacío = todas)' : 'Sede')}
       options={sedes}
       disabled={disabled}
-      textFieldProps={{ variant: 'standard', ...(helperText ? { helperText } : {}) }}
+      textFieldProps={{ variant: 'standard', required, ...(helperText ? { helperText } : {}) }}
       {...props}
     />
   );
@@ -82,6 +82,7 @@ export const CampoSede = ({ disabled, opcional, label, helperText, ...props }) =
 CampoSede.propTypes = {
   disabled: PropTypes.bool,
   opcional: PropTypes.bool,
+  required: PropTypes.bool,
   label: PropTypes.string,
   helperText: PropTypes.string,
 };

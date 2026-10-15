@@ -11,11 +11,11 @@ import { valorActivo, colorActivo } from '../../../shared/constants/Academia';
 const cells = [
   { id: 'nombres', typeHead: 'string', label: 'Nombres', value: (v) => v, align: 'left', mostrarInicio: true },
   { id: 'apellidos', typeHead: 'string', label: 'Apellidos', value: (v) => v, align: 'left', mostrarInicio: true },
-  { id: 'documento', typeHead: 'string', label: 'Documento', value: (v) => v, align: 'left', mostrarInicio: true, ordenable: false },
-  { id: 'telefono', typeHead: 'string', label: 'Teléfono', value: (v) => v, align: 'left', mostrarInicio: true, ordenable: false },
-  { id: 'correo', typeHead: 'string', label: 'Correo', value: (v) => v, align: 'left', mostrarInicio: true, ordenable: false },
-  { id: 'especialidad', typeHead: 'string', label: 'Especialidad', value: (v) => v, align: 'left', mostrarInicio: true },
-  { id: 'estado', typeHead: 'string', label: 'Estado', value: valorActivo, cellColor: colorActivo, align: 'left', mostrarInicio: true },
+  { id: 'documento', typeHead: 'string', label: 'Documento', value: (v) => v, align: 'left', mostrarInicio: false, ordenable: false },
+  { id: 'telefono', typeHead: 'string', label: 'Teléfono', value: (v) => v, align: 'left', mostrarInicio: false, ordenable: false },
+  { id: 'correo', typeHead: 'string', label: 'Correo', value: (v) => v, align: 'left', mostrarInicio: false, ordenable: false },
+  { id: 'especialidad', typeHead: 'string', label: 'Especialidad', value: (v) => v, align: 'left', mostrarInicio: false },
+  { id: 'estado', typeHead: 'string', label: 'Estado', value: valorActivo, cellColor: colorActivo, align: 'left', mostrarInicio: false },
   ...auditCells,
 ];
 

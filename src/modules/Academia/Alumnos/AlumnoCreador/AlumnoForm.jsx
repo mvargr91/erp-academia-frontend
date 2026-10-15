@@ -12,19 +12,16 @@ const AlumnoForm = ({ accion, titulo, handleOnClose, saving }) => {
 
   return (
     <AppCrudForm titulo={titulo} accion={accion} handleOnClose={handleOnClose} saving={saving}>
-      <SeccionForm titulo='Datos personales' />
+      <SeccionForm titulo='Datos obligatorios' />
       <MyTextField autoFocus fullWidth label='Nombres' name='nombres' disabled={disabled} required />
       <MyTextField fullWidth label='Apellidos' name='apellidos' disabled={disabled} required />
+      <MyTextField fullWidth type='email' label='Correo' name='correo' disabled={disabled} required />
+      <CampoSede disabled={disabled} label='Sede principal' required />
+      <SeccionForm titulo='Otros datos' />
       <MyTextField fullWidth label='Documento' name='documento' disabled={disabled} />
       <MyTextField fullWidth label='Teléfono' name='telefono' disabled={disabled} />
-      <MyTextField fullWidth type='email' label='Correo' name='correo' disabled={disabled} />
       <MyDateField label='Fecha de nacimiento' name='fecha_nacimiento' disabled={disabled} />
       <MyTextField className='campo-completo' fullWidth label='Dirección' name='direccion' disabled={disabled} />
-      <CampoSede
-        className='campo-completo'
-        disabled={disabled}
-        label='Sede principal'
-      />
       <SeccionForm titulo='Contacto de emergencia' />
       <MyTextField fullWidth label='Contacto de emergencia' name='contacto_emergencia' disabled={disabled} />
       <MyTextField fullWidth label='Teléfono de emergencia' name='telefono_emergencia' disabled={disabled} />

@@ -10,6 +10,7 @@ import { onGetColeccion } from '../../../@crema/redux/features/parametros/parame
 export const valorParametro = (valor, row) => {
   if (valor === null || valor === undefined || valor === '') return '—';
   if (row?.tipo === 'porcentaje') return `${valor} %`;
+  if (row?.tipo === 'si_no') return String(valor).toUpperCase() === 'SI' ? 'Sí' : 'No';
   return String(valor).length > 60 ? `${String(valor).slice(0, 60)}…` : valor;
 };
 

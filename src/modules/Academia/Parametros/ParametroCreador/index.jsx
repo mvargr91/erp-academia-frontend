@@ -5,7 +5,13 @@ import { InputAdornment, TextField } from '@mui/material';
 import AppCrudDialog from '../../../../shared/components/AppCrudDialog';
 import AppCrudForm from '../../../../shared/components/AppCrudForm';
 import MyTextField from '../../../../shared/components/MyTextField';
+import MySelectField from '../../../../shared/components/MySelectField';
 import { onShow, onUpdate, resetActual } from '../../../../@crema/redux/features/parametros/parametrosSlice';
+
+const OPCIONES_SI_NO = [
+  { id: 'SI', nombre: 'Sí' },
+  { id: 'NO', nombre: 'No' },
+];
 
 const validationSchema = yup.object({
   valor: yup.string().when('tipo', {
@@ -46,7 +52,9 @@ const ParametroCreador = ({ parametro, accion, handleOnClose, updateColeccion, t
         <TextField className='campo-completo' variant='standard' label='Parámetro' value={registro?.descripcion ?? ''} disabled />
         <TextField variant='standard' label='Grupo' value={registro?.grupo ?? ''} disabled />
         <TextField variant='standard' label='Código (lo usa el sistema)' value={registro?.codigo ?? ''} disabled />
-        {registro?.tipo === 'texto' ? (
+        {registro?.tipo === 'si_no' ? (
+          <MySelectField name='valor' label='Valor' options={OPCIONES_SI_NO} disabled={accion === 'ver'} fullWidth variant='standard' />
+        ) : registro?.tipo === 'texto' ? (
           <MyTextField className='campo-completo' fullWidth multiline minRows={3} label='Valor' name='valor' disabled={accion === 'ver'} />
         ) : (
           <MyTextField

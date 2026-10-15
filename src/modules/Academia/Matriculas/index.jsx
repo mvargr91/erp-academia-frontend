@@ -51,7 +51,7 @@ const ALTO_LISTA_CURSOS = 360;
 const esquema = yup.object({
   nombres: yup.string().when('tipo', { is: 'nuevo', then: (s) => s.required('Requerido').max(100, 'Máximo 100 caracteres') }),
   apellidos: yup.string().when('tipo', { is: 'nuevo', then: (s) => s.required('Requerido').max(100, 'Máximo 100 caracteres') }),
-  correo: yup.string().email('Correo inválido').nullable(),
+  correo: yup.string().when('tipo', { is: 'nuevo', then: (s) => s.required('Requerido').email('Correo inválido'), otherwise: (s) => s.nullable() }),
   alumno_id: yup.mixed().when('tipo', { is: 'existente', then: (s) => s.test('alumno', 'Elige el alumno', (v) => Boolean(v)) }),
   cursos: yup.array().min(1, 'Agrega al menos un curso'),
   monto: yup.mixed().when('pagar', { is: true, then: (s) => s.test('monto', 'Debe ser mayor que 0', (v) => Number(v) > 0) }),
@@ -232,11 +232,11 @@ const Contenido = ({ catalogos, cotizacion, setCotizacion }) => {
             <Box sx={dosColumnas}>
               <MyTextField autoFocus fullWidth label='Nombres' name='nombres' required />
               <MyTextField fullWidth label='Apellidos' name='apellidos' required />
+              <MyTextField fullWidth type='email' label='Correo' name='correo' required />
+              <CampoSede label='Sede principal' required />
               <MyTextField fullWidth label='Documento' name='documento' />
               <MyTextField fullWidth label='Teléfono' name='telefono' />
-              <MyTextField fullWidth type='email' label='Correo' name='correo' />
               <MyDateField label='Fecha de nacimiento' name='fecha_nacimiento' />
-              <CampoSede label='Sede principal' />
             </Box>
           )}
         </CardContent>
