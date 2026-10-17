@@ -72,12 +72,16 @@ const CalendarioCurso = () => {
       .finally(() => setEnviando(false));
   };
   const habilitar = (s) => {
-    if (window.confirm(`¿El curso tendrá clase el ${fecha(s.fecha)} (${s.motivo})? Esa clase cuenta en el ciclo de los alumnos, así que su próximo pago llega una semana antes.`)) {
+    const efecto = datos.curso.mensual
+      ? 'Esa clase cuenta en la mensualidad de los alumnos (el valor del mes no cambia).'
+      : 'Esa clase cuenta en el ciclo de los alumnos, así que su próximo pago llega una semana antes.';
+    if (window.confirm(`¿El curso tendrá clase el ${fecha(s.fecha)} (${s.motivo})? ${efecto}`)) {
       enviar(jwtAxios.post(`cursos/${id}/festivos-habilitados`, { fecha: s.fecha }));
     }
   };
   const deshabilitar = (s) => {
-    if (window.confirm(`¿Quitar la clase del ${fecha(s.fecha)}? La clase vuelve a correrse a la semana siguiente.`)) {
+    const efecto = datos.curso.mensual ? 'Ese día no habrá clase.' : 'La clase vuelve a correrse a la semana siguiente.';
+    if (window.confirm(`¿Quitar la clase del ${fecha(s.fecha)}? ${efecto}`)) {
       enviar(jwtAxios.delete(`cursos/${id}/festivos-habilitados/${s.fecha}`));
     }
   };
@@ -101,13 +105,19 @@ const CalendarioCurso = () => {
             Calendario · {datos.curso.nombre}
           </Typography>
           <Typography color='text.secondary'>
-            {datos.curso.horario} · ciclos de {datos.curso.clases_por_ciclo} clases
+            {datos.curso.horario} · {datos.curso.mensual ? 'mensualidad' : `ciclos de ${datos.curso.clases_por_ciclo} clases`}
           </Typography>
         </Box>
       </Box>
 
       <Alert severity='info' sx={{ mb: 3 }}>
-        {datos.dicta_festivos
+        {datos.curso.mensual
+          ? `Se cobra por mes: el mismo valor si el mes trae 4 o 5 clases. ${
+              datos.dicta_festivos ? 'La academia dicta clases los festivos; si' : 'Si'
+            } una clase cae en ${datos.dicta_festivos ? 'un cierre de la academia' : 'festivo o en un cierre de la academia'} no se dicta ni se repone, y un mes sin ninguna clase no se cobra.${
+              datos.dicta_festivos ? '' : ' Si el curso sí tiene clase en un festivo, usa "Dar clase" en esa fecha.'
+            }`
+          : datos.dicta_festivos
           ? 'La academia dicta clases los festivos. Solo los cierres de la academia corren la clase a la semana siguiente.'
           : 'Si una clase cae en festivo o en un cierre de la academia no se dicta: se corre a la semana siguiente y el ciclo de cada alumno (y su próximo pago) termina una semana después. Si el curso sí tiene clase en un festivo, usa "Dar clase" en esa fecha.'}
       </Alert>
@@ -153,7 +163,7 @@ const CalendarioCurso = () => {
                           {[
                             s.fecha === hoy ? 'Hoy' : '',
                             s.festivo_habilitado ? `Festivo con clase (${s.festivo_habilitado})` : '',
-                            esClase ? '' : `${s.motivo} → se corre al ${fecha(s.se_corre_a)}`,
+                            esClase ? '' : s.se_corre_a ? `${s.motivo} → se corre al ${fecha(s.se_corre_a)}` : `${s.motivo} → no se dicta`,
                           ]
                             .filter(Boolean)
                             .join(' · ')}

@@ -20,6 +20,8 @@ const columnas = (variasSedes) => [
   { id: 'ritmo_nombre', typeHead: 'string', label: 'Ritmo', value: (v) => v, align: 'left', mostrarInicio: true },
   celdaSede(variasSedes, { ordenable: true }),
   { id: 'profesor_nombre', typeHead: 'string', label: 'Profesor', value: (v) => v, align: 'left', mostrarInicio: false },
+  { id: 'modalidad_nombre', typeHead: 'string', label: 'Modalidad', value: (v) => v, align: 'left', mostrarInicio: false },
+  { id: 'duracion_minutos', typeHead: 'numeric', label: 'Duración (min)', value: (v) => v, align: 'center', mostrarInicio: false, ordenable: false },
   { id: 'dia', typeHead: 'string', label: 'Día', value: (v) => nombreDe(DIAS_SEMANA, v), align: 'left', mostrarInicio: true },
   { id: 'hora', typeHead: 'string', label: 'Hora', value: (v) => (v ? String(v).substring(0, 5) : ''), align: 'left', mostrarInicio: true },
   { id: 'matriculados', typeHead: 'numeric', label: 'Matriculados', value: (v) => v, align: 'center', mostrarInicio: false, ordenable: false },

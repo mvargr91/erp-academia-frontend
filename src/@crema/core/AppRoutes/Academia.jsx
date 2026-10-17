@@ -8,6 +8,8 @@ const Sedes = React.lazy(() => import('../../../modules/Academia/Sedes'));
 const SedeCreador = React.lazy(() => import('../../../modules/Academia/Sedes/SedeCreador'));
 const Ritmos = React.lazy(() => import('../../../modules/Academia/Ritmos'));
 const RitmoCreador = React.lazy(() => import('../../../modules/Academia/Ritmos/RitmoCreador'));
+const Modalidades = React.lazy(() => import('../../../modules/Academia/Modalidades'));
+const ModalidadCreador = React.lazy(() => import('../../../modules/Academia/Modalidades/ModalidadCreador'));
 const Tarifas = React.lazy(() => import('../../../modules/Academia/Tarifas'));
 const Profesores = React.lazy(() => import('../../../modules/Academia/Profesores'));
 const ProfesorCreador = React.lazy(() => import('../../../modules/Academia/Profesores/ProfesorCreador'));
@@ -70,6 +72,7 @@ export const academiaConfigs = [
   },
   ...rutasCrud('/sedes', Sedes, (p) => <SedeCreador sede={p.id} {...props(p)} />),
   ...rutasCrud('/ritmos', Ritmos, (p) => <RitmoCreador ritmo={p.id} {...props(p)} />),
+  ...rutasCrud('/modalidades', Modalidades, (p) => <ModalidadCreador modalidad={p.id} {...props(p)} />),
   {
     permittedRole: RoutePermittedRole.User,
     path: '/tarifas',

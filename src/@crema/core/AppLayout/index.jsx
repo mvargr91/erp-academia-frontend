@@ -15,6 +15,7 @@ import {
 import { useRoutes } from 'react-router-dom';
 import AvisoSuscripcion from '../../../shared/components/AvisoSuscripcion';
 import { initialUrl } from '@crema/constants/AppConst';
+import { urlDeInicio } from '@crema/helpers/RouteHelper';
 import { useSelector, useDispatch } from 'react-redux';
 import { getAuthUser } from '../../redux/features/auth/authSlice';
 
@@ -41,8 +42,8 @@ const AppLayout = () => {
   });
 
   useEffect(() => {
-    setUrl(user?.usuario?.permisos[0]['opciones'][0]['url']);
-  }, [user, url]); 
+    setUrl(urlDeInicio(user?.usuario?.permisos, initialUrl));
+  }, [user]);
 
   
   // Aquí debes asegurarte de que `useRoutes` recibe un array con objetos correctos

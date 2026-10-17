@@ -15,6 +15,7 @@ import cuentaReducer from './features/cuenta/cuentaSlice';
 import sedesReducer from './features/sedes/sedesSlice';
 import sedeActualReducer from './features/sedes/sedeActualSlice';
 import ritmosReducer from './features/ritmos/ritmosSlice';
+import modalidadesReducer from './features/modalidades/modalidadesSlice';
 import planesReducer from './features/planes/planesSlice';
 import profesoresReducer from './features/profesores/profesoresSlice';
 import alumnosReducer from './features/alumnos/alumnosSlice';
@@ -54,6 +55,7 @@ export const store = configureStore({
     sedes: sedesReducer,
     sedeActual: sedeActualReducer,
     ritmos: ritmosReducer,
+    modalidades: modalidadesReducer,
     planes: planesReducer,
     profesores: profesoresReducer,
     alumnos: alumnosReducer,

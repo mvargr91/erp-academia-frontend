@@ -273,9 +273,10 @@ const EstadoCuenta = () => {
                       {variasSedes && <TableCell>{c.sede}</TableCell>}
                       <TableCell>
                         {!c.curso_activo && <Chip size='small' color='warning' label='Curso inactivo' sx={{ ml: 1 }} />}
-                        {c.clases_ciclo && c.curso_activo && (
+                        {c.clases_ciclo > 0 && c.curso_activo && (
                           <Typography component='span' variant='caption' color='text.secondary' sx={{ display: 'block' }}>
-                            Clase {c.clases_consumidas} de {c.clases_ciclo} · renueva {fecha(c.proximo_pago)}
+                            Clase {c.clases_consumidas} de {c.clases_ciclo}
+                            {c.mensual ? ' del mes' : ''} · renueva {fecha(c.proximo_pago)}
                           </Typography>
                         )}
                       </TableCell>

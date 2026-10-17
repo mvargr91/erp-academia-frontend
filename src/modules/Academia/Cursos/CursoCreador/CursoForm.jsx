@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useFormikContext } from 'formik';
 import AppCrudForm, { SeccionForm } from '../../../../shared/components/AppCrudForm';
 import MyTextField from '../../../../shared/components/MyTextField';
 import MySelectField from '../../../../shared/components/MySelectField';
@@ -13,8 +14,12 @@ import ParejasCurso from './ParejasCurso';
 import usePermisosOpcion from '../../../../shared/hooks/usePermisosOpcion';
 
 const CursoForm = (props) => {
-  const { accion, titulo, handleOnClose, saving, ritmos, profesores, alumnos, registro } = props;
+  const { accion, titulo, handleOnClose, saving, ritmos, profesores, alumnos, modalidades, registro } = props;
   const disabled = accion === 'ver';
+  const { values } = useFormikContext();
+  const modalidad = modalidades.find((m) => String(m.id) === String(values.modalidad_id));
+  // Las inactivas no se ofrecen para cursos nuevos, salvo la que el curso ya tiene.
+  const opcionesModalidad = modalidades.filter((m) => m.estado || String(m.id) === String(registro?.modalidad_id));
   // Definir cómo paga cada alumno (individual o en pareja) es un permiso aparte de modificar el curso.
   const { permisos } = usePermisosOpcion('/cursos');
   const puedeFormaDePago = permisos.indexOf('FormaDePago') >= 0;
@@ -29,7 +34,35 @@ const CursoForm = (props) => {
       <FormikAutocomplete name='profesor_id' label='Profesor' options={profesores} disabled={disabled} textFieldProps={{ variant: 'standard' }} />
       <MyTextField fullWidth label='Nombre (opcional)' name='nombre' disabled={disabled} />
 
-      <SeccionForm titulo='Horario' />
+      <SeccionForm titulo='Modalidad y horario' />
+      <FormikAutocomplete
+        name='modalidad_id'
+        label='Modalidad'
+        options={opcionesModalidad}
+        getOptionLabel={(m) => `${m.nombre}${m.estado ? '' : ' (inactiva)'}`}
+        disabled={disabled}
+        textFieldProps={{
+          variant: 'standard',
+          required: true,
+          // Sin modalidad elegida no se pasa ayuda, para que se vea el mensaje de error del campo.
+          ...(modalidad && {
+            helperText: `${
+              modalidad.tipo_cobro === 'mensual' ? 'Cobra cada mes' : `Cobra cada ${modalidad.clases_por_ciclo} clases`
+            }. El precio está en Tarifas.`,
+          }),
+        }}
+      />
+      <MyTextField
+        fullWidth
+        type='number'
+        label='Duración de la clase (minutos)'
+        name='duracion_minutos'
+        placeholder={modalidad ? String(modalidad.duracion_minutos) : ''}
+        helperText={modalidad ? `Vacío: la de la modalidad (${modalidad.duracion_minutos} min).` : 'Vacío: la de la modalidad.'}
+        inputProps={{ min: 15, max: 600, step: 5 }}
+        InputLabelProps={{ shrink: true }}
+        disabled={disabled}
+      />
       <MySelectField name='dia' label='Día' options={DIAS_SEMANA} disabled={disabled} fullWidth variant='standard' />
       <MyTextField fullWidth type='time' label='Hora' name='hora' disabled={disabled} required InputLabelProps={{ shrink: true }} />
       <MyDateField label='Fecha de inicio' name='fecha_inicio' disabled={disabled} />
@@ -64,6 +97,7 @@ CursoForm.propTypes = {
   ritmos: PropTypes.array.isRequired,
   profesores: PropTypes.array.isRequired,
   alumnos: PropTypes.array.isRequired,
+  modalidades: PropTypes.array.isRequired,
   registro: PropTypes.object,
 };
 

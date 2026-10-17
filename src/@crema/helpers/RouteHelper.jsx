@@ -20,3 +20,9 @@ export const checkPermission = (routeRole, userRole) => {
   // Verificamos si los roles coinciden
   return routeRole === userRole;
 };
+
+// Pantalla de inicio (tras el login y al pulsar el logo): el panel si el usuario lo tiene; si no, su primera opción.
+export const urlDeInicio = (permisos, panelUrl) => {
+  const urls = (permisos || []).flatMap((modulo) => (modulo.opciones || []).map((o) => o.url));
+  return urls.includes(panelUrl) ? panelUrl : urls[0] || panelUrl;
+};

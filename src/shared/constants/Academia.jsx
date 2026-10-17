@@ -7,6 +7,12 @@ export const OPCIONES_ESTADO = [
   { value: '0', label: 'Inactivo' },
 ];
 
+// Cómo se cobra una modalidad de curso.
+export const TIPOS_COBRO = [
+  { value: 'ciclo', label: 'Por ciclo de clases' },
+  { value: 'mensual', label: 'Por mes' },
+];
+
 export const OPCIONES_SI_NO = [
   { value: '1', label: 'Sí' },
   { value: '0', label: 'No' },
