@@ -14,6 +14,7 @@ import {
 } from '../AppRoutes';
 import { useRoutes } from 'react-router-dom';
 import AvisoSuscripcion from '../../../shared/components/AvisoSuscripcion';
+import CambioClaveObligatorio from '../../../shared/components/CambioClaveObligatorio';
 import { initialUrl } from '@crema/constants/AppConst';
 import { urlDeInicio } from '@crema/helpers/RouteHelper';
 import { useSelector, useDispatch } from 'react-redux';
@@ -53,6 +54,11 @@ const AppLayout = () => {
   useEffect(() => {
     if (isAuthenticated && !loading && params.layout) updateNavStyle(params.layout);
   }, [isAuthenticated, loading, params.layout, updateNavStyle]);
+
+  // Contraseña inicial (la dio el administrador): debe cambiarla antes de ver el ERP.
+  if (isAuthenticated && user?.usuario?.debe_cambiar_clave) {
+    return <CambioClaveObligatorio />;
+  }
 
   return (
     <>

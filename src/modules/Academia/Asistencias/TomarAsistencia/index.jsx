@@ -24,6 +24,7 @@ import {
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import SearchIcon from '@mui/icons-material/Search';
+import { useLocation } from 'react-router-dom';
 import jwtAxios from '../../../../@crema/services/auth/jwt-auth';
 import usePermisosOpcion from '../../../../shared/hooks/usePermisosOpcion';
 import { useSedes } from '../../../../shared/sedes';
@@ -41,8 +42,9 @@ const mensajesDe = (e, porDefecto) => {
 };
 
 const TomarAsistencia = ({ route }) => {
+  const location = useLocation();
   const { titulo, permisos, cargado } = usePermisosOpcion(route.path);
-  const { variasSedes } = useSedes();
+  const { variasSedes, sedeId } = useSedes();
   const [cursos, setCursos] = useState([]);
   const [curso, setCurso] = useState(null);
   const [fecha, setFecha] = useState(hoy());
@@ -67,20 +69,28 @@ const TomarAsistencia = ({ route }) => {
 
   // Lista completa (no la ligera): trae horario, profesor y matriculados para el buscador.
   // Primero los cursos que tienen clase hoy, que son los que normalmente se van a llamar.
+  // ?curso=ID&fecha=AAAA-MM-DD (desde Mis cursos) deja ese curso y esa fecha ya elegidos.
+  // Sigue al selector de sede: al cambiarla se recarga y, si el curso elegido no es de esa sede, se quita.
   useEffect(() => {
     const diaHoy = dayjs().day();
+    const params = new URLSearchParams(location.search);
     jwtAxios
       .get('cursos', { params: { limite: 500, ordenar_por: 'hora:asc' } })
-      .then(({ data }) =>
-        setCursos(
-          data.datos
-            .filter((c) => esActivo(c.estado))
-            .map((c) => ({ ...c, grupo: Number(c.dia) === diaHoy ? 'Clases de hoy' : 'Otros días' }))
-            .sort((a, b) => (a.grupo === b.grupo ? 0 : a.grupo === 'Clases de hoy' ? -1 : 1)),
-        ),
-      )
+      .then(({ data }) => {
+        const lista = data.datos
+          .filter((c) => esActivo(c.estado))
+          .map((c) => ({ ...c, grupo: Number(c.dia) === diaHoy ? 'Clases de hoy' : 'Otros días' }))
+          .sort((a, b) => (a.grupo === b.grupo ? 0 : a.grupo === 'Clases de hoy' ? -1 : 1));
+        setCursos(lista);
+        const elegido = lista.find((c) => String(c.id) === params.get('curso'));
+        if (elegido && /^\d{4}-\d{2}-\d{2}$/.test(params.get('fecha') ?? '')) setFecha(params.get('fecha'));
+        setCurso((actual) => {
+          if (actual) return lista.find((c) => c.id === actual.id) ?? null;
+          return elegido ?? null;
+        });
+      })
       .catch(() => setError('No se pudieron cargar los cursos.'));
-  }, []);
+  }, [sedeId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Alumnos del curso y validación de la fecha contra su calendario (día de clase, festivos, cierres).
   useEffect(() => {
@@ -219,7 +229,11 @@ const TomarAsistencia = ({ route }) => {
                   return palabras.every((p) => texto.includes(p));
                 });
               }}
-              noOptionsText='Ningún curso coincide con la búsqueda.'
+              noOptionsText={
+                cursos.length === 0 && sedeId
+                  ? 'No hay cursos en esta sede. Elige otra sede o «Todas» en el selector de arriba.'
+                  : 'Ningún curso coincide con la búsqueda.'
+              }
               renderOption={(props, c) => (
                 <li {...props} key={c.id}>
                   <Box>

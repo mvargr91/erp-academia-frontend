@@ -1,7 +1,7 @@
 // Calendario de un curso: semanas con clase, festivos y cierres (a dónde se corre la clase).
 // Un festivo se puede habilitar para que el curso sí tenga clase ese día.
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   Alert,
   Box,
@@ -43,6 +43,7 @@ const sombra = { boxShadow: '0px 0px 5px 2px rgb(0 0 0 / 8%)', height: '100%' };
 const CalendarioCurso = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [datos, setDatos] = useState(null);
   const [error, setError] = useState('');
   const [aviso, setAviso] = useState(null);
@@ -96,7 +97,8 @@ const CalendarioCurso = () => {
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
         <Tooltip title='Volver'>
-          <IconButton onClick={() => navigate('/cursos')}>
+          {/* Desde Mis cursos se vuelve allá (el profesor no tiene la lista de Cursos). */}
+          <IconButton onClick={() => navigate(location.state?.desde ?? '/cursos')}>
             <ArrowBackIosIcon />
           </IconButton>
         </Tooltip>

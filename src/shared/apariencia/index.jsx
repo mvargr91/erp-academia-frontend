@@ -8,6 +8,7 @@ import { useSidebarActionsContext } from '@crema/context/AppContextProvider/Side
 import { ThemeMode } from '@crema/constants/AppEnums';
 import jwtAxios from '@crema/services/auth/jwt-auth';
 import {
+  ICONO_DEFECTO,
   MODO_CLARO,
   MODO_OSCURO,
   construirMenu,
@@ -66,6 +67,17 @@ const AparienciaProvider = ({ children }) => {
     if (apariencia.nombre) document.title = apariencia.nombre;
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', apariencia.color_menu);
   }, [apariencia.nombre, apariencia.color_menu]);
+
+  // Ícono de la pestaña: el de la academia, si no su logo, si no el del ERP. (En producción el servidor
+  // ya entrega la página con él; esto lo actualiza en desarrollo y apenas se guarda en Apariencia.)
+  useEffect(() => {
+    const icono = apariencia.icono_url || apariencia.logo_url || ICONO_DEFECTO;
+    document.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"]').forEach((link) => {
+      link.setAttribute('href', icono);
+      link.removeAttribute('type');
+      link.removeAttribute('sizes');
+    });
+  }, [apariencia.icono_url, apariencia.logo_url]);
 
   const alternarModo = useCallback(() => {
     const nuevo = modo === MODO_OSCURO ? MODO_CLARO : MODO_OSCURO;

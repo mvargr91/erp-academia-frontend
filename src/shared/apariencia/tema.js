@@ -25,10 +25,16 @@ export const APARIENCIA_DEFECTO = {
   login_titulo: '',
   login_subtitulo: '',
   login_posicion: 'izquierda',
+  // Texto de la vista previa al compartir el enlace (lo pone el servidor en el HTML).
+  descripcion: '',
   logo_url: null,
   logo_oscuro_url: null,
   login_fondo_url: null,
+  icono_url: null,
 };
+
+// Ícono de la pestaña y del acceso directo en el celular cuando la academia no subió uno.
+export const ICONO_DEFECTO = '/brand/favicon-192.png';
 
 export const LOGO_DEFECTO = '/brand/logo.png';
 export const LOGO_OSCURO_DEFECTO = '/brand/logo-oscuro.png';

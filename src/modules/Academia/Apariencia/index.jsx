@@ -28,6 +28,7 @@ import { useApariencia } from '../../../shared/apariencia';
 import {
   APARIENCIA_DEFECTO,
   CONTRASTE_MINIMO,
+  ICONO_DEFECTO,
   LOGO_DEFECTO,
   LOGO_OSCURO_DEFECTO,
   MODO_CLARO,
@@ -61,9 +62,10 @@ const IMAGENES = {
   logo: ['Logo', 'Se muestra en la cabecera y en la pantalla de ingreso. PNG con fondo transparente recomendado.', LOGO_DEFECTO, 2, '#FFFFFF'],
   logo_oscuro: ['Logo para modo oscuro', 'Opcional: versión clara del logo para fondos oscuros. Si no se sube, se usa el logo normal.', LOGO_OSCURO_DEFECTO, 2, '#1E2530'],
   login_fondo: ['Imagen de fondo', 'Cubre toda la pantalla de ingreso. Horizontal, de al menos 1600 px de ancho.', fondoLoginDefecto, 5, '#FFFFFF'],
+  icono: ['Ícono', 'Pestaña del navegador y acceso directo en el celular. Cuadrado, de al menos 512 × 512 px. Si no se sube, se usa el logo.', ICONO_DEFECTO, 1, '#FFFFFF'],
 };
 const FORMATOS = ['image/png', 'image/jpeg', 'image/webp'];
-const SIN_IMAGENES = { logo: null, logo_oscuro: null, login_fondo: null };
+const SIN_IMAGENES = { logo: null, logo_oscuro: null, login_fondo: null, icono: null };
 
 const camposDe = (apariencia) =>
   Object.fromEntries(Object.keys(APARIENCIA_DEFECTO).filter((c) => !c.endsWith('_url') && c !== 'nombre').map((c) => [c, apariencia[c] ?? '']));
@@ -224,6 +226,7 @@ const Apariencia = ({ route }) => {
       logo_url: vistas.logo,
       logo_oscuro_url: vistas.logo_oscuro,
       login_fondo_url: vistas.login_fondo,
+      icono_url: vistas.icono,
     }),
     [apariencia, campos, vistas],
   );
@@ -369,6 +372,32 @@ const Apariencia = ({ route }) => {
                 disabled={!puedeEditar}
               />
             ))}
+          </Seccion>
+
+          <Seccion
+            titulo='Ícono y enlace para compartir'
+            descripcion='Cuando alguien comparte el enlace del ERP (WhatsApp, redes, correo) se ve el nombre de la academia, este texto y el logo. WhatsApp guarda la vista previa un tiempo: un cambio puede tardar en verse en un chat donde ya se compartió.'
+          >
+            <CampoImagen
+              campo='icono'
+              vista={vistas.icono || vistas.logo || IMAGENES.icono[2]}
+              personalizada={Boolean(vistas.icono)}
+              onElegir={(archivo) => elegirImagen('icono', archivo)}
+              onQuitar={() => quitarImagen('icono')}
+              disabled={!puedeEditar}
+            />
+            <TextField
+              variant='standard'
+              fullWidth
+              multiline
+              label='Texto al compartir el enlace (opcional)'
+              placeholder={`Ingresa al sistema de ${apariencia.nombre || 'la academia'}.`}
+              value={campos.descripcion}
+              onChange={(e) => cambiar('descripcion', e.target.value)}
+              disabled={!puedeEditar}
+              helperText={`${(campos.descripcion ?? '').length}/200. Si se deja vacío se usa el texto de la pantalla de ingreso o «Ingresa al sistema de…».`}
+              inputProps={{ maxLength: 200 }}
+            />
           </Seccion>
 
           <Seccion titulo='Pantalla de ingreso'>

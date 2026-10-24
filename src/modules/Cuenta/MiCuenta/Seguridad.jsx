@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { Form, Formik } from 'formik';
 import * as yup from 'yup';
@@ -23,7 +24,8 @@ const esquema = yup.object({
     .oneOf([yup.ref('clave')], 'Las contraseñas no coinciden'),
 });
 
-const Seguridad = () => {
+// onCambiada: se llama tras cambiarla (p. ej. al terminar el cambio obligatorio de la contraseña inicial).
+const Seguridad = ({ onCambiada, descripcion = 'Por seguridad te pedimos tu contraseña actual.' }) => {
   const dispatch = useDispatch();
   const saving = useSelector((state) => state.cuenta.saving);
 
@@ -32,11 +34,19 @@ const Seguridad = () => {
       initialValues={VACIO}
       validationSchema={esquema}
       onSubmit={(params, { resetForm }) =>
-        dispatch(onCambiarClave({ params, onSuccess: () => resetForm({ values: VACIO }) }))
+        dispatch(
+          onCambiarClave({
+            params,
+            onSuccess: () => {
+              resetForm({ values: VACIO });
+              onCambiada?.();
+            },
+          }),
+        )
       }
     >
       <Form noValidate>
-        <Seccion titulo='Cambiar contraseña' descripcion='Por seguridad te pedimos tu contraseña actual.'>
+        <Seccion titulo='Cambiar contraseña' descripcion={descripcion}>
           <Grid item xs={12} md={6}>
             <MyTextField name='clave_actual' label='Contraseña actual' type='password' fullWidth required variant='outlined' autoComplete='current-password' />
           </Grid>
@@ -61,6 +71,11 @@ const Seguridad = () => {
       </Form>
     </Formik>
   );
+};
+
+Seguridad.propTypes = {
+  onCambiada: PropTypes.func,
+  descripcion: PropTypes.string,
 };
 
 export default Seguridad;

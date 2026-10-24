@@ -4,6 +4,7 @@ import { RoutePermittedRole } from '@crema/constants/AppEnums';
 import { rutasCrud } from '../../../shared/components/PaginaCrud';
 
 const DashboardAcademia = React.lazy(() => import('../../../modules/Academia/DashboardAcademia'));
+const MisCursos = React.lazy(() => import('../../../modules/Academia/MisCursos'));
 const Sedes = React.lazy(() => import('../../../modules/Academia/Sedes'));
 const SedeCreador = React.lazy(() => import('../../../modules/Academia/Sedes/SedeCreador'));
 const Ritmos = React.lazy(() => import('../../../modules/Academia/Ritmos'));
@@ -69,6 +70,11 @@ export const academiaConfigs = [
     permittedRole: RoutePermittedRole.User,
     path: '/dashboard-academia',
     element: <DashboardAcademia route={{ auth: authRole, path: '/dashboard-academia' }} />,
+  },
+  {
+    permittedRole: RoutePermittedRole.User,
+    path: '/mis-cursos',
+    element: <MisCursos route={{ auth: authRole, path: '/mis-cursos' }} />,
   },
   ...rutasCrud('/sedes', Sedes, (p) => <SedeCreador sede={p.id} {...props(p)} />),
   ...rutasCrud('/ritmos', Ritmos, (p) => <RitmoCreador ritmo={p.id} {...props(p)} />),
