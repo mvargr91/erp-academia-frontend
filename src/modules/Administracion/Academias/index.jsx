@@ -7,12 +7,13 @@ import { accionesEnPagina } from '../../../shared/components/PaginaCrud';
 import useCrudModulo from '../../../shared/hooks/useCrudModulo';
 import { onGetColeccion } from '../../../@crema/redux/features/academias/academiasSlice';
 import { valorActivo, colorActivo, valorSiNo, formatoMoneda } from '../../../shared/constants/Academia';
-import { colorEstadoCuenta } from '../../../shared/constants/Administracion';
+import { colorEstadoCuenta, colorCertificado, valorCertificado } from '../../../shared/constants/Administracion';
 
 const cells = [
   { id: 'codigo', typeHead: 'string', label: 'Código', value: (v) => v, align: 'left', mostrarInicio: true },
   { id: 'nombre', typeHead: 'string', label: 'Nombre', value: (v) => v, align: 'left', mostrarInicio: true },
   { id: 'url', typeHead: 'string', label: 'URL', value: (v) => v, align: 'left', mostrarInicio: true, ordenable: false },
+  { id: 'certificado', typeHead: 'string', label: 'Certificado SSL', value: valorCertificado, cellColor: colorCertificado, align: 'left', mostrarInicio: true, ordenable: false },
   { id: 'correo', typeHead: 'string', label: 'Correo', value: (v) => v, align: 'left', mostrarInicio: false, ordenable: false },
   { id: 'tarifa_mensual', typeHead: 'numeric', label: 'Tarifa', value: formatoMoneda, align: 'right', mostrarInicio: true },
   { id: 'dia_corte', typeHead: 'numeric', label: 'Día de corte', value: (v) => v, align: 'center', mostrarInicio: false },

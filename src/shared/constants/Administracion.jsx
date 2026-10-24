@@ -24,3 +24,12 @@ export const colorEstadoFactura = (_valor, row) => COLORES_FACTURA[row?.estado] 
 
 const COLORES_CUENTA = { al_dia: 'green', pendiente: '#F9A825', en_mora: 'red', suspendida: 'red', sin_cobro: 'gray' };
 export const colorEstadoCuenta = (_valor, row) => COLORES_CUENTA[row?.estado_cuenta] ?? '';
+
+// Certificado SSL del subdominio de la academia (lo amplía el servidor al crearla). null = no se gestiona.
+const CERTIFICADO = {
+  listo: ['Listo', 'green'],
+  pendiente: ['En proceso', '#F9A825'],
+  error: ['Error: reintentar', 'red'],
+};
+export const valorCertificado = (valor) => CERTIFICADO[valor]?.[0] ?? '—';
+export const colorCertificado = (valor) => CERTIFICADO[valor]?.[1] ?? '';

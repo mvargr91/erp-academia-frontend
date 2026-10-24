@@ -7,6 +7,7 @@ import MyTextField from '../../../../shared/components/MyTextField';
 import MyRadioField from '../../../../shared/components/MyRadioField';
 import MyDateField from '../../../../shared/components/MyDateField';
 import { OPCIONES_ESTADO } from '../../../../shared/constants/Academia';
+import CertificadoAcademia from './CertificadoAcademia';
 
 const AcademiaForm = ({ accion, titulo, handleOnClose, saving, registro }) => {
   const disabled = accion === 'ver';
@@ -24,6 +25,15 @@ const AcademiaForm = ({ accion, titulo, handleOnClose, saving, registro }) => {
       />
       <MyTextField fullWidth label='Nombre comercial' name='nombre' disabled={disabled} required />
       {!crear && registro?.url && <StyledTextField fullWidth variant='standard' label='Dirección web' value={registro.url} disabled />}
+      {!crear && registro?.id && (
+        <CertificadoAcademia
+          key={registro.id}
+          academiaId={registro.id}
+          estadoInicial={registro.certificado}
+          mensajeInicial={registro.certificado_mensaje}
+          puedeModificar={!disabled}
+        />
+      )}
       <MyTextField fullWidth label='Correo de contacto' name='correo' disabled={disabled} />
       <MyTextField fullWidth label='Teléfono' name='telefono' disabled={disabled} />
       <SeccionForm titulo='Cobro del ERP' />
