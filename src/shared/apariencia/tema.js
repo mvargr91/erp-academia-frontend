@@ -18,9 +18,9 @@ export const MODOS = [MODO_CLARO, MODO_OSCURO];
 // Mismos valores por defecto que el backend (App\Support\Academias\Apariencia).
 export const APARIENCIA_DEFECTO = {
   nombre: '',
-  color_primario: '#00A1CC',
-  color_menu: '#1C4A59',
-  color_acento: '#00A1CC',
+  color_primario: '#0058F4',
+  color_menu: '#111736',
+  color_acento: '#8943E7',
   modo: MODO_CLARO,
   login_titulo: '',
   login_subtitulo: '',

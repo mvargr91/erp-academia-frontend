@@ -36,7 +36,7 @@ import {
   contrasteConBlanco,
   esColor,
 } from '../../../shared/apariencia/tema';
-import fondoLoginDefecto from '../../../assets/fondo/247.jpg';
+import fondoLoginDefecto from '../../../assets/fondo/zunevia.jpg';
 import VistaPrevia from './VistaPrevia';
 
 const sombra = { boxShadow: '0px 0px 5px 2px rgb(0 0 0 / 8%)' };
@@ -48,6 +48,7 @@ const COLORES = [
 ];
 
 const COMBINACIONES = [
+  { nombre: 'Zunevia', color_primario: '#0058F4', color_menu: '#111736', color_acento: '#8943E7' },
   { nombre: 'Azul', color_primario: '#00A1CC', color_menu: '#1C4A59', color_acento: '#00A1CC' },
   { nombre: 'Violeta', color_primario: '#7B3FE4', color_menu: '#2A1B4D', color_acento: '#B061FF' },
   { nombre: 'Rojo', color_primario: '#D32F2F', color_menu: '#3A1414', color_acento: '#F0564A' },

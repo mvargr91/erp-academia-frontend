@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { Typography } from '@mui/material';
 import { Fonts } from '@crema/constants/AppEnums';
 import AppLogo from '@crema/components/AppLayout/components/AppLogo';
-import fondoDefecto from '../../assets/fondo/247.jpg';
+import fondoDefecto from '../../assets/fondo/zunevia.jpg';
 import { useApariencia } from '../../shared/apariencia';
 import BotonModo from '../../shared/apariencia/BotonModo';
 

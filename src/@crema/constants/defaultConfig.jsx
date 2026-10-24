@@ -13,7 +13,7 @@ import {
 import environment from './../../env';
 import { COLORES_MARCA, TEMA_MARCA_PANEL } from '../../shared/constants/Marca';
 
-// Colores del panel. "anterior" es el tema original; "marca" alinea el panel con el portal (Travel City).
+// Colores del panel. "anterior" es el tema original; "marca" alinea el panel con la marca (Zunevia).
 const COLORES_PANEL = {
   anterior: {
     principal: '#5d9802',
@@ -23,7 +23,7 @@ const COLORES_PANEL = {
   },
   marca: {
     principal: COLORES_MARCA.azul,
-    acento: COLORES_MARCA.azul,
+    acento: COLORES_MARCA.violeta,
     textoEncabezado: COLORES_MARCA.azulOscuro,
     barraMenu: COLORES_MARCA.azulOscuro,
   },

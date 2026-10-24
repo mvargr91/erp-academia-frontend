@@ -1,6 +1,6 @@
 {
-  "short_name": "ERP Academias",
-  "name": "ERP Academias",
+  "short_name": "Zunevia",
+  "name": "Zunevia",
   "icons": [
     { "src": "/brand/favicon-32.png", "sizes": "32x32", "type": "image/png" },
     { "src": "/brand/favicon-192.png", "sizes": "192x192", "type": "image/png" },
@@ -8,6 +8,6 @@
   ],
   "start_url": "/",
   "display": "standalone",
-  "theme_color": "#00A1CC",
+  "theme_color": "#111736",
   "background_color": "#ffffff"
 }
