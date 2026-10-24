@@ -8,10 +8,13 @@ import MyRadioField from '../../../../shared/components/MyRadioField';
 import MyDateField from '../../../../shared/components/MyDateField';
 import { OPCIONES_ESTADO } from '../../../../shared/constants/Academia';
 import CertificadoAcademia from './CertificadoAcademia';
+import EliminarAcademia from './EliminarAcademia';
+import usePermisosOpcion from '../../../../shared/hooks/usePermisosOpcion';
 
 const AcademiaForm = ({ accion, titulo, handleOnClose, saving, registro }) => {
   const disabled = accion === 'ver';
   const crear = accion === 'crear';
+  const puedeEliminar = usePermisosOpcion('/academias').permisos.indexOf('Eliminar') >= 0;
 
   return (
     <AppCrudForm titulo={titulo} accion={accion} handleOnClose={handleOnClose} saving={saving}>
@@ -62,6 +65,13 @@ const AcademiaForm = ({ accion, titulo, handleOnClose, saving, registro }) => {
           required
           options={OPCIONES_ESTADO}
         />
+      )}
+
+      {accion === 'editar' && puedeEliminar && registro?.id && registro.es_administradora !== 1 && (
+        <>
+          <SeccionForm titulo='Zona de peligro' />
+          <EliminarAcademia academia={registro} onEliminada={handleOnClose} />
+        </>
       )}
 
       {crear && (
