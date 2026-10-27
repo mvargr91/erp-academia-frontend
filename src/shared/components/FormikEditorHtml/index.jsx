@@ -7,10 +7,31 @@ import { Box, Chip, FormHelperText, Tooltip, Typography } from '@mui/material';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import '@ckeditor/ckeditor5-build-classic/build/translations/es';
+import jwtAxios from '../../../@crema/services/auth/jwt-auth';
 
 const BARRA = ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'blockQuote', 'undo', 'redo'];
 
-const FormikEditorHtml = ({ name, label, variables, disabled, className }) => {
+// Solo imágenes: el selector de archivos y lo que se pega o arrastra se limitan a estos tipos
+// (el backend lo vuelve a verificar por el contenido del archivo).
+const TIPOS_IMAGEN = ['png', 'jpeg', 'webp', 'gif'];
+
+// Sube al ERP las imágenes que se insertan, pegan o arrastran en el editor y deja su URL pública.
+function AdaptadorImagenes(editor) {
+  editor.plugins.get('FileRepository').createUploadAdapter = (loader) => ({
+    upload: () =>
+      loader.file.then((archivo) => {
+        const datos = new FormData();
+        datos.append('imagen', archivo);
+        return jwtAxios
+          .post('correo-imagenes', datos, { headers: { 'Content-Type': 'multipart/form-data' } })
+          .then(({ data }) => ({ default: data.url }))
+          .catch((e) => Promise.reject(e?.response?.data?.mensajes?.[0] ?? 'No se pudo subir la imagen.'));
+      }),
+    abort: () => {},
+  });
+}
+
+const FormikEditorHtml = ({ name, label, variables, disabled, className, imagenes }) => {
   const [field, meta] = useField(name);
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const editorRef = useRef(null);
@@ -55,6 +76,7 @@ const FormikEditorHtml = ({ name, label, variables, disabled, className }) => {
         sx={{
           // El editor va sobre fondo claro aunque el panel esté en modo oscuro.
           '& .ck-editor__editable': { minHeight: 220, color: '#222' },
+          '& .ck-editor__editable img': { maxWidth: '100%', height: 'auto' },
           '& .ck.ck-editor__main > .ck-editor__editable': { background: '#fff' },
         }}
       >
@@ -62,7 +84,19 @@ const FormikEditorHtml = ({ name, label, variables, disabled, className }) => {
           editor={ClassicEditor}
           data={field.value || ''}
           disabled={disabled}
-          config={{ toolbar: BARRA, language: 'es' }}
+          config={
+            imagenes
+              ? {
+                  toolbar: [...BARRA.slice(0, 7), 'uploadImage', ...BARRA.slice(7)],
+                  language: 'es',
+                  extraPlugins: [AdaptadorImagenes],
+                  image: {
+                    upload: { types: TIPOS_IMAGEN },
+                    toolbar: ['imageTextAlternative'],
+                  },
+                }
+              : { toolbar: BARRA, language: 'es' }
+          }
           onReady={(editor) => {
             editorRef.current = editor;
           }}
@@ -81,10 +115,16 @@ FormikEditorHtml.propTypes = {
   variables: PropTypes.object,
   disabled: PropTypes.bool,
   className: PropTypes.string,
+  // Botón para insertar imágenes (se suben al ERP). Solo para contenido de correos.
+  imagenes: PropTypes.bool,
 };
 
 FormikEditorHtml.defaultProps = {
   className: 'campo-completo',
+  imagenes: false,
 };
+
+/** ¿El HTML tiene contenido: texto o al menos una imagen? (un correo puede ser solo una imagen). */
+export const tieneContenido = (html) => Boolean(html && (/<img\b/i.test(html) || html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim()));
 
 export default FormikEditorHtml;
