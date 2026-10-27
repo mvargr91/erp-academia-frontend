@@ -11,7 +11,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Fonts } from "@crema/constants/AppEnums";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
-import { Business, Person } from '@mui/icons-material';
+import { Logout, ManageAccountsOutlined, Person } from '@mui/icons-material';
 import { useAuthMethod, useAuthUser } from "@crema/hooks/AuthHooks";
 import { useSelector, useDispatch } from 'react-redux';
 import { logout, logoutUser } from "../../../../redux/features/auth/authSlice";
@@ -99,18 +99,18 @@ const UserInfo = ({ color }) => {
         <Box
           display="flex"
           style={{ justifyContent: "space-evenly", alignItems: "center" }}
-          ml={3}
+          ml={isMobile ? 1 : 3}
           className={classes.userName}
         >
-          {!isMobile && (
-            <Person
-              style={{
-                width: "50px",
-                height: "50px",
-                color: theme.palette.cuarternario.main,
-              }}
-            />
-          )}
+          {/* Siempre visible: en el celular es lo único que abre Mi cuenta y Cerrar sesión. */}
+          <Person
+            aria-label="Mi cuenta y cerrar sesión"
+            style={{
+              width: isMobile ? "36px" : "50px",
+              height: isMobile ? "36px" : "50px",
+              color: theme.palette.cuarternario.main,
+            }}
+          />
         </Box>
         
         <Box
@@ -190,12 +190,14 @@ const UserInfo = ({ color }) => {
             {user.usuario.correo_electronico}
           </MenuItem>
           <MenuItem onClick={() => irA(RUTA_MI_CUENTA)}>
+            <ManageAccountsOutlined fontSize="small" sx={{ mr: 1.5 }} />
             Mi cuenta
           </MenuItem>
           <Box className={classes.btnContainer}>
             <Button
               onClick={handleLogout} className={classes.logoutBtn}
               variant='contained'
+              startIcon={<Logout />}
             >
               Cerrar Sesión
             </Button>

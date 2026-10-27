@@ -1,39 +1,18 @@
 import React from "react";
-import { styled, useTheme } from '@mui/material/styles';
 import PropTypes from "prop-types";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
-import AppLngSwitcher from "../../../AppLngSwitcher";
 import Box from "@mui/material/Box";
-import AppSearchBar from "../../../AppSearchBar";
-import Hidden from "@mui/material/Hidden";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
-import AppMessages from "../../../AppMessages";
-import AppNotifications from "../../../AppNotifications";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import AppTooltip from "../../../AppTooltip";
-import { alpha } from "@mui/material/styles";
-import NotificationBar from "../NotificationBar";
 import AppLogo from "../../components/AppLogo";
 import UserInfo from "../../components/UserInfo";
-import { allowMultiLanguage } from "../../../../constants/AppConst";
 import BotonModo from "../../../../../shared/apariencia/BotonModo";
 import { SelectorSede } from "../../../../../shared/sedes";
 
+// Cabecera: botón del menú, logo, selector de sede, modo claro/oscuro y el usuario (Mi cuenta y
+// Cerrar sesión). En el celular el usuario se ve como un ícono que abre esas mismas opciones.
 const AppHeader = ({ toggleNavCollapsed, menuOculto }) => {
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const theme = useTheme();
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
   return (
     <AppBar
       position="relative"
@@ -62,7 +41,7 @@ const AppHeader = ({ toggleNavCollapsed, menuOculto }) => {
             width: "100%",
             maxWidth: { lg: 1340, xl: 1420 },
             mx: "auto",
-            px: 5,
+            px: { xs: 3, sm: 5 },
             display: "flex",
             alignItems: "center",
           }}
@@ -92,6 +71,11 @@ const AppHeader = ({ toggleNavCollapsed, menuOculto }) => {
               "& .app-logo": {
                 pl: 0,
               },
+              // En el celular el logo es más pequeño para dejar espacio a la sede y al usuario.
+              "& .app-logo img": {
+                height: { xs: 36, sm: 65 },
+                maxWidth: { xs: 96, sm: 240 },
+              },
               "& .logo-text": {
                 display: { xs: "none", sm: "block" },
               },
@@ -106,17 +90,16 @@ const AppHeader = ({ toggleNavCollapsed, menuOculto }) => {
           />
           <Box
             sx={{
-              ml: 4,
+              ml: { xs: 1, sm: 4 },
               display: "flex",
               alignItems: "center",
             }}
           >
-            <SelectorSede sx={{ mr: 2 }} />
+            <SelectorSede sx={{ mr: { xs: 1, sm: 2 }, minWidth: { xs: 110, sm: 190 }, maxWidth: { xs: 130, sm: "none" } }} />
             <BotonModo />
             <Box
               sx={{
-                ml: { sm: 4 },
-                mr: { xs: 4, sm: 0 },
+                ml: { xs: 1, sm: 4 },
                 minWidth: { md: 220 },
                 "& .user-info-view": {
                   p: 0,
@@ -128,65 +111,6 @@ const AppHeader = ({ toggleNavCollapsed, menuOculto }) => {
             >
               <UserInfo />
             </Box>
-
-            <Hidden smUp>
-              <Box
-                sx={{
-                  position: "relative",
-                  display: "flex",
-                  alignItems: "center",
-                  marginLeft: -2,
-                  marginRight: -2,
-                }}
-              >
-                <Box
-                  sx={{
-                    px: 1.85,
-                  }}
-                >
-                  <AppTooltip title="More">
-                    <IconButton
-                      sx={{
-                        borderRadius: "50%",
-                        width: 40,
-                        height: 40,
-                        color: (theme) => theme.palette.text.secondary,
-                        backgroundColor: (theme) =>
-                          theme.palette.background.default,
-                        border: 1,
-                        borderColor: "transparent",
-                        "&:hover, &:focus": {
-                          color: (theme) => theme.palette.text.primary,
-                          backgroundColor: (theme) =>
-                            alpha(theme.palette.background.default, 0.9),
-                          borderColor: (theme) =>
-                            alpha(theme.palette.text.secondary, 0.25),
-                        },
-                      }}
-                      onClick={handleClick}
-                      size="large"
-                    >
-                      <MoreVertIcon />
-                    </IconButton>
-                  </AppTooltip>
-                </Box>
-              </Box>
-            </Hidden>
-            <Menu
-              id="simple-menu"
-              anchorEl={anchorEl}
-              keepMounted
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-            >
-              <MenuItem>
-                <AppNotifications isMenu />
-              </MenuItem>
-              <MenuItem>
-                <AppMessages isMenu />
-              </MenuItem>
-              <MenuItem>Setting</MenuItem>
-            </Menu>
           </Box>
         </Box>
       </Toolbar>
