@@ -11,7 +11,7 @@ import AppCrudDialog from '../../../../shared/components/AppCrudDialog';
 import AppCrudForm, { SeccionForm } from '../../../../shared/components/AppCrudForm';
 import MyTextField from '../../../../shared/components/MyTextField';
 import MyRadioField from '../../../../shared/components/MyRadioField';
-import FormikEditorHtml from '../../../../shared/components/FormikEditorHtml';
+import FormikEditorHtml, { tieneContenido } from '../../../../shared/components/FormikEditorHtml';
 import jwtAxios from '../../../../@crema/services/auth/jwt-auth';
 import { OPCIONES_ESTADO, aRadio } from '../../../../shared/constants/Academia';
 import { onShow, onCreate, onUpdate, resetActual } from '../../../../@crema/redux/features/plantillasCorreo/plantillasCorreoSlice';
@@ -27,9 +27,8 @@ const VARIABLES_MANUALES = {
 const validationSchema = yup.object({
   nombre: yup.string().when('tipo', { is: 'manual', then: (s) => s.required('Requerido').max(128, 'Máximo 128 caracteres') }),
   asunto: yup.string().required('Requerido').max(128, 'Máximo 128 caracteres'),
-  texto: yup
-    .string()
-    .test('vacio', 'El contenido no puede estar vacío', (v) => Boolean(v && v.replace(/<[^>]*>/g, '').trim())),
+  // Puede ser solo una imagen (un afiche) sin texto.
+  texto: yup.string().test('vacio', 'Escribe el contenido o inserta una imagen', tieneContenido),
 });
 
 const initialValues = (registro) => ({
@@ -175,6 +174,7 @@ const PlantillaCreador = ({ plantilla, accion, handleOnClose, updateColeccion, t
             label='Contenido del correo'
             variables={manual ? VARIABLES_MANUALES : registro?.variables}
             disabled={ver}
+            imagenes
           />
           <Alert severity='info' className='campo-completo'>
             El encabezado con el nombre de la academia, el saludo y el pie con los datos de contacto se agregan

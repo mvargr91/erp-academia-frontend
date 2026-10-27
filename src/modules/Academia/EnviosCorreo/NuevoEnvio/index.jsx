@@ -14,7 +14,7 @@ import { showMessage } from '../../../../@crema/redux/features/cammon/commonSlic
 import MyTextField from '../../../../shared/components/MyTextField';
 import FormikAutocomplete from '../../../../shared/components/FormikAutocomplete';
 import FormikMultiSelect from '../../../../shared/components/FormikMultiSelect';
-import FormikEditorHtml from '../../../../shared/components/FormikEditorHtml';
+import FormikEditorHtml, { tieneContenido } from '../../../../shared/components/FormikEditorHtml';
 import { formatoMoneda } from '../../../../shared/constants/Academia';
 
 const VARIABLES = {
@@ -55,7 +55,8 @@ const anuncioDe = (v) => {
 
 const esquema = yup.object({
   asunto: yup.string().required('Requerido').max(150, 'Máximo 150 caracteres'),
-  texto: yup.string().test('vacio', 'Escribe el contenido', (v) => Boolean(v && v.replace(/<[^>]*>/g, '').trim())),
+  // Puede ser solo una imagen (un afiche) sin texto.
+  texto: yup.string().test('vacio', 'Escribe el contenido o inserta una imagen', tieneContenido),
   audiencia: yup.string().required('Elige a quién enviar'),
   curso_id: yup.mixed().when('audiencia', { is: 'curso', then: (s) => s.required('Elige el curso') }),
   vacacional_curso_id: yup.mixed().when('audiencia', { is: 'vacacional_curso', then: (s) => s.required('Elige el curso vacacional') }),
@@ -91,7 +92,7 @@ const Contenido = ({ catalogos, resumen, setResumen }) => {
             textFieldProps={{ variant: 'standard' }}
           />
           <MyTextField fullWidth label='Asunto' name='asunto' required />
-          <FormikEditorHtml name='texto' label='Contenido' variables={VARIABLES} className='' />
+          <FormikEditorHtml name='texto' label='Contenido' variables={VARIABLES} className='' imagenes />
         </CardContent>
       </Card>
 
