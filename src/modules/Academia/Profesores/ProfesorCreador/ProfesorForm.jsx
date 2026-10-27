@@ -25,7 +25,14 @@ const ProfesorForm = ({ accion, titulo, handleOnClose, saving, registro }) => {
       <MyRadioField className='campo-completo' label='Estado' name='estado' disabled={disabled} required options={OPCIONES_ESTADO} />
       <SeccionForm titulo='Acceso al ERP' />
       {registro?.id ? (
-        <AccesoProfesor key={registro.id} profesorId={registro.id} accesoInicial={registro.acceso} puedeModificar={puedeModificar} />
+        <AccesoProfesor
+          key={registro.id}
+          profesorId={registro.id}
+          accesoInicial={registro.acceso}
+          puedeModificar={puedeModificar}
+          nombres={registro.nombres}
+          apellidos={registro.apellidos}
+        />
       ) : (
         <Typography className='campo-completo' color='text.secondary'>
           Guarda el profesor y luego, al editarlo, podrás darle acceso al ERP.
