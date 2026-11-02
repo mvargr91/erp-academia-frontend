@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { Alert, Box, Button, Card, CardActions, CardContent, Chip, Grid, LinearProgress, Stack, Typography } from '@mui/material';
 import ChecklistIcon from '@mui/icons-material/Checklist';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import HowToRegIcon from '@mui/icons-material/HowToReg';
 import jwtAxios from '../../../@crema/services/auth/jwt-auth';
 import usePermisosOpcion from '../../../shared/hooks/usePermisosOpcion';
 import { useSedes } from '../../../shared/sedes';
@@ -66,10 +67,51 @@ Tarjeta.propTypes = {
   onCalendario: PropTypes.func.isRequired,
 };
 
+const estadoClase = (c) => {
+  if (c.hoy) return { label: 'Hoy', color: 'warning' };
+  if (c.pasada) return { label: `${fechaCorta(c.fecha)} · sin registrar`, color: 'error' };
+  return { label: fechaCorta(c.fecha), color: 'default' };
+};
+
+// Clase personalizada: se registra el día de la clase o en los días siguientes, no antes.
+const TarjetaClase = ({ clase, verProfesor, puedeRegistrar, onRegistrar }) => {
+  const estado = estadoClase(clase);
+  const detalle = [`${clase.hora}`, `${clase.duracion_min} min`, clase.sede, verProfesor ? clase.profesor : null].filter(Boolean);
+
+  return (
+    <Card sx={sombra}>
+      <CardContent sx={{ flexGrow: 1 }}>
+        <Stack direction='row' justifyContent='space-between' alignItems='flex-start' spacing={1} sx={{ mb: 1 }}>
+          <Typography variant='h4' sx={{ fontWeight: 'bold' }}>
+            {clase.alumnos || 'Sin alumnos'}
+          </Typography>
+          <Chip size='small' color={estado.color} label={estado.label} />
+        </Stack>
+        <Typography color='text.secondary'>{detalle.join(' · ')}</Typography>
+      </CardContent>
+      {puedeRegistrar && (clase.hoy || clase.pasada) && (
+        <CardActions sx={{ px: 2, pb: 2 }}>
+          <Button variant='contained' startIcon={<HowToRegIcon />} onClick={onRegistrar}>
+            Registrar asistencia
+          </Button>
+        </CardActions>
+      )}
+    </Card>
+  );
+};
+
+TarjetaClase.propTypes = {
+  clase: PropTypes.object.isRequired,
+  verProfesor: PropTypes.bool,
+  puedeRegistrar: PropTypes.bool,
+  onRegistrar: PropTypes.func.isRequired,
+};
+
 const MisCursos = ({ route }) => {
   const navigate = useNavigate();
   const { titulo } = usePermisosOpcion(route.path);
   const puedeTomar = usePermisosOpcion('/tomar-asistencia').permisos.length > 0;
+  const puedeRegistrar = usePermisosOpcion('/clases-privadas').permisos.includes('RegistrarAsistencia');
   const [datos, setDatos] = useState(null);
   const [error, setError] = useState('');
   // Sigue al selector de sede del encabezado (cabecera X-Sede): al cambiarla se vuelve a pedir.
@@ -121,6 +163,30 @@ const MisCursos = ({ route }) => {
             </Grid>
           ))}
         </Grid>
+      )}
+
+      {puedeRegistrar && datos.clases_privadas?.length > 0 && (
+        <>
+          <Typography variant='h3' sx={{ fontWeight: 'bold', mt: 5, mb: 1 }}>
+            Clases personalizadas
+          </Typography>
+          <Typography color='text.secondary' sx={{ mb: 3 }}>
+            {datos.profesor ? 'Tus clases' : 'Clases'} por registrar de los últimos días y las de la próxima semana. Al registrar la
+            asistencia se descuenta la clase del paquete del alumno.
+          </Typography>
+          <Grid container spacing={3}>
+            {datos.clases_privadas.map((c) => (
+              <Grid item xs={12} sm={6} lg={4} key={c.id}>
+                <TarjetaClase
+                  clase={c}
+                  verProfesor={!datos.profesor}
+                  puedeRegistrar={puedeRegistrar}
+                  onRegistrar={() => navigate(`/clases-privadas/${c.id}/registrar`, { state: { desde: route.path } })}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        </>
       )}
     </Box>
   );
