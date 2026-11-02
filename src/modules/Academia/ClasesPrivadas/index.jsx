@@ -16,7 +16,7 @@ import { formatoMoneda } from '../../../shared/constants/Academia';
 const COLORES = { programada: '#1A73E8', realizada: 'green', cancelada: 'gray' };
 const COLORES_COBRO = { pagada: 'green', por_cobrar: 'red', paquete: 'gray' };
 
-const columnas = (variasSedes) => [
+const columnas = (variasSedes, verCobro) => [
   { id: 'fecha', typeHead: 'string', label: 'Fecha', value: (v) => v, align: 'left', mostrarInicio: true, ordenable: false },
   { id: 'hora', typeHead: 'string', label: 'Hora', value: (v, row) => `${v} (${row.duracion_min} min)`, align: 'left', mostrarInicio: true, ordenable: false },
   celdaSede(variasSedes),
@@ -32,36 +32,42 @@ const columnas = (variasSedes) => [
     mostrarInicio: false,
     ordenable: false,
   },
-  {
-    id: 'cobro_nombre',
-    typeHead: 'string',
-    label: 'Cobro',
-    value: (v, row) => (row.cobro === 'paquete' ? v : `${v} · ${formatoMoneda(row.valor)}`),
-    cellColor: (_v, row) => COLORES_COBRO[row?.cobro] ?? '',
-    align: 'left',
-    mostrarInicio: true,
-    ordenable: false,
-  },
+  ...(verCobro
+    ? [
+        {
+          id: 'cobro_nombre',
+          typeHead: 'string',
+          label: 'Cobro',
+          value: (v, row) => (row.cobro === 'paquete' ? v : `${v} · ${formatoMoneda(row.valor)}`),
+          cellColor: (_v, row) => COLORES_COBRO[row?.cobro] ?? '',
+          align: 'left',
+          mostrarInicio: true,
+          ordenable: false,
+        },
+      ]
+    : []),
   ...auditCells,
 ];
 
 const ClasesPrivadas = ({ route }) => {
   const { variasSedes } = useSedes();
-  const cells = useMemo(() => columnas(variasSedes), [variasSedes]);
   const dispatch = useDispatch();
   const { titulo, urlAyuda, permisos } = usePermisosOpcion(route.path);
+  // Quien solo registra asistencia (el profesor) ve sus clases, sin el cobro ni el filtro de profesor.
+  const soloRegistra = !permisos.some((p) => ['Listar', 'Crear', 'Modificar', 'Pagar'].includes(p));
+  const cells = useMemo(() => columnas(variasSedes, !soloRegistra), [variasSedes, soloRegistra]);
   const { refreshKey } = useCrudModulo();
   const navigate = useNavigate();
   const { coleccionLigera: profesores } = useSelector((s) => s.profesores);
 
   useEffect(() => {
-    dispatch(onGetProfesores());
-  }, [dispatch]);
+    if (!soloRegistra) dispatch(onGetProfesores());
+  }, [dispatch, soloRegistra]);
 
   const filtrosConfig = [
     { name: 'fecha_desde', label: 'Desde', type: 'date' },
     { name: 'fecha_hasta', label: 'Hasta', type: 'date' },
-    { name: 'profesor_id', label: 'Profesor', type: 'select', options: profesores ?? [] },
+    ...(soloRegistra ? [] : [{ name: 'profesor_id', label: 'Profesor', type: 'select', options: profesores ?? [] }]),
     {
       name: 'estado',
       label: 'Estado',
@@ -82,7 +88,11 @@ const ClasesPrivadas = ({ route }) => {
       cells={cells}
       filtrosConfig={filtrosConfig}
       titulo={titulo}
-      subtitulo='Para alumnos con paquete o para una persona que solo toma una clase suelta. Asistir, no asistir o cancelar tarde descuenta la clase; cancelar a tiempo no.'
+      subtitulo={
+        soloRegistra
+          ? 'Tus clases personalizadas. Asistir, no asistir o cancelar tarde descuenta la clase del paquete del alumno; cancelar a tiempo no.'
+          : 'Para alumnos con paquete o para una persona que solo toma una clase suelta. Asistir, no asistir o cancelar tarde descuenta la clase; cancelar a tiempo no.'
+      }
       urlAyuda={urlAyuda}
       permisos={permisos}
       entidadNombre='Clase'

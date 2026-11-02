@@ -3,7 +3,7 @@
 // La persona no registrada (clase suelta) no tiene paquete: solo se anota su resultado.
 // El cobro de la clase va aparte (CobrarClase): es de otro perfil.
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import {
   Alert,
@@ -37,6 +37,8 @@ const opcionDe = (resultado, descuenta) =>
 const RegistrarClase = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  // Se vuelve a donde se abrió: la lista de clases o Mis cursos (el profesor).
+  const volverA = useLocation().state?.desde ?? '/clases-privadas';
   const dispatch = useDispatch();
   const [clase, setClase] = useState(null);
   const [resultados, setResultados] = useState({});
@@ -76,7 +78,7 @@ const RegistrarClase = () => {
       })
       .then(({ data }) => {
         dispatch(showMessage(data.mensajes));
-        navigate('/clases-privadas');
+        navigate(volverA);
       })
       .catch((e) => setErrorCobro(e?.response?.data?.mensajes?.[0] ?? 'No se pudo registrar.'))
       .finally(() => setGuardando(false));
@@ -86,7 +88,7 @@ const RegistrarClase = () => {
     <Box sx={{ maxWidth: 900 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
         <Tooltip title='Volver'>
-          <IconButton onClick={() => navigate('/clases-privadas')}>
+          <IconButton onClick={() => navigate(volverA)}>
             <ArrowBackIosIcon />
           </IconButton>
         </Tooltip>
@@ -170,7 +172,7 @@ const RegistrarClase = () => {
       )}
 
       <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 3 }}>
-        <Button onClick={() => navigate('/clases-privadas')}>Cancelar</Button>
+        <Button onClick={() => navigate(volverA)}>Cancelar</Button>
         <Button variant='contained' onClick={guardar} disabled={guardando}>
           Guardar resultado
         </Button>
