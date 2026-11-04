@@ -13,6 +13,7 @@ const columnas = (variasSedes) => [
   { id: 'fecha_hasta', typeHead: 'string', label: 'Hasta', value: (v) => v, align: 'left', mostrarInicio: true, ordenable: false },
   { id: 'dias', typeHead: 'numeric', label: 'Días', value: (v) => v, align: 'center', mostrarInicio: true, ordenable: false },
   { id: 'motivo', typeHead: 'string', label: 'Motivo', value: (v) => v, align: 'left', mostrarInicio: true, ordenable: false },
+  { id: 'cursos_nombres', typeHead: 'string', label: 'Cursos', value: (v) => v, align: 'left', mostrarInicio: true, ordenable: false },
   celdaSede(variasSedes),
   ...auditCells,
 ];
@@ -31,7 +32,7 @@ const Cierres = ({ route }) => {
       onDelete={onDelete}
       cells={cells}
       titulo={titulo}
-      subtitulo='Fechas en que la academia no dicta clases: igual que los festivos, esas clases se corren a la semana siguiente.'
+      subtitulo='Fechas en que la academia, una sede o algunos cursos no dictan clases: igual que los festivos, esas clases se corren a la semana siguiente.'
       urlAyuda={urlAyuda}
       permisos={permisos}
       entidadNombre='Cierre'
