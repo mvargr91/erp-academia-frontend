@@ -30,7 +30,6 @@ const initialValues = (registro) => ({
   correo: registro?.correo ?? '',
   acudiente_nombre: registro?.acudiente_nombre ?? '',
   acudiente_telefono: registro?.acudiente_telefono ?? '',
-  observacion: registro?.observacion ?? '',
   estado: aRadio(registro?.estado),
 });
 
@@ -72,7 +71,6 @@ const VacacionalAlumnoCreador = ({ alumno, accion, handleOnClose, updateColeccio
           />
           <MyTextField fullWidth label='Acudiente' name='acudiente_nombre' disabled={disabled} />
           <MyTextField fullWidth label='Teléfono del acudiente' name='acudiente_telefono' disabled={disabled} />
-          <MyTextField className='campo-completo' fullWidth label='Observación' name='observacion' disabled={disabled} />
           <MyRadioField className='campo-completo' label='Estado' name='estado' disabled={disabled} required options={OPCIONES_ESTADO} />
         </AppCrudForm>
       )}

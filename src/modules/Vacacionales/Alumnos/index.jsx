@@ -1,4 +1,5 @@
-// Alumnos de vacacionales: un público aparte de los alumnos de la academia.
+// Alumnos de vacacionales: son los alumnos de la academia; aquí se ven los que toman vacacionales o no
+// tienen cursos regulares. Al buscar por nombre aparecen todos los de la academia.
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
@@ -41,7 +42,7 @@ const VacacionalAlumnos = ({ route }) => {
       cells={cells}
       filtrosConfig={filtrosConfig}
       titulo={titulo}
-      subtitulo='Este listado es solo de vacacionales: no se mezcla con los alumnos de la academia.'
+      subtitulo='Alumnos que toman vacacionales o no tienen cursos regulares. Son los mismos de Alumnos: buscando por nombre aparecen todos los de la academia.'
       urlAyuda={urlAyuda}
       permisos={permisos}
       entidadNombre='Alumno'

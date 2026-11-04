@@ -18,6 +18,7 @@ const dinero = { ...texto, typeHead: 'numeric', value: formatoMoneda, align: 'ri
 const columnas = (variasSedes) => [
   { id: 'alumno_nombre', label: 'Alumno', ...texto, mostrarInicio: true },
   { id: 'curso_nombre', label: 'Curso vacacional', ...texto, mostrarInicio: true },
+  { id: 'pareja_nombre', label: 'Pareja', ...texto, mostrarInicio: false },
   celdaSede(variasSedes),
   { id: 'fechas_texto', label: 'Clases que toma', ...texto, mostrarInicio: true },
   {

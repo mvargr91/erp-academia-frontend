@@ -1,7 +1,7 @@
 // Tarifas de la academia, la única pantalla de precios: por cada modalidad, lo que paga un alumno por
 // ciclo según cuántos cursos de esa modalidad toma (individual y en pareja), y los precios de las clases
-// personalizadas (clase suelta o paquete, con precio aparte para alumnos de cursos). Los cursos no
-// tienen precio propio.
+// personalizadas (clase suelta o paquete, con precio aparte para alumnos de cursos) y una escala para
+// todos los cursos vacacionales. Los cursos no tienen precio propio.
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -56,8 +56,9 @@ const numero = (texto) => (texto === '' || texto === null || texto === undefined
 const escalonInvalido = (totales) =>
   totales.findIndex((t, i) => numero(t) === null || numero(t) < 0 || (i > 0 && numero(t) < (numero(totales[i - 1]) ?? 0)));
 
-const Escala = ({ tipo, totales, onChange, puedeEditar, periodo }) => {
-  const [titulo, explicacion, personas] = ESCALAS[tipo];
+const Escala = ({ tipo, totales, onChange, puedeEditar, periodo, explicacion: otraExplicacion }) => {
+  const [titulo, explicacionModalidad, personas] = ESCALAS[tipo];
+  const explicacion = otraExplicacion ?? explicacionModalidad;
   const invalido = escalonInvalido(totales);
 
   return (
@@ -141,8 +142,47 @@ Escala.propTypes = {
   totales: PropTypes.array.isRequired,
   onChange: PropTypes.func.isRequired,
   puedeEditar: PropTypes.bool,
-  // 'ciclo' o 'mes', según cómo se cobra la modalidad.
+  // 'ciclo' o 'mes', según cómo se cobra la modalidad ('temporada' en vacacionales).
   periodo: PropTypes.string.isRequired,
+  // Reemplaza la explicación de la escala (la de vacacionales no habla de modalidades).
+  explicacion: PropTypes.string,
+};
+
+const EXPLICACION_VACACIONALES = {
+  individual:
+    'Total que paga un alumno en la temporada según cuántos cursos vacacionales toma (los que no han terminado). El valor de 1 curso es el precio de un curso vacacional. Si se deja vacío, cada curso cobra el valor que tiene en Cursos vacacionales.',
+  pareja:
+    'Total que pagan las dos personas cuando toman el curso vacacional en pareja (se elige al inscribir). Si se deja vacío, cada uno paga la tarifa individual.',
+};
+
+// Precio de los cursos vacacionales: una sola escala para todos, individual y en pareja.
+const PreciosVacacionales = ({ escalas, onChange, puedeEditar }) => (
+  <Box sx={{ mb: 3 }}>
+    <Typography variant='h4' sx={{ fontWeight: 'bold', mb: 1 }}>
+      Cursos vacacionales
+    </Typography>
+    <Typography variant='body2' color='text.secondary' sx={{ mb: 2 }}>
+      Una tarifa para todos los vacacionales, tengan las clases que tengan. El valor se propone al inscribir y se puede ajustar en la
+      inscripción; cambiar la tarifa no modifica las inscripciones ya hechas.
+    </Typography>
+    {Object.keys(ESCALAS).map((tipo) => (
+      <Escala
+        key={`vacacionales-${tipo}`}
+        tipo={tipo}
+        totales={escalas[tipo]}
+        onChange={(totales) => onChange({ ...escalas, [tipo]: totales })}
+        puedeEditar={puedeEditar}
+        periodo='temporada'
+        explicacion={EXPLICACION_VACACIONALES[tipo]}
+      />
+    ))}
+  </Box>
+);
+
+PreciosVacacionales.propTypes = {
+  escalas: PropTypes.object.isRequired,
+  onChange: PropTypes.func.isRequired,
+  puedeEditar: PropTypes.bool,
 };
 
 const paqueteInvalido = (p) => !String(p.nombre).trim() || !(Number(p.clases) >= 1) || numero(p.valor) === null || numero(p.valor) < 0;
@@ -328,6 +368,7 @@ const Tarifas = ({ route }) => {
       ...Object.fromEntries(Object.keys(ESCALAS).map((tipo) => [tipo, (m[tipo] ?? []).map(String)])),
     })),
     personalizadas: (datos.personalizadas ?? []).map((p) => ({ ...p, valor_alumno: p.valor_alumno ?? '', vigencia_dias: p.vigencia_dias ?? '' })),
+    vacacionales: Object.fromEntries(Object.keys(ESCALAS).map((tipo) => [tipo, (datos.vacacionales?.[tipo] ?? []).map(String)])),
   });
 
   useEffect(() => {
@@ -355,6 +396,7 @@ const Tarifas = ({ route }) => {
           valor_alumno: numero(p.valor_alumno),
           vigencia_dias: numero(p.vigencia_dias),
         })),
+        vacacionales: Object.fromEntries(Object.keys(ESCALAS).map((tipo) => [tipo, escalas.vacacionales[tipo].map(Number)])),
       })
       .then(({ data }) => {
         setEscalas(aTexto(data.datos));
@@ -367,7 +409,8 @@ const Tarifas = ({ route }) => {
   if (!escalas) {
     return error ? <Alert severity='error'>{error}</Alert> : <LinearProgress />;
   }
-  const hayInvalidos = escalas.modalidades.some(modalidadInvalida) || escalas.personalizadas.some(paqueteInvalido);
+  const hayInvalidos =
+    escalas.modalidades.some(modalidadInvalida) || escalas.personalizadas.some(paqueteInvalido) || modalidadInvalida(escalas.vacacionales);
 
   return (
     <Box sx={{ maxWidth: 1000 }}>
@@ -392,6 +435,11 @@ const Tarifas = ({ route }) => {
       <PreciosCursos
         modalidades={escalas.modalidades}
         onChange={(modalidades) => setEscalas({ ...escalas, modalidades })}
+        puedeEditar={puedeEditar}
+      />
+      <PreciosVacacionales
+        escalas={escalas.vacacionales}
+        onChange={(vacacionales) => setEscalas({ ...escalas, vacacionales })}
         puedeEditar={puedeEditar}
       />
       <Personalizadas

@@ -1,10 +1,12 @@
-// Inscripción de un alumno a un curso vacacional: se eligen en el calendario las clases que tomará
-// (entre los días del curso). Si el curso tiene justo las clases de cada alumno, quedan todas marcadas.
-import React, { useEffect } from 'react';
+// Inscripción de un alumno (de la academia) a un curso vacacional: se eligen en el calendario las clases
+// que tomará (entre los días del curso). Si el curso tiene justo las clases de cada alumno, quedan todas
+// marcadas. El valor lo propone la tarifa de vacacionales (cuántos toma en la temporada y si paga en pareja).
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import * as yup from 'yup';
 import { useDispatch, useSelector } from 'react-redux';
 import { useFormikContext } from 'formik';
+import jwtAxios from '../../../../@crema/services/auth/jwt-auth';
 import AppCrudDialog from '../../../../shared/components/AppCrudDialog';
 import AppCrudForm, { SeccionForm } from '../../../../shared/components/AppCrudForm';
 import MyTextField from '../../../../shared/components/MyTextField';
@@ -32,7 +34,13 @@ const hoy = () => new Date(Date.now() - new Date().getTimezoneOffset() * 60000).
 const validationSchema = yup.object({
   alumno_id: yup.mixed().required('Elige el alumno'),
   curso_id: yup.mixed().required('Elige el curso'),
-  valor: yup.number().typeError('Debe ser un número').required('Requerido').min(0, 'No puede ser negativo'),
+  // Vacío al editar = se recalcula con la tarifa (p. ej. al cambiar la pareja).
+  valor: yup
+    .number()
+    .transform((v, original) => (original === '' ? null : v))
+    .typeError('Debe ser un número')
+    .nullable()
+    .min(0, 'No puede ser negativo'),
   fechas: yup.array().min(1, 'Marca en el calendario las clases que tomará el alumno'),
 });
 
@@ -40,6 +48,7 @@ const initialValues = (registro, inicial) => ({
   id: registro?.id ?? '',
   alumno_id: registro?.alumno_id ?? inicial.alumno_id,
   curso_id: registro?.curso_id ?? inicial.curso_id,
+  pareja_alumno_id: registro?.pareja_alumno_id ?? '',
   fecha_inscripcion: registro?.fecha_inscripcion ?? hoy(),
   valor: registro?.valor ?? '',
   observacion: registro?.observacion ?? '',
@@ -54,28 +63,70 @@ const Campos = ({ accion, titulo, handleOnClose, saving, alumnos, cursos, regist
   const curso = cursos.find((c) => String(c.id) === String(values.curso_id));
   const diasCurso = curso?.fechas ?? registro?.fechas_curso ?? [];
   const clases = curso?.clases_por_alumno ?? registro?.clases_por_alumno ?? 0;
+  const [regla, setRegla] = useState('');
+  const parejas = alumnos.filter((a) => String(a.id) !== String(values.alumno_id));
 
-  // Al elegir el curso se propone su valor y, si no hay nada que escoger, todas sus clases.
+  // Al elegir el curso, si no hay nada que escoger, van todas sus clases.
   useEffect(() => {
     if (creando && curso) {
-      setFieldValue('valor', curso.valor);
       setFieldValue('fechas', curso.fechas.length <= curso.clases_por_alumno ? curso.fechas : []);
     }
   }, [creando, curso?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // El valor lo propone la tarifa: cuántos vacacionales toma el alumno en la temporada y si paga en pareja.
+  useEffect(() => {
+    if (!creando || !curso) return;
+    jwtAxios
+      .post('vacacionales-matriculas/cotizar', {
+        alumno_id: values.alumno_id || null,
+        cursos: [{ curso_id: curso.id, pareja_alumno_id: values.pareja_alumno_id || null }],
+      })
+      .then(({ data }) => {
+        setFieldValue('valor', data[0]?.valor ?? curso.valor);
+        setRegla(data[0]?.regla ?? '');
+      })
+      .catch(() => setFieldValue('valor', curso.valor));
+  }, [creando, curso?.id, values.alumno_id, values.pareja_alumno_id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Al cambiar la pareja de una inscripción ya hecha, el valor se recalcula al guardar.
+  useEffect(() => {
+    if (accion === 'editar' && registro && String(values.pareja_alumno_id ?? '') !== String(registro.pareja_alumno_id ?? '')) {
+      setFieldValue('valor', '');
+    }
+  }, [values.pareja_alumno_id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <AppCrudForm titulo={titulo} accion={accion} handleOnClose={handleOnClose} saving={saving}>
       <SeccionForm titulo='Inscripción' />
       <FormikAutocomplete
         name='alumno_id'
-        label='Alumno de vacacionales'
+        label='Alumno'
         options={alumnos}
         disabled={!creando}
         textFieldProps={{ variant: 'standard' }}
       />
       <FormikAutocomplete name='curso_id' label='Curso vacacional' options={cursos} disabled={!creando} textFieldProps={{ variant: 'standard' }} />
       <MyDateField label='Fecha de inscripción' name='fecha_inscripcion' disabled={disabled} />
-      <MyTextField fullWidth type='number' label='Valor' name='valor' disabled={disabled} required />
+      <FormikAutocomplete
+        name='pareja_alumno_id'
+        label='Paga en pareja con (opcional)'
+        options={parejas}
+        disabled={disabled}
+        textFieldProps={{
+          variant: 'standard',
+          helperText: 'Los dos pagan en pareja este curso: cada uno la mitad de la tarifa de pareja.',
+        }}
+      />
+      <MyTextField
+        fullWidth
+        type='number'
+        label='Valor'
+        name='valor'
+        disabled={disabled}
+        helperText={
+          values.valor === '' && !creando ? 'Se recalcula con la tarifa al guardar' : creando && regla ? `Según la tarifa: ${regla}` : ''
+        }
+      />
 
       {(curso || registro) && (
         <>

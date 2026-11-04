@@ -1,6 +1,7 @@
-// Matrícula rápida de vacacionales: crea el alumno (o elige uno existente), lo inscribe en uno o
+// Matrícula rápida de vacacionales: elige un alumno de la academia (o lo crea), lo inscribe en uno o
 // varios cursos vacacionales con las clases que toma en cada uno y registra el pago, todo en un
-// solo guardado. Es aparte de la matrícula rápida de la academia.
+// solo guardado. El valor de cada curso lo propone la tarifa de vacacionales (cuántos toma en la
+// temporada y si paga en pareja). Es aparte de la matrícula rápida de los cursos regulares.
 import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +10,7 @@ import * as yup from 'yup';
 import dayjs from 'dayjs';
 import {
   Alert,
+  Autocomplete,
   Box,
   Button,
   Card,
@@ -75,6 +77,9 @@ const valoresIniciales = () => ({
   cursos: [],
   // curso_id => clases (fechas) que toma el alumno, en los cursos donde se escogen
   fechas: {},
+  // curso_id => alumno con quien paga en pareja, y curso_id => valor que propone la tarifa
+  parejas: {},
+  precios: {},
   pagar: true,
   monto: '',
   fecha_pago: dayjs().format('YYYY-MM-DD'),
@@ -97,7 +102,12 @@ const payload = (v, elegidos) => ({
           acudiente_telefono: v.acudiente_telefono,
         },
       }),
-  cursos: elegidos.map((c) => ({ curso_id: c.id, fechas: fechasDe(c, v) })),
+  cursos: elegidos.map((c) => ({
+    curso_id: c.id,
+    fechas: fechasDe(c, v),
+    valor: precioDe(c, v),
+    pareja_alumno_id: v.parejas[c.id] || null,
+  })),
   pago: v.pagar
     ? { monto: Number(v.monto), fecha_pago: v.fecha_pago, metodo_pago: v.metodo_pago, referencia: v.referencia }
     : null,
@@ -123,6 +133,9 @@ Titulo.propTypes = { children: PropTypes.node, ayuda: PropTypes.string };
 const elegidosDe = (catalogos, values) =>
   values.cursos.map((id) => catalogos.cursos.find((c) => String(c.id) === String(id))).filter(Boolean);
 
+// Valor del curso según la tarifa (mientras llega la cotización, el valor propio del curso).
+const precioDe = (curso, values) => Number(values.precios[curso.id] ?? curso.valor);
+
 const Contenido = ({ catalogos }) => {
   const { values, setFieldValue, errors, submitCount } = useFormikContext();
   const { variasSedes } = useSedes();
@@ -133,7 +146,25 @@ const Contenido = ({ catalogos }) => {
   const alumnoId = values.tipo === 'existente' ? values.alumno_id : '';
 
   const elegidos = elegidosDe(catalogos, values);
-  const total = elegidos.reduce((suma, c) => suma + Number(c.valor), 0);
+  const total = elegidos.reduce((suma, c) => suma + precioDe(c, values), 0);
+  const parejasPosibles = catalogos.alumnos.filter((a) => String(a.id) !== String(alumnoId));
+
+  // Valor de cada curso marcado según la tarifa: depende del alumno, del orden y de las parejas.
+  const consulta = JSON.stringify({ alumnoId, cursos: values.cursos, parejas: values.parejas });
+  useEffect(() => {
+    if (values.cursos.length === 0) return undefined;
+    let vigente = true;
+    jwtAxios
+      .post('vacacionales-matriculas/cotizar', {
+        alumno_id: alumnoId || null,
+        cursos: values.cursos.map((id) => ({ curso_id: id, pareja_alumno_id: values.parejas[id] || null })),
+      })
+      .then(({ data }) => vigente && setFieldValue('precios', Object.fromEntries(data.map((c) => [c.curso_id, c.valor]))))
+      .catch(() => {});
+    return () => {
+      vigente = false;
+    };
+  }, [consulta]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // El monto sigue al total mientras no se haya escrito otro valor (un abono).
   useEffect(() => {
@@ -182,7 +213,7 @@ const Contenido = ({ catalogos }) => {
     <>
       <Card sx={sombra}>
         <CardContent>
-          <Titulo ayuda='Queda en el listado de alumnos de vacacionales, aparte de los alumnos de la academia.'>1. Alumno</Titulo>
+          <Titulo ayuda='Se elige entre los alumnos de la academia; el alumno nuevo también queda en Alumnos.'>1. Alumno</Titulo>
           <ToggleButtonGroup
             exclusive
             size='small'
@@ -195,7 +226,7 @@ const Contenido = ({ catalogos }) => {
             <ToggleButton value='existente'>Alumno existente</ToggleButton>
           </ToggleButtonGroup>
           {values.tipo === 'existente' ? (
-            <FormikAutocomplete name='alumno_id' label='Alumno de vacacionales' options={catalogos.alumnos} textFieldProps={{ variant: 'standard' }} />
+            <FormikAutocomplete name='alumno_id' label='Alumno' options={catalogos.alumnos} textFieldProps={{ variant: 'standard' }} />
           ) : (
             <Box sx={dosColumnas}>
               <MyTextField autoFocus fullWidth label='Nombres' name='nombres' required />
@@ -295,7 +326,7 @@ const Contenido = ({ catalogos }) => {
                           {variasSedes && <TableCell>{c.sede_nombre}</TableCell>}
                           <TableCell>{(c.profesor_nombre ?? '').trim()}</TableCell>
                           <TableCell>{c.cupo_max ? `${c.inscritos} (cupo ${c.cupo_max} por clase)` : c.inscritos}</TableCell>
-                          <TableCell align='right'>{formatoMoneda(c.valor)}</TableCell>
+                          <TableCell align='right'>{marcado ? formatoMoneda(precioDe(c, values)) : ''}</TableCell>
                         </TableRow>
                       );
                     })}
@@ -315,6 +346,29 @@ const Contenido = ({ catalogos }) => {
                 </span>
                 <span>{formatoMoneda(total)}</span>
               </Box>
+              {elegidos.length > 0 && (
+                <Box sx={{ mt: 4 }}>
+                  <Typography sx={{ fontWeight: 'bold' }}>¿Paga en pareja?</Typography>
+                  <Typography variant='body2' color='text.secondary' sx={{ mb: 2 }}>
+                    Si toma el curso en pareja, elige con quién: cada uno paga la mitad de la tarifa de pareja. Déjalo vacío si paga solo.
+                  </Typography>
+                  {elegidos.map((c) => (
+                    <Box key={c.id} sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, flexWrap: 'wrap' }}>
+                      <Typography sx={{ flex: '1 1 200px' }}>{c.nombre}</Typography>
+                      <Autocomplete
+                        sx={{ flex: '2 1 280px' }}
+                        options={parejasPosibles}
+                        getOptionLabel={(a) => a?.nombre ?? ''}
+                        isOptionEqualToValue={(a, b) => String(a.id) === String(b.id)}
+                        value={parejasPosibles.find((a) => String(a.id) === String(values.parejas[c.id])) ?? null}
+                        onChange={(_, a) => setFieldValue('parejas', { ...values.parejas, [c.id]: a?.id ?? '' })}
+                        renderInput={(params) => <TextField {...params} variant='standard' label='Paga en pareja con (opcional)' />}
+                      />
+                      <Typography sx={{ minWidth: 110, textAlign: 'right' }}>{formatoMoneda(precioDe(c, values))}</Typography>
+                    </Box>
+                  ))}
+                </Box>
+              )}
               {porEscoger.length > 0 && (
                 <Box sx={{ mt: 4 }}>
                   <Typography sx={{ fontWeight: 'bold' }}>¿Qué clases toma?</Typography>
@@ -401,7 +455,7 @@ const VacacionalMatriculas = ({ route }) => {
 
   const guardar = (values, { setSubmitting }) => {
     const elegidos = elegidosDe(catalogos, values);
-    const total = elegidos.reduce((suma, c) => suma + Number(c.valor), 0);
+    const total = elegidos.reduce((suma, c) => suma + precioDe(c, values), 0);
     const sinClases = elegidos.find((c) => fechasDe(c, values).length === 0);
     const problema =
       (sinClases && `Marca en el calendario las clases que toma en «${sinClases.nombre}».`) ||
