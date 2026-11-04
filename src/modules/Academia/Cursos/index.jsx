@@ -1,12 +1,14 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AppCrudTable, { auditCells } from '../../../shared/components/AppCrudTable';
 import usePermisosOpcion from '../../../shared/hooks/usePermisosOpcion';
 import { accionesEnPagina } from '../../../shared/components/PaginaCrud';
 import useCrudModulo from '../../../shared/hooks/useCrudModulo';
 import { onGetColeccion, onDelete } from '../../../@crema/redux/features/cursos/cursosSlice';
+import { onGetColeccionLigera as onGetProfesores } from '../../../@crema/redux/features/profesores/profesoresSlice';
 import { useSedes, celdaSede } from '../../../shared/sedes';
 import {
   DIAS_SEMANA,
@@ -19,7 +21,7 @@ import {
 const columnas = (variasSedes) => [
   { id: 'ritmo_nombre', typeHead: 'string', label: 'Ritmo', value: (v) => v, align: 'left', mostrarInicio: true },
   celdaSede(variasSedes, { ordenable: true }),
-  { id: 'profesor_nombre', typeHead: 'string', label: 'Profesor', value: (v) => v, align: 'left', mostrarInicio: false },
+  { id: 'profesor_nombre', typeHead: 'string', label: 'Profesor', value: (v) => v, align: 'left', mostrarInicio: true },
   { id: 'modalidad_nombre', typeHead: 'string', label: 'Modalidad', value: (v) => v, align: 'left', mostrarInicio: false },
   { id: 'duracion_minutos', typeHead: 'numeric', label: 'Duración (min)', value: (v) => v, align: 'center', mostrarInicio: false, ordenable: false },
   { id: 'dia', typeHead: 'string', label: 'Día', value: (v) => nombreDe(DIAS_SEMANA, v), align: 'left', mostrarInicio: true },
@@ -30,7 +32,6 @@ const columnas = (variasSedes) => [
   ...auditCells,
 ];
 
-const filtrosConfig = [{ name: 'nombre', label: 'Ritmo', type: 'text' }];
 
 const Cursos = ({ route }) => {
   const { variasSedes } = useSedes();
@@ -38,6 +39,18 @@ const Cursos = ({ route }) => {
   const { titulo, urlAyuda, permisos } = usePermisosOpcion(route.path);
   const { refreshKey } = useCrudModulo();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { coleccionLigera: profesores } = useSelector((s) => s.profesores);
+
+  useEffect(() => {
+    dispatch(onGetProfesores());
+  }, [dispatch]);
+
+  const filtrosConfig = [
+    { name: 'nombre', label: 'Ritmo', type: 'text' },
+    { name: 'dia', label: 'Día', type: 'select', options: DIAS_SEMANA },
+    { name: 'profesor_id', label: 'Profesor', type: 'select', options: profesores ?? [] },
+  ];
 
   return (
     <>
