@@ -30,7 +30,7 @@ const columnas = (variasSedes) => [
   ...auditCells,
 ];
 
-const filtrosConfig = [{ name: 'nombre', label: 'Nombre o apellido', type: 'text' }];
+const filtrosConfig = [{ name: 'nombre', label: 'Nombre completo', type: 'text' }];
 
 const Alumnos = ({ route }) => {
   const { variasSedes } = useSedes();

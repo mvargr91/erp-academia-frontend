@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useFormikContext } from 'formik';
 import { useDispatch } from 'react-redux';
-import { Alert, Box, Button } from '@mui/material';
+import { Alert, Box, Button, Typography } from '@mui/material';
 import MoneyOffIcon from '@mui/icons-material/MoneyOff';
 import jwtAxios from '../../../../@crema/services/auth/jwt-auth';
 import AppCrudForm, { SeccionForm } from '../../../../shared/components/AppCrudForm';
@@ -11,15 +11,23 @@ import MySelectField from '../../../../shared/components/MySelectField';
 import MyDateField from '../../../../shared/components/MyDateField';
 import FormikAutocomplete from '../../../../shared/components/FormikAutocomplete';
 import { CampoSede } from '../../../../shared/sedes';
-import { METODOS_PAGO } from '../../../../shared/constants/Academia';
+import { DIAS_SEMANA, METODOS_PAGO, nombreDe } from '../../../../shared/constants/Academia';
 import usePermisosOpcion from '../../../../shared/hooks/usePermisosOpcion';
 import { showMessage } from '../../../../@crema/redux/features/cammon/commonSlice';
+
+// Día, hora y profesor del curso: va en letra pequeña bajo el nombre.
+const detalleCurso = (c) =>
+  [c?.dia !== undefined && c?.dia !== null ? `${nombreDe(DIAS_SEMANA, Number(c.dia))} ${c.hora ?? ''}`.trim() : null, c?.profesor_nombre]
+    .filter(Boolean)
+    .join(' · ');
 
 const PagoForm = (props) => {
   const { accion, titulo, handleOnClose, saving, alumnos, cursos } = props;
   const disabled = accion === 'ver';
-  const { values } = useFormikContext();
+  const { values, setFieldValue } = useFormikContext();
   const [paquetes, setPaquetes] = useState([]);
+  // Cursos en que está matriculado el alumno elegido (null mientras carga).
+  const [cursosAlumno, setCursosAlumno] = useState(null);
   const dispatch = useDispatch();
   // Condonar (perdonar la deuda sin recibir dinero) es un permiso aparte de registrar pagos.
   const puedeCondonar = usePermisosOpcion('/pagos').permisos.indexOf('Condonar') >= 0;
@@ -58,6 +66,39 @@ const PagoForm = (props) => {
       .catch(() => setPaquetes([]));
   }, [values.alumno_id]);
 
+  // Al elegir el alumno, el curso se escoge entre los suyos; si solo tiene uno, se propone.
+  useEffect(() => {
+    if (!values.alumno_id) {
+      setCursosAlumno([]);
+      return;
+    }
+    setCursosAlumno(null);
+    jwtAxios
+      .get('cursos', { params: { ligera: 1, alumno_id: values.alumno_id } })
+      .then(({ data }) => {
+        setCursosAlumno(data);
+        if (accion !== 'crear') return;
+        if (values.curso_id && !data.some((c) => String(c.id) === String(values.curso_id))) setFieldValue('curso_id', '');
+        if (!values.curso_id && !values.paquete_id && data.length === 1) setFieldValue('curso_id', data[0].id);
+      })
+      .catch(() => setCursosAlumno([]));
+  }, [values.alumno_id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Un pago ya guardado puede ser de un curso del que el alumno ya se retiró: se conserva en la lista.
+  const guardado = cursos.find((c) => String(c.id) === String(values.curso_id));
+  const opcionesCurso = [
+    ...(cursosAlumno ?? []),
+    ...(guardado && !(cursosAlumno ?? []).some((c) => String(c.id) === String(guardado.id)) ? [guardado] : []),
+  ];
+  const cursoElegido = opcionesCurso.find((c) => String(c.id) === String(values.curso_id));
+  const ayudaCurso = !values.alumno_id
+    ? 'Elige primero el alumno'
+    : cursoElegido
+    ? detalleCurso(cursoElegido)
+    : cursosAlumno?.length === 0
+    ? 'El alumno no está matriculado en ningún curso activo'
+    : '';
+
   return (
     <AppCrudForm titulo={titulo} accion={accion} handleOnClose={handleOnClose} saving={saving}>
       <SeccionForm titulo='Datos del pago' />
@@ -70,7 +111,25 @@ const PagoForm = (props) => {
         textFieldProps={{ variant: 'standard' }}
       />
       {!values.paquete_id && (
-        <FormikAutocomplete name='curso_id' label='Curso' options={cursos} disabled={disabled} textFieldProps={{ variant: 'standard' }} />
+        <FormikAutocomplete
+          name='curso_id'
+          label='Curso'
+          options={opcionesCurso}
+          loading={cursosAlumno === null}
+          disabled={disabled || !values.alumno_id}
+          getOptionLabel={(c) => c.ritmo ?? c.nombre}
+          renderOption={(liProps, c) => (
+            <li {...liProps} key={c.id}>
+              <Box>
+                <Typography variant='body2'>{c.ritmo ?? c.nombre}</Typography>
+                <Typography variant='caption' color='text.secondary'>
+                  {detalleCurso(c)}
+                </Typography>
+              </Box>
+            </li>
+          )}
+          textFieldProps={{ variant: 'standard', helperText: ayudaCurso }}
+        />
       )}
       <MyTextField fullWidth type='number' label='Monto' name='monto' disabled={disabled} required />
       <MyDateField label='Fecha de pago' name='fecha_pago' disabled={disabled} />
