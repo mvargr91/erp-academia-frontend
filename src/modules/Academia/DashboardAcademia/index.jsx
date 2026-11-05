@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import {
   Box,
   Card,
+  CardActionArea,
   CardContent,
   Grid,
   Typography,
@@ -26,34 +27,38 @@ import jwtAxios from '../../../@crema/services/auth/jwt-auth';
 import usePermisosOpcion from '../../../shared/hooks/usePermisosOpcion';
 import { formatoMoneda } from '../../../shared/constants/Academia';
 import { useSedes } from '../../../shared/sedes';
+import DetalleIndicador from './DetalleIndicador';
 
-const Tarjeta = ({ titulo, valor, icono: Icono, color }) => (
+// Al hacer clic se abre la lista de registros que suman ese número.
+const Tarjeta = ({ titulo, valor, icono: Icono, color, onClick }) => (
   <Card sx={{ height: '100%', boxShadow: '0px 0px 5px 2px rgb(0 0 0 / 8%)' }}>
-    <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-      <Box
-        sx={{
-          width: 52,
-          height: 52,
-          borderRadius: '12px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: color,
-          color: 'white',
-          flexShrink: 0,
-        }}
-      >
-        <Icono />
-      </Box>
-      <Box sx={{ minWidth: 0 }}>
-        <Typography variant='h4' sx={{ fontWeight: 'bold' }} noWrap>
-          {valor}
-        </Typography>
-        <Typography variant='body2' color='text.secondary'>
-          {titulo}
-        </Typography>
-      </Box>
-    </CardContent>
+    <CardActionArea onClick={onClick} sx={{ height: '100%' }} title='Ver detalle'>
+      <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box
+          sx={{
+            width: 52,
+            height: 52,
+            borderRadius: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: color,
+            color: 'white',
+            flexShrink: 0,
+          }}
+        >
+          <Icono />
+        </Box>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography variant='h4' sx={{ fontWeight: 'bold' }} noWrap>
+            {valor}
+          </Typography>
+          <Typography variant='body2' color='text.secondary'>
+            {titulo}
+          </Typography>
+        </Box>
+      </CardContent>
+    </CardActionArea>
   </Card>
 );
 
@@ -62,9 +67,10 @@ Tarjeta.propTypes = {
   valor: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   icono: PropTypes.elementType.isRequired,
   color: PropTypes.string.isRequired,
+  onClick: PropTypes.func,
 };
 
-const BarraLista = ({ titulo, items, etiqueta, valor, formato }) => {
+const BarraLista = ({ titulo, items, etiqueta, valor, formato, onItem }) => {
   const theme = useTheme();
   const max = Math.max(1, ...items.map((it) => Number(valor(it)) || 0));
   return (
@@ -77,7 +83,12 @@ const BarraLista = ({ titulo, items, etiqueta, valor, formato }) => {
           <Typography color='text.secondary'>Sin datos.</Typography>
         ) : (
           items.map((it, i) => (
-            <Box key={i} sx={{ mb: 1.5 }}>
+            <Box
+              key={i}
+              onClick={onItem ? () => onItem(it) : undefined}
+              title={onItem ? 'Ver detalle' : undefined}
+              sx={{ mb: 1.5, ...(onItem && { cursor: 'pointer', borderRadius: 1, '&:hover': { backgroundColor: theme.palette.action.hover } }) }}
+            >
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                 <Typography variant='body2'>{etiqueta(it)}</Typography>
                 <Typography variant='body2' sx={{ fontWeight: 'bold' }}>
@@ -103,6 +114,8 @@ BarraLista.propTypes = {
   etiqueta: PropTypes.func.isRequired,
   valor: PropTypes.func.isRequired,
   formato: PropTypes.func,
+  // Clic en una barra: abre su detalle.
+  onItem: PropTypes.func,
 };
 
 const porcentaje = (valor) => (valor === null || valor === undefined ? '—' : `${valor} %`);
@@ -197,6 +210,9 @@ const DashboardAcademia = ({ route }) => {
   const { titulo, permisos } = usePermisosOpcion(route.path);
   const [data, setData] = useState(null);
   const [cargando, setCargando] = useState(true);
+  // Indicador cuyo detalle se está viendo ({ indicador, mes?, ritmo? }) o null.
+  const [detalle, setDetalle] = useState(null);
+  const ver = (indicador, extra = {}) => () => setDetalle({ indicador, ...extra });
   // El panel sigue al selector de sede del encabezado (cabecera X-Sede).
   const { sedeId, variasSedes } = useSedes();
 
@@ -242,25 +258,25 @@ const DashboardAcademia = ({ route }) => {
 
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6} md={3}>
-          <Tarjeta titulo='Alumnos activos' valor={t.alumnos_activos ?? 0} icono={GroupsIcon} color='#2E75B6' />
+          <Tarjeta onClick={ver('alumnos_activos')} titulo='Alumnos activos' valor={t.alumnos_activos ?? 0} icono={GroupsIcon} color='#2E75B6' />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Tarjeta titulo='Cursos activos' valor={t.cursos_activos ?? 0} icono={EventIcon} color='#7C4DFF' />
+          <Tarjeta onClick={ver('cursos_activos')} titulo='Cursos activos' valor={t.cursos_activos ?? 0} icono={EventIcon} color='#7C4DFF' />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Tarjeta titulo='Ingresos del mes' valor={formatoMoneda(t.ingresos_mes ?? 0)} icono={PaymentsIcon} color='green' />
+          <Tarjeta onClick={ver('ingresos_mes')} titulo='Ingresos del mes' valor={formatoMoneda(t.ingresos_mes ?? 0)} icono={PaymentsIcon} color='green' />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Tarjeta titulo='Matrículas activas' valor={t.matriculas_activas ?? 0} icono={HowToRegIcon} color='#00838F' />
+          <Tarjeta onClick={ver('matriculas_activas')} titulo='Matrículas activas' valor={t.matriculas_activas ?? 0} icono={HowToRegIcon} color='#00838F' />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Tarjeta titulo='Profesores activos' valor={t.profesores_activos ?? 0} icono={PersonIcon} color='#455A64' />
+          <Tarjeta onClick={ver('profesores_activos')} titulo='Profesores activos' valor={t.profesores_activos ?? 0} icono={PersonIcon} color='#455A64' />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Tarjeta titulo='Alumnos morosos' valor={t.morosos ?? 0} icono={WarningAmberIcon} color='#FE8500' />
+          <Tarjeta onClick={ver('morosos')} titulo='Alumnos morosos' valor={t.morosos ?? 0} icono={WarningAmberIcon} color='#FE8500' />
         </Grid>
         <Grid item xs={12} sm={6} md={6}>
-          <Tarjeta titulo='Saldo pendiente por cobrar' valor={formatoMoneda(t.saldo_pendiente ?? 0)} icono={AccountBalanceWalletIcon} color='#B80001' />
+          <Tarjeta onClick={ver('saldo_pendiente')} titulo='Saldo pendiente por cobrar' valor={formatoMoneda(t.saldo_pendiente ?? 0)} icono={AccountBalanceWalletIcon} color='#B80001' />
         </Grid>
       </Grid>
 
@@ -272,6 +288,7 @@ const DashboardAcademia = ({ route }) => {
             etiqueta={(it) => it.mes}
             valor={(it) => it.total}
             formato={formatoMoneda}
+            onItem={(it) => setDetalle({ indicador: 'ingresos', mes: it.clave })}
           />
         </Grid>
         <Grid item xs={12} md={6}>
@@ -280,9 +297,12 @@ const DashboardAcademia = ({ route }) => {
             items={data.alumnos_por_ritmo ?? []}
             etiqueta={(it) => it.nombre}
             valor={(it) => it.total}
+            onItem={(it) => setDetalle({ indicador: 'ritmo', ritmo: it.nombre })}
           />
         </Grid>
       </Grid>
+
+      <DetalleIndicador consulta={detalle} onClose={() => setDetalle(null)} />
 
       {data.por_sede?.length > 0 && (
         <ComparacionSedes sedes={data.por_sede} ingresosPorMes={data.ingresos_por_mes ?? []} />
