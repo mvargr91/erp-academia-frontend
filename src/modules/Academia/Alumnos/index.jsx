@@ -10,12 +10,31 @@ import useCrudModulo from '../../../shared/hooks/useCrudModulo';
 import { onGetColeccion, onDelete } from '../../../@crema/redux/features/alumnos/alumnosSlice';
 import { valorActivo, colorActivo, formatoMoneda } from '../../../shared/constants/Academia';
 
+// Qué toma el alumno: se deduce de sus matrículas activas y de sus inscripciones a vacacionales.
+const TIPOS = [
+  { id: 'cursos', nombre: 'Cursos regulares' },
+  { id: 'vacacionales', nombre: 'Vacacionales' },
+  { id: 'ambos', nombre: 'Ambos' },
+  { id: 'sin_cursos', nombre: 'Sin cursos' },
+];
+const COLORES_TIPO = { cursos: '#2E75B6', vacacionales: '#7C4DFF', ambos: 'green', sin_cursos: 'gray' };
+
 const columnas = (variasSedes) => [
   { id: 'nombres', typeHead: 'string', label: 'Nombres', value: (v) => v, align: 'left', mostrarInicio: true },
   { id: 'apellidos', typeHead: 'string', label: 'Apellidos', value: (v) => v, align: 'left', mostrarInicio: true },
   { id: 'documento', typeHead: 'string', label: 'Documento', value: (v) => v, align: 'left', mostrarInicio: false, ordenable: false },
   { id: 'telefono', typeHead: 'string', label: 'Teléfono', value: (v) => v, align: 'left', mostrarInicio: false, ordenable: false },
   celdaSede(variasSedes),
+  {
+    id: 'tipo',
+    typeHead: 'string',
+    label: 'Tipo',
+    value: (v) => TIPOS.find((t) => t.id === v)?.nombre ?? '',
+    cellColor: (v) => COLORES_TIPO[v] ?? '',
+    align: 'left',
+    mostrarInicio: true,
+    ordenable: false,
+  },
   {
     id: 'saldo_pendiente',
     typeHead: 'numeric',
@@ -30,7 +49,10 @@ const columnas = (variasSedes) => [
   ...auditCells,
 ];
 
-const filtrosConfig = [{ name: 'nombre', label: 'Nombre completo', type: 'text' }];
+const filtrosConfig = [
+  { name: 'nombre', label: 'Nombre completo', type: 'text' },
+  { name: 'tipo', label: 'Tipo', type: 'select', options: TIPOS },
+];
 
 const Alumnos = ({ route }) => {
   const { variasSedes } = useSedes();
