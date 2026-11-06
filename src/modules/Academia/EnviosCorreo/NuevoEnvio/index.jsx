@@ -37,7 +37,8 @@ const anuncioDe = (v) => {
     ['Días de clase', v.fechas_texto],
     v.hora_inicio && ['Horario', v.hora_fin ? `${v.hora_inicio} a ${v.hora_fin}` : v.hora_inicio],
     v.total_fechas > v.clases_por_alumno && ['Clases', `eliges ${v.clases_por_alumno} de los ${v.total_fechas} días`],
-    ['Valor', formatoMoneda(v.valor)],
+    // Con tarifa de vacacionales, la escala (1 curso, 2 cursos, en pareja); sin ella, el valor del curso.
+    ['Valor', v.precio_texto ?? formatoMoneda(v.valor)],
   ].filter(Boolean);
   return {
     ...VACIO,

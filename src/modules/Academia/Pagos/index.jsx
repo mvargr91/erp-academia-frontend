@@ -11,7 +11,8 @@ import { METODOS_PAGO, nombreDe, formatoMoneda } from '../../../shared/constants
 
 const columnas = (variasSedes) => [
   { id: 'alumno_nombre', typeHead: 'string', label: 'Alumno', value: (v) => v, align: 'left', mostrarInicio: true },
-  { id: 'curso_nombre', typeHead: 'string', label: 'Curso', value: (v) => v, align: 'left', mostrarInicio: true, ordenable: false },
+  // Curso (con día y hora), paquete, clase personalizada o clase suelta.
+  { id: 'concepto', typeHead: 'string', label: 'Concepto', value: (v) => v, align: 'left', mostrarInicio: true, ordenable: false },
   celdaSede(variasSedes, { ordenable: true }),
   { id: 'monto', typeHead: 'numeric', label: 'Monto', value: formatoMoneda, align: 'right', mostrarInicio: true },
   { id: 'fecha_pago', typeHead: 'string', label: 'Fecha de pago', value: (v) => v, align: 'left', mostrarInicio: true },
@@ -20,7 +21,19 @@ const columnas = (variasSedes) => [
   ...auditCells,
 ];
 
-const filtrosConfig = [{ name: 'nombre', label: 'Alumno', type: 'text' }];
+const filtrosConfig = [
+  { name: 'nombre', label: 'Alumno', type: 'text' },
+  {
+    name: 'concepto',
+    label: 'Concepto',
+    type: 'select',
+    options: [
+      { id: 'curso', nombre: 'Cursos' },
+      { id: 'paquete', nombre: 'Paquetes de clases' },
+      { id: 'clase', nombre: 'Clases personalizadas' },
+    ],
+  },
+];
 
 const Pagos = ({ route }) => {
   const { variasSedes } = useSedes();

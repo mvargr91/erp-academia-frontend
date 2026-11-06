@@ -1,7 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import * as yup from 'yup';
 import { useDispatch, useSelector } from 'react-redux';
+import { Link as RouterLink } from 'react-router-dom';
+import { Alert } from '@mui/material';
+import jwtAxios from '../../../../@crema/services/auth/jwt-auth';
 import AppCrudDialog from '../../../../shared/components/AppCrudDialog';
 import AppCrudForm, { SeccionForm } from '../../../../shared/components/AppCrudForm';
 import MyTextField from '../../../../shared/components/MyTextField';
@@ -17,7 +20,7 @@ import {
 } from '../../../../@crema/redux/features/vacacionales/vacacionalCursosSlice';
 import { onGetColeccionLigera as onGetRitmos } from '../../../../@crema/redux/features/ritmos/ritmosSlice';
 import { onGetColeccionLigera as onGetProfesores } from '../../../../@crema/redux/features/profesores/profesoresSlice';
-import { aRadio, OPCIONES_ESTADO } from '../../../../shared/constants/Academia';
+import { aRadio, OPCIONES_ESTADO, formatoMoneda } from '../../../../shared/constants/Academia';
 
 const validationSchema = yup.object({
   nombre: yup.string().required('Requerido').max(150, 'Máximo 150 caracteres'),
@@ -29,7 +32,13 @@ const validationSchema = yup.object({
     .test('dias', 'No puede ser mayor que los días marcados en el calendario', function (v) {
       return !this.parent.fechas?.length || !v || v <= this.parent.fechas.length;
     }),
-  valor: yup.number().typeError('Debe ser un número').required('Requerido').min(0, 'No puede ser negativo'),
+  // Solo se pide si la academia no tiene tarifa de vacacionales (el backend lo exige en ese caso).
+  valor: yup
+    .number()
+    .transform((valor, original) => (original === '' ? null : valor))
+    .typeError('Debe ser un número')
+    .nullable()
+    .min(0, 'No puede ser negativo'),
   cupo_max: yup
     .number()
     .transform((valor, original) => (original === '' ? null : valor))
@@ -55,7 +64,19 @@ const initialValues = (registro, sedePorDefecto) => ({
   estado: aRadio(registro?.estado),
 });
 
+// Escala como texto corto: "1 curso $120.000 · 2 cursos $200.000".
+const escalaTexto = (totales) =>
+  (totales ?? []).map((total, i) => `${i + 1} curso${i === 0 ? '' : 's'} ${formatoMoneda(total)}`).join(' · ');
+
 const VacacionalCursoCreador = ({ curso, accion, handleOnClose, updateColeccion, titulo }) => {
+  // Tarifa de vacacionales: si existe, el curso no lleva precio propio.
+  const [tarifa, setTarifa] = useState(null);
+  useEffect(() => {
+    jwtAxios
+      .get('vacacionales-cursos/tarifa')
+      .then(({ data }) => setTarifa(data))
+      .catch(() => setTarifa({ usa_tarifa: false }));
+  }, []);
   const dispatch = useDispatch();
   const { coleccionLigera: ritmos } = useSelector((s) => s.ritmos);
   const { coleccionLigera: profesores } = useSelector((s) => s.profesores);
@@ -113,7 +134,23 @@ const VacacionalCursoCreador = ({ curso, accion, handleOnClose, updateColeccion,
           <MyTextField fullWidth type='number' label='Cupo máximo por clase' name='cupo_max' disabled={disabled} />
 
           <SeccionForm titulo='Precio y estado' />
-          <MyTextField fullWidth type='number' label='Valor del curso' name='valor' disabled={disabled} required />
+          {tarifa?.usa_tarifa ? (
+            <Alert severity='info' className='campo-completo'>
+              El precio sale de la tarifa de vacacionales: {escalaTexto(tarifa.individual)}
+              {tarifa.pareja?.length > 0 && `; en pareja (los dos): ${escalaTexto(tarifa.pareja)}`}. Se cambia en{' '}
+              <RouterLink to='/tarifas'>Configuración → Tarifas</RouterLink>.
+            </Alert>
+          ) : (
+            <MyTextField
+              fullWidth
+              type='number'
+              label='Valor del curso'
+              name='valor'
+              disabled={disabled}
+              required
+              helperText='No hay tarifa de vacacionales: este es el precio. Si la defines en Configuración → Tarifas, este campo ya no se usa.'
+            />
+          )}
           <MyRadioField label='Estado' name='estado' disabled={disabled} required options={OPCIONES_ESTADO} />
           <MyTextField
             className='campo-completo'
