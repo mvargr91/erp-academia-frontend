@@ -62,10 +62,15 @@ const ahora = () => {
   return { fecha: d.slice(0, 10), hora: d.slice(11, 16) };
 };
 
-// Clase que se toma en el momento (p. ej. una clase suelta): queda con fecha y hora de ahora y, al
-// guardar, con la asistencia registrada (asistieron todos y se descuenta del paquete).
+// Clase suelta que se toma en el momento: queda con fecha y hora de ahora y, al guardar, realizada y
+// con la asistencia de la persona. Solo para una persona no registrada (sin alumnos en la clase).
 const TomadaAhora = () => {
   const { values, setFieldValue } = useFormikContext();
+  const esSuelta = Boolean(String(values.externo_nombre ?? '').trim()) && (values.alumnos ?? []).length === 0;
+  useEffect(() => {
+    if (!esSuelta && values.tomada_ahora) setFieldValue('tomada_ahora', false);
+  }, [esSuelta]); // eslint-disable-line react-hooks/exhaustive-deps
+  if (!esSuelta) return null;
   const cambiar = (marcada) => {
     setFieldValue('tomada_ahora', marcada);
     if (marcada) {
@@ -78,13 +83,10 @@ const TomadaAhora = () => {
     <Box className='campo-completo'>
       <FormControlLabel
         control={<Checkbox checked={Boolean(values.tomada_ahora)} onChange={(e) => cambiar(e.target.checked)} />}
-        label='Se toma ahora: registrar la asistencia al guardar'
+        label='La persona toma la clase ahora: queda realizada al guardar'
       />
       {values.tomada_ahora && (
-        <Alert severity='info'>
-          La clase queda realizada y con «Asistió» para todos; a los alumnos con paquete se les descuenta. Si se cobra aparte, márcala
-          como pagada abajo.
-        </Alert>
+        <Alert severity='info'>La clase queda con fecha y hora de ahora, realizada y con «Asistió». Si ya pagó, márcala como pagada abajo.</Alert>
       )}
     </Box>
   );
@@ -145,7 +147,6 @@ const ClasePrivadaCreador = ({ clase, accion, handleOnClose, updateColeccion, ti
             </Alert>
           )}
           <SeccionForm titulo='Clase' />
-          {accion === 'crear' && puedeRegistrar && <TomadaAhora />}
           <CampoSede disabled={ver} />
           <MyDateField label='Fecha' name='fecha' disabled={ver} />
           <MyTextField fullWidth type='time' label='Hora' name='hora' disabled={ver} required InputLabelProps={{ shrink: true }} />
@@ -166,6 +167,7 @@ const ClasePrivadaCreador = ({ clase, accion, handleOnClose, updateColeccion, ti
           </Alert>
           <MyTextField fullWidth label='Nombre de la persona' name='externo_nombre' disabled={ver} />
           <MyTextField fullWidth label='Teléfono' name='externo_telefono' disabled={ver} />
+          {accion === 'crear' && puedeRegistrar && <TomadaAhora />}
 
           <SeccionForm titulo='Cobro de la clase' />
           <Alert severity='info' className='campo-completo'>
