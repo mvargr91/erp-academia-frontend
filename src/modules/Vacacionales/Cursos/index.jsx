@@ -26,7 +26,16 @@ const columnas = (variasSedes) => [
   { id: 'fechas_texto', label: 'Días de clase', ...texto, mostrarInicio: true },
   { id: 'hora_inicio', label: 'Horario', ...texto, value: horario, mostrarInicio: true },
   { id: 'clases_por_alumno', label: 'Clases por alumno', ...texto, typeHead: 'numeric', align: 'right', mostrarInicio: false },
-  { id: 'valor', label: 'Valor', ...texto, typeHead: 'numeric', value: formatoMoneda, align: 'right', mostrarInicio: true },
+  // Con tarifa de vacacionales el curso no tiene precio propio: depende de cuántos tome el alumno.
+  {
+    id: 'valor',
+    label: 'Valor',
+    ...texto,
+    typeHead: 'numeric',
+    value: (v, row) => (row?.usa_tarifa ? 'Según tarifa' : formatoMoneda(v)),
+    align: 'right',
+    mostrarInicio: true,
+  },
   {
     id: 'inscritos',
     label: 'Inscritos',

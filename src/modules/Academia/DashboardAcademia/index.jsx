@@ -30,7 +30,7 @@ import { useSedes } from '../../../shared/sedes';
 import DetalleIndicador from './DetalleIndicador';
 
 // Al hacer clic se abre la lista de registros que suman ese número.
-const Tarjeta = ({ titulo, valor, icono: Icono, color, onClick }) => (
+const Tarjeta = ({ titulo, valor, icono: Icono, color, onClick, nota }) => (
   <Card sx={{ height: '100%', boxShadow: '0px 0px 5px 2px rgb(0 0 0 / 8%)' }}>
     <CardActionArea onClick={onClick} sx={{ height: '100%' }} title='Ver detalle'>
       <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -56,6 +56,11 @@ const Tarjeta = ({ titulo, valor, icono: Icono, color, onClick }) => (
           <Typography variant='body2' color='text.secondary'>
             {titulo}
           </Typography>
+          {nota && (
+            <Typography variant='caption' color='text.secondary'>
+              {nota}
+            </Typography>
+          )}
         </Box>
       </CardContent>
     </CardActionArea>
@@ -68,6 +73,8 @@ Tarjeta.propTypes = {
   icono: PropTypes.elementType.isRequired,
   color: PropTypes.string.isRequired,
   onClick: PropTypes.func,
+  // Línea pequeña bajo el título (p. ej. cuánto de los ingresos es de vacacionales).
+  nota: PropTypes.string,
 };
 
 const BarraLista = ({ titulo, items, etiqueta, valor, formato, onItem }) => {
@@ -264,7 +271,14 @@ const DashboardAcademia = ({ route }) => {
           <Tarjeta onClick={ver('cursos_activos')} titulo='Cursos activos' valor={t.cursos_activos ?? 0} icono={EventIcon} color='#7C4DFF' />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Tarjeta onClick={ver('ingresos_mes')} titulo='Ingresos del mes' valor={formatoMoneda(t.ingresos_mes ?? 0)} icono={PaymentsIcon} color='green' />
+          <Tarjeta
+            onClick={ver('ingresos_mes')}
+            nota={t.ingresos_vacacionales_mes > 0 ? `Incluye vacacionales: ${formatoMoneda(t.ingresos_vacacionales_mes)}` : undefined}
+            titulo='Ingresos del mes'
+            valor={formatoMoneda(t.ingresos_mes ?? 0)}
+            icono={PaymentsIcon}
+            color='green'
+          />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <Tarjeta onClick={ver('matriculas_activas')} titulo='Matrículas activas' valor={t.matriculas_activas ?? 0} icono={HowToRegIcon} color='#00838F' />
@@ -285,7 +299,7 @@ const DashboardAcademia = ({ route }) => {
           <BarraLista
             titulo='Ingresos últimos 6 meses'
             items={data.ingresos_por_mes ?? []}
-            etiqueta={(it) => it.mes}
+            etiqueta={(it) => (it.vacacionales > 0 ? `${it.mes} (vacacionales ${formatoMoneda(it.vacacionales)})` : it.mes)}
             valor={(it) => it.total}
             formato={formatoMoneda}
             onItem={(it) => setDetalle({ indicador: 'ingresos', mes: it.clave })}

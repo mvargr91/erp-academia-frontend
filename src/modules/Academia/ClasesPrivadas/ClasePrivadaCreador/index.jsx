@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import * as yup from 'yup';
 import { useFormikContext } from 'formik';
 import { useDispatch, useSelector } from 'react-redux';
-import { Alert, Chip, Box } from '@mui/material';
+import { Alert, Chip, Box, Checkbox, FormControlLabel } from '@mui/material';
 import AppCrudDialog from '../../../../shared/components/AppCrudDialog';
 import AppCrudForm, { SeccionForm } from '../../../../shared/components/AppCrudForm';
 import MyTextField from '../../../../shared/components/MyTextField';
@@ -54,7 +54,41 @@ const initialValues = (registro, sedePorDefecto) => ({
   externo_telefono: registro?.externo_telefono ?? '',
   ...cobroDe(registro),
   observacion: registro?.observacion ?? '',
+  tomada_ahora: false,
 });
+
+const ahora = () => {
+  const d = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString();
+  return { fecha: d.slice(0, 10), hora: d.slice(11, 16) };
+};
+
+// Clase que se toma en el momento (p. ej. una clase suelta): queda con fecha y hora de ahora y, al
+// guardar, con la asistencia registrada (asistieron todos y se descuenta del paquete).
+const TomadaAhora = () => {
+  const { values, setFieldValue } = useFormikContext();
+  const cambiar = (marcada) => {
+    setFieldValue('tomada_ahora', marcada);
+    if (marcada) {
+      const { fecha, hora } = ahora();
+      setFieldValue('fecha', fecha);
+      setFieldValue('hora', hora);
+    }
+  };
+  return (
+    <Box className='campo-completo'>
+      <FormControlLabel
+        control={<Checkbox checked={Boolean(values.tomada_ahora)} onChange={(e) => cambiar(e.target.checked)} />}
+        label='Se toma ahora: registrar la asistencia al guardar'
+      />
+      {values.tomada_ahora && (
+        <Alert severity='info'>
+          La clase queda realizada y con «Asistió» para todos; a los alumnos con paquete se les descuenta. Si se cobra aparte, márcala
+          como pagada abajo.
+        </Alert>
+      )}
+    </Box>
+  );
+};
 
 // Campos de cobro enlazados al formulario (los errores se muestran al intentar guardar).
 const CobroFormik = ({ disabled }) => {
@@ -81,6 +115,7 @@ const ClasePrivadaCreador = ({ clase, accion, handleOnClose, updateColeccion, ti
   const { coleccionLigera: profesores } = useSelector((s) => s.profesores);
   const ver = accion === 'ver';
   const { sedePorDefecto } = useSedes();
+  const puedeRegistrar = usePermisosOpcion('/clases-privadas').permisos.includes('RegistrarAsistencia');
 
   useEffect(() => {
     dispatch(onGetAlumnos());
@@ -110,6 +145,7 @@ const ClasePrivadaCreador = ({ clase, accion, handleOnClose, updateColeccion, ti
             </Alert>
           )}
           <SeccionForm titulo='Clase' />
+          {accion === 'crear' && puedeRegistrar && <TomadaAhora />}
           <CampoSede disabled={ver} />
           <MyDateField label='Fecha' name='fecha' disabled={ver} />
           <MyTextField fullWidth type='time' label='Hora' name='hora' disabled={ver} required InputLabelProps={{ shrink: true }} />
