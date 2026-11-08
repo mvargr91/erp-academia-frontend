@@ -2,6 +2,8 @@ import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import TableViewIcon from '@mui/icons-material/TableView';
+import { descargarArchivo } from '../../../shared/functions/Archivos';
 import AppCrudTable, { auditCells } from '../../../shared/components/AppCrudTable';
 import { useSedes, celdaSede } from '../../../shared/sedes';
 import usePermisosOpcion from '../../../shared/hooks/usePermisosOpcion';
@@ -75,6 +77,21 @@ const Alumnos = ({ route }) => {
         entidadNombre='Alumno'
         refreshKey={refreshKey}
         {...accionesEnPagina(navigate, route.path)}
+        botonesExtra={[
+          {
+            // Excel de validación: alumnos por curso, lo que debe cada uno, paquetes, vacacionales y sin curso.
+            titulo: 'Descargar alumnos por curso y deuda',
+            icono: TableViewIcon,
+            permiso: 'Exportar',
+            color: '#B45309',
+            mensajeError: 'No se pudo generar el Excel de alumnos por curso. Inténtalo de nuevo.',
+            onClick: () =>
+              descargarArchivo(
+                'alumnos/exportar-por-curso',
+                `alumnos-por-curso-${new Date().toISOString().slice(0, 10)}.xlsx`,
+              ),
+          },
+        ]}
         accionesExtra={[
           {
             titulo: 'Estado de cuenta y pagos',
