@@ -4,6 +4,7 @@ import { RoutePermittedRole } from '@crema/constants/AppEnums';
 import { rutasCrud } from '../../../shared/components/PaginaCrud';
 
 const DashboardAcademia = React.lazy(() => import('../../../modules/Academia/DashboardAcademia'));
+const AlumnosPorCurso = React.lazy(() => import('../../../modules/Academia/AlumnosPorCurso'));
 const MisCursos = React.lazy(() => import('../../../modules/Academia/MisCursos'));
 const DatosAcademia = React.lazy(() => import('../../../modules/Academia/DatosAcademia'));
 const Sedes = React.lazy(() => import('../../../modules/Academia/Sedes'));
@@ -71,6 +72,11 @@ export const academiaConfigs = [
     permittedRole: RoutePermittedRole.User,
     path: '/dashboard-academia',
     element: <DashboardAcademia route={{ auth: authRole, path: '/dashboard-academia' }} />,
+  },
+  {
+    permittedRole: RoutePermittedRole.User,
+    path: '/alumnos-por-curso',
+    element: <AlumnosPorCurso route={{ auth: authRole, path: '/alumnos-por-curso' }} />,
   },
   {
     permittedRole: RoutePermittedRole.User,

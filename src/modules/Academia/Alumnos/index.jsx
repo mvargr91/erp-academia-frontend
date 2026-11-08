@@ -1,7 +1,11 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import TableViewIcon from '@mui/icons-material/TableView';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import ImportarCorrecciones from './ImportarCorrecciones';
+import { descargarArchivo } from '../../../shared/functions/Archivos';
 import AppCrudTable, { auditCells } from '../../../shared/components/AppCrudTable';
 import { useSedes, celdaSede } from '../../../shared/sedes';
 import usePermisosOpcion from '../../../shared/hooks/usePermisosOpcion';
@@ -58,7 +62,8 @@ const Alumnos = ({ route }) => {
   const { variasSedes } = useSedes();
   const cells = useMemo(() => columnas(variasSedes), [variasSedes]);
   const { titulo, urlAyuda, permisos } = usePermisosOpcion(route.path);
-  const { refreshKey } = useCrudModulo();
+  const { refreshKey, updateColeccion } = useCrudModulo();
+  const [subiendo, setSubiendo] = useState(false);
   const navigate = useNavigate();
 
   return (
@@ -75,6 +80,29 @@ const Alumnos = ({ route }) => {
         entidadNombre='Alumno'
         refreshKey={refreshKey}
         {...accionesEnPagina(navigate, route.path)}
+        botonesExtra={[
+          {
+            // Excel de validación: alumnos por curso, lo que debe cada uno, paquetes, vacacionales y sin curso.
+            titulo: 'Descargar alumnos por curso y deuda',
+            icono: TableViewIcon,
+            permiso: 'Exportar',
+            color: '#B45309',
+            mensajeError: 'No se pudo generar el Excel de alumnos por curso. Inténtalo de nuevo.',
+            onClick: () =>
+              descargarArchivo(
+                'alumnos/exportar-por-curso',
+                `alumnos-por-curso-${new Date().toISOString().slice(0, 10)}.xlsx`,
+              ),
+          },
+          {
+            // Devuelve ese mismo Excel con correcciones: pareja, valor especial, retiros y nuevas matrículas.
+            titulo: 'Subir correcciones',
+            icono: UploadFileIcon,
+            permiso: 'ImportarCorrecciones',
+            color: '#0369A1',
+            onClick: () => setSubiendo(true),
+          },
+        ]}
         accionesExtra={[
           {
             titulo: 'Estado de cuenta y pagos',
@@ -84,6 +112,7 @@ const Alumnos = ({ route }) => {
           },
         ]}
       />
+      <ImportarCorrecciones abierto={subiendo} onCerrar={() => setSubiendo(false)} onAplicado={updateColeccion} />
     </>
   );
 };

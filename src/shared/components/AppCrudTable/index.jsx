@@ -220,6 +220,7 @@ const AppCrudTable = (props) => {
     onEditar,
     onVer,
     accionesExtra,
+    botonesExtra,
     eliminable,
     onVolver,
   } = props;
@@ -243,6 +244,8 @@ const AppCrudTable = (props) => {
   const [columnasMostradas, setColumnasMostradas] = useState(() => construirColumnas(cells));
   const [popoverTarget, setPopoverTarget] = useState(null);
   const [exportando, setExportando] = useState(false);
+  // Índice del botón extra cuya acción (async) está en curso.
+  const [botonOcupado, setBotonOcupado] = useState(null);
 
   const classes = useStyles({ vp: '0px', numFiltros: Math.max(filtrosConfig.length, 1) });
   const filtrosFijosKey = JSON.stringify(filtrosFijos);
@@ -291,6 +294,23 @@ const AppCrudTable = (props) => {
       });
     } finally {
       setExportando(false);
+    }
+  };
+
+  const ejecutarBotonExtra = async (boton, indice) => {
+    setBotonOcupado(indice);
+    try {
+      await boton.onClick();
+    } catch (e) {
+      Swal.fire({
+        background: theme.palette.background.default,
+        color: theme.palette.text.primary,
+        title: 'Error',
+        text: boton.mensajeError || 'No se pudo completar la acción. Inténtalo de nuevo.',
+        icon: 'error',
+      });
+    } finally {
+      setBotonOcupado(null);
     }
   };
 
@@ -488,6 +508,23 @@ const AppCrudTable = (props) => {
                     </span>
                   </Tooltip>
                 )}
+                {botonesExtra.map((boton, indice) => {
+                  if (boton.permiso && !puede(boton.permiso)) return null;
+                  const Icono = boton.icono;
+                  return (
+                    <Tooltip key={boton.titulo} title={boton.titulo}>
+                      <span>
+                        <IconButton
+                          sx={botonSx(boton.color || theme.palette.primary.main)}
+                          onClick={() => ejecutarBotonExtra(boton, indice)}
+                          disabled={botonOcupado !== null}
+                        >
+                          {botonOcupado === indice ? <CircularProgress size={22} color='inherit' /> : <Icono />}
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                  );
+                })}
                 {onCrear && puede('Crear') && (
                   <Tooltip title={`Crear ${entidadNombre}`}>
                     <IconButton sx={botonSx(theme.palette.primary.main)} onClick={onCrear}>
@@ -733,6 +770,8 @@ AppCrudTable.propTypes = {
   onVer: PropTypes.func,
   // [{ titulo, icono, onClick(row), permiso?, visible?(row), color? }]
   accionesExtra: PropTypes.array,
+  // Botones de la barra superior: [{ titulo, icono, onClick() (puede ser async), permiso?, color?, mensajeError? }]
+  botonesExtra: PropTypes.array,
   // (row) => bool: si se muestra Eliminar en esa fila (por defecto en todas).
   eliminable: PropTypes.func,
   onVolver: PropTypes.func,
@@ -748,6 +787,7 @@ AppCrudTable.defaultProps = {
   defaultOrderBy: 'fecha_modificacion:desc',
   refreshKey: 0,
   accionesExtra: [],
+  botonesExtra: [],
 };
 
 export default AppCrudTable;
